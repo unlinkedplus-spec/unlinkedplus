@@ -93,7 +93,7 @@
         html2canvas(card, {
           scale: 2,
           useCORS: true,
-          backgroundColor: '#F5C518'
+          backgroundColor: '#F5C542'
         }).then(function (canvas) {
           var link      = document.createElement('a');
           link.download = 'sertifikat-kegagalan.png';

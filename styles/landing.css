@@ -1,5 +1,5 @@
 /* ============================================================
-   SambatIn — landing.css
+   unlinked+ — landing.css
    Landing page component styles. Mobile-first (320px base).
    Requires main.css custom properties to be loaded first.
    ============================================================ */
@@ -337,6 +337,69 @@
   color: var(--color-gray-400);
   font-size: 0.9rem;
   line-height: 1.5;
+}
+
+/* ----------------------------------------------------------
+   Manifesto / About Section
+   ---------------------------------------------------------- */
+.manifesto-section {
+  background: var(--color-navy);
+  padding: 60px 20px;
+}
+
+.manifesto-inner {
+  max-width: 760px;
+  margin: 0 auto;
+}
+
+.manifesto-text {
+  color: rgba(250, 250, 250, 0.85);
+  font-size: 1rem;
+  line-height: 1.8;
+  text-align: center;
+  margin-bottom: 40px;
+  max-width: 640px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.brand-pillars {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+@media (min-width: 768px) {
+  .brand-pillars {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+.pillar-card {
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: var(--radius-lg);
+  padding: 20px 16px;
+  text-align: center;
+  transition: background 0.2s;
+}
+
+.pillar-card:hover {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.pillar-icon {
+  font-size: 2rem;
+  display: block;
+  margin-bottom: 10px;
+  line-height: 1;
+}
+
+.pillar-label {
+  color: var(--color-white);
+  font-weight: 700;
+  font-size: 0.85rem;
+  line-height: 1.4;
 }
 
 /* ----------------------------------------------------------

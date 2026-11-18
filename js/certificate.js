@@ -58,10 +58,10 @@
       scale: 2,
       useCORS: true,
       allowTaint: true,
-      backgroundColor: '#F5C518'
+      backgroundColor: '#F5C542'
     }).then(function (canvas) {
       var link = document.createElement('a');
-      link.download = 'sertifikat-sambatin.png';
+      link.download = 'sertifikat-unlinkedplus.png';
       link.href = canvas.toDataURL('image/png');
       document.body.appendChild(link);
       link.click();

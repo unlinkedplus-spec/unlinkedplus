@@ -14,7 +14,7 @@
     { min: 50,  max: 149,      level: 2, name: 'Tahan Banting',  color: '#60A5FA' },
     { min: 150, max: 299,      level: 3, name: 'Kebal Revisi',   color: '#A78BFA' },
     { min: 300, max: 499,      level: 4, name: 'Kebal PHP HRD',  color: '#F97316' },
-    { min: 500, max: 999999,   level: 5, name: 'Suhu Sambat',    color: '#EF4444' }
+    { min: 500, max: 999999,   level: 5, name: 'Suhu Spill',    color: '#EF4444' }
   ];
 
   /* --------------------------------------------------------

@@ -39,7 +39,7 @@
   var SEED_POSTS = [
     {
       id: 'seed1',
-      username: 'PejuangKubik_87',
+      username: 'BudakKantor_8701',
       characterId: 'panda',
       accessories: ['id-card'],
       category: 'Ditolak HRD',
@@ -48,7 +48,7 @@
     },
     {
       id: 'seed2',
-      username: 'MagangAbadi_Joko',
+      username: 'BudakKantor_2204',
       characterId: 'intern',
       accessories: ['kopi'],
       category: 'Salah Kirim Chat',
@@ -57,7 +57,7 @@
     },
     {
       id: 'seed3',
-      username: 'FreelancerKucingTua',
+      username: 'BudakKantor_5590',
       characterId: 'freelancer',
       accessories: ['kopi', 'bendera'],
       category: 'Bisnis Boncos',
@@ -66,7 +66,7 @@
     },
     {
       id: 'seed4',
-      username: 'SarjanaPenganggur',
+      username: 'BudakKantor_3317',
       characterId: 'php-victim',
       accessories: [],
       category: 'Salah Jurusan',
@@ -75,12 +75,39 @@
     },
     {
       id: 'seed5',
-      username: 'KaryawanReguler_02',
+      username: 'BudakKantor_0294',
       characterId: 'panda',
       accessories: ['kardus'],
       category: 'Dimarahi Bos',
       text: 'Rapat presentasi hasil Q3. Slide ke-7, bos nyela: "Data ini dari mana? Google? Ini bukan skripsi!" Semua orang lihat ke saya. Padahal datanya dari laporan internal yang dia kirim sendiri bulan lalu. Nomor halaman 23. Saya tunjukkan. Dia bilang "Meeting dilanjutkan Senin."',
       timestamp: Date.now() - 3600000 * 48
+    },
+    {
+      id: 'seed6',
+      username: 'BudakKantor_1337',
+      characterId: 'panda',
+      accessories: ['kopi', 'id-card'],
+      category: 'Ditolak HRD',
+      text: 'Apply 47 pekerjaan dalam 3 bulan. Dapat balasan 3. Dipanggil interview 1. Proses sampai offering. Terus di-ghosting seminggu. Chat HR: "Halo, ada update?" — read, tidak dibalas. Lamaran ke-48 sudah saya kirim. Ini semua demi bisa nge-ghosting balik suatu hari.',
+      timestamp: Date.now() - 3600000 * 60
+    },
+    {
+      id: 'seed7',
+      username: 'BudakKantor_7291',
+      characterId: 'freelancer',
+      accessories: ['bendera'],
+      category: 'Bisnis Boncos',
+      text: 'Startup saya baru dapat funding Series A — oh tunggu, bukan. Investor bilang "market timing belum tepat". Sudah kedua kalinya. Teman-teman pada kabur ke kerja kantoran. Saya masih di sini, laptop nyala, kopi tinggal setengah, bakar uang tabungan sendiri sejak 2022. Ini namanya konsisten, kan?',
+      timestamp: Date.now() - 3600000 * 72
+    },
+    {
+      id: 'seed8',
+      username: 'BudakKantor_4812',
+      characterId: 'intern',
+      accessories: [],
+      category: 'Salah Kirim Chat',
+      text: 'Ngetik di kolom pencarian: nama crush. Lupa itu bukan Google. Itu search bar grup "Project Tim Alpha". Enter. Semua 23 anggota grup lihat nama itu muncul sebagai pesan. Termasuk dia. Termasuk manajernya. Termasuk HR-nya. Senin rapat. Topik agendanya: "Profesionalisme di Lingkungan Kerja".',
+      timestamp: Date.now() - 3600000 * 84
     }
   ];
 
@@ -292,7 +319,7 @@
       } catch (e) {}
 
       var username = localStorage.getItem('sambatin_username') ||
-        ('BudakKorporat_' + (Math.floor(Math.random() * 900) + 100));
+        ('BudakKantor_' + (Math.floor(Math.random() * 9000) + 1000));
       localStorage.setItem('sambatin_username', username);
 
       var post = {
@@ -327,7 +354,7 @@
       if (warning) warning.setAttribute('hidden', '');
       submitBtn.disabled = false;
 
-      if (window.showToast) window.showToast('Sambatan diposting! 📢');
+      if (window.showToast) window.showToast('✨ Spill berhasil dipost!');
 
       /* Scroll feed to top */
       var feedTab = document.getElementById('tab-feed');

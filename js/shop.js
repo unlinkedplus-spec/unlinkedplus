@@ -1,5 +1,5 @@
 /* ============================================================
-   SambatIn — shop.js
+   unlinked+ — shop.js
    IIFE exposing window.Shop.
    LocalStorage key: sambatin_purchases (array of item ids).
    ============================================================ */
@@ -20,31 +20,49 @@
       priceDisplay: 'Rp10.000'
     },
     {
-      id: 'badge-sultan',
+      id: 'pack-sultan-rebahan',
       type: 'badge',
-      emoji: '👑',
-      name: 'Lencana Sultan Sambat',
-      desc: 'Tunjukkan bahwa kamu adalah raja keluhan. Dihormati sesama budak korporat.',
+      emoji: '🛋️',
+      name: 'Pack Sultan Rebahan',
+      desc: 'Ekspresi eksklusif untuk mereka yang rebahan adalah produktivitas.',
       price: 15000,
       priceDisplay: 'Rp15.000'
     },
     {
-      id: 'badge-suhu',
+      id: 'pack-overthinking-pro',
       type: 'badge',
-      emoji: '🏆',
-      name: 'Lencana Suhu Sambat',
-      desc: 'Gelar tertinggi. Kamu sudah melewati semua level penderitaan.',
+      emoji: '🌀',
+      name: 'Pack Overthinking Pro',
+      desc: 'Koleksi ekspresi untuk level overthinking di atas rata-rata.',
       price: 12000,
       priceDisplay: 'Rp12.000'
     },
     {
-      id: 'pack-expressi',
+      id: 'pack-rapat-zoom-piyama',
       type: 'badge',
-      emoji: '🎭',
-      name: 'Paket Ekspresi Budak',
-      desc: '4 ekspresi eksklusif: Senin-itis, Deadline Face, HR-Trauma, dan Revisi-Mode.',
+      emoji: '💻',
+      name: 'Pack Rapat Zoom Piyama',
+      desc: 'Profesional dari pinggang ke atas. Piyama dari pinggang ke bawah.',
       price: 15000,
       priceDisplay: 'Rp15.000'
+    },
+    {
+      id: 'badge-sultan-spill',
+      type: 'badge',
+      emoji: '👑',
+      name: 'Lencana Sultan Spill',
+      desc: 'Tunjukkan bahwa kamu adalah raja keluhan. Dihormati sesama budak korporat.',
+      price: 10000,
+      priceDisplay: 'Rp10.000'
+    },
+    {
+      id: 'badge-founding-member',
+      type: 'badge',
+      emoji: '🏅',
+      name: 'Lencana Founding Member',
+      desc: 'Kamu salah satu yang pertama. Pendiri Sekte Spill sejati.',
+      price: 10000,
+      priceDisplay: 'Rp10.000'
     }
   ];
 

@@ -14,7 +14,7 @@
     { min: 50,  max: 149,      level: 2, name: 'Tahan Banting',  color: '#60A5FA' },
     { min: 150, max: 299,      level: 3, name: 'Kebal Revisi',   color: '#A78BFA' },
     { min: 300, max: 499,      level: 4, name: 'Kebal PHP HRD',  color: '#F97316' },
-    { min: 500, max: Infinity, level: 5, name: 'Suhu Sambat',    color: '#EF4444' }
+    { min: 500, max: Infinity, level: 5, name: 'Suhu Spill',    color: '#EF4444' }
   ];
 
   /* --------------------------------------------------------
@@ -99,7 +99,7 @@
 
     var xp = parseInt(localStorage.getItem('sambatin_xp') || '0', 10);
     var t = _getThreshold(xp);
-    var username = localStorage.getItem('sambatin_username') || 'BudakKorporat';
+    var username = localStorage.getItem('sambatin_username') || 'BudakKantor_0001';
 
     /* Avatar SVG */
     var avatarSVG = '';
@@ -137,10 +137,12 @@
     } catch (e) {}
 
     var badgeItems = {
-      'kacamata':      { emoji: '👓', name: 'Kacamata Melorot' },
-      'badge-sultan':  { emoji: '👑', name: 'Sultan Sambat' },
-      'badge-suhu':    { emoji: '🔥', name: 'Suhu Level' },
-      'pack-expressi': { emoji: '🎭', name: 'Paket Ekspresi' }
+      'kacamata':              { emoji: '👓', name: 'Kacamata Melorot' },
+      'pack-sultan-rebahan':   { emoji: '🛋️', name: 'Sultan Rebahan' },
+      'pack-overthinking-pro': { emoji: '🌀', name: 'Overthinking Pro' },
+      'pack-rapat-zoom-piyama':{ emoji: '💻', name: 'Rapat Zoom Piyama' },
+      'badge-sultan-spill':    { emoji: '👑', name: 'Sultan Spill' },
+      'badge-founding-member': { emoji: '🏅', name: 'Founding Member' }
     };
 
     var badgesHTML = '';
@@ -156,7 +158,7 @@
       badgesHTML += '</div>';
     } else {
       badgesHTML = '<div class="badges-section-title">Lencana & Item</div>' +
-        '<p style="font-size:0.82rem;color:var(--color-gray-400);text-align:center">Belum ada lencana. Kunjungi Toko Sambat!</p>';
+        '<p style="font-size:0.82rem;color:var(--color-gray-400);text-align:center">Belum ada lencana. Kunjungi Toko unlinked+!</p>';
     }
 
     /* XP band progress */
@@ -178,7 +180,7 @@
         '<div class="profile-stats">' +
           '<div class="stat-card">' +
             '<div class="stat-num">' + posts.length + '</div>' +
-            '<div class="stat-label">Total Sambatan</div>' +
+            '<div class="stat-label">Total Spill</div>' +
           '</div>' +
           '<div class="stat-card">' +
             '<div class="stat-num">' + totalReactions + '</div>' +

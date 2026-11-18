@@ -1,5 +1,5 @@
 /* ============================================================
-   SambatIn — main.css
+   unlinked+ — main.css
    Global design tokens, reset, utility classes, keyframes.
    Consumed by landing.css and app.css.
    ============================================================ */
@@ -14,9 +14,9 @@
    ---------------------------------------------------------- */
 :root {
   /* Colors */
-  --color-yellow:      #F5C518;
-  --color-orange:      #FF6B35;
-  --color-navy:        #1A2744;
+  --color-yellow:      #F5C542;
+  --color-orange:      #F57C00;
+  --color-navy:        #172B4D;
   --color-navy-light:  #2D4080;
   --color-white:       #FAFAFA;
   --color-gray-100:    #F0F0F0;
