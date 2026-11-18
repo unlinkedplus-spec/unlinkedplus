@@ -2,7 +2,7 @@
   "id": "FEAT-003",
   "type": "feat",
   "description": "Store + Avatar + Certificates backend modules, plus the full Next.js 14 frontend. Backend: AvatarsModule (GET /avatar/items), StoreModule (POST /store/purchase, POST /store/purchase/confirm/:id, GET /store/transactions), CertificatesModule (POST /certificates, GET /certificates/:id), plus BullMQ worker for background jobs. Frontend: Next.js App Router with all 7 components ported from vanilla HTML, connecting to /api/* endpoints. Depends on FEAT-001 (infra) and FEAT-002 (auth+social API) being complete.",
-  "status": "pending",
+  "status": "completed",
   "steps": [
     "Create apps/api/src/avatars/ module. avatars.service.ts: findAllItems() returns all avatar_items sorted by isPremium asc, price asc. avatars.controller.ts: GET /avatar/items (@Public()). avatars.module.ts.",
 
