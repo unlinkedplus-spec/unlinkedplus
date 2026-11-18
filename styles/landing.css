@@ -1,0 +1,369 @@
+/* ============================================================
+   SambatIn — landing.css
+   Landing page component styles. Mobile-first (320px base).
+   Requires main.css custom properties to be loaded first.
+   ============================================================ */
+
+/* ----------------------------------------------------------
+   Top Navigation
+   ---------------------------------------------------------- */
+.top-nav {
+  position: sticky;
+  top: 0;
+  background: var(--color-white);
+  z-index: 50;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 20px;
+  border-bottom: 1px solid var(--color-gray-100);
+  box-shadow: 0 1px 4px rgba(26, 39, 68, 0.06);
+}
+
+.nav-logo {
+  font-family: var(--font-display);
+  font-weight: 900;
+  font-size: 1.4rem;
+  color: var(--color-navy);
+  letter-spacing: -0.02em;
+}
+
+/* ----------------------------------------------------------
+   Hero Section
+   ---------------------------------------------------------- */
+.hero-section {
+  min-height: 100dvh;
+  background: linear-gradient(135deg, #FFF9E6 0%, #FFFDE7 60%, #FFF3CD 100%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  text-align: center;
+}
+
+.hero-badge {
+  display: inline-block;
+  background: var(--color-orange);
+  color: #fff;
+  padding: 6px 16px;
+  border-radius: var(--radius-pill);
+  font-size: 0.85rem;
+  font-weight: 700;
+  margin-bottom: 16px;
+  animation: pulse-soft 2s infinite;
+}
+
+.hero-headline {
+  font-family: var(--font-display);
+  font-size: clamp(2rem, 6vw, 3.75rem);
+  font-weight: 900;
+  color: var(--color-navy);
+  line-height: 1.15;
+  margin-bottom: 16px;
+  letter-spacing: -0.02em;
+}
+
+.hero-subheadline {
+  font-size: clamp(1rem, 2.5vw, 1.25rem);
+  color: #374151;
+  max-width: 560px;
+  margin: 0 auto 32px;
+  line-height: 1.6;
+}
+
+/* ----------------------------------------------------------
+   Waitlist Form Card
+   ---------------------------------------------------------- */
+.waitlist-form {
+  background: #fff;
+  border-radius: var(--radius-lg);
+  padding: 28px 24px;
+  max-width: 480px;
+  width: 100%;
+  margin: 0 auto;
+  box-shadow: 0 8px 32px rgba(26, 39, 68, 0.12);
+}
+
+.urgency-badge {
+  background: rgba(255, 107, 53, 0.12);
+  color: var(--color-orange);
+  border: 1px solid var(--color-orange);
+  border-radius: var(--radius-md);
+  padding: 10px 14px;
+  font-size: 0.85rem;
+  margin-bottom: 16px;
+  font-weight: 600;
+  line-height: 1.5;
+}
+
+.waitlist-input {
+  width: 100%;
+  padding: 14px 16px;
+  border: 2px solid var(--color-gray-100);
+  border-radius: var(--radius-md);
+  font-size: 1rem;
+  font-family: var(--font-body);
+  margin-bottom: 12px;
+  outline: none;
+  transition: border-color 0.15s ease;
+  background: #fff;
+  color: var(--color-navy);
+}
+
+.waitlist-input:focus {
+  border-color: var(--color-yellow);
+}
+
+.waitlist-input::placeholder {
+  color: var(--color-gray-400);
+}
+
+.waitlist-success {
+  color: var(--color-success);
+  font-weight: 600;
+  margin-top: 12px;
+  font-size: 0.95rem;
+  text-align: center;
+}
+
+.waitlist-success[hidden] {
+  display: none;
+}
+
+/* ----------------------------------------------------------
+   Certificate Preview Section
+   ---------------------------------------------------------- */
+.cert-preview-section {
+  padding: 60px 20px;
+  max-width: 760px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.section-title {
+  font-family: var(--font-display);
+  font-size: clamp(1.5rem, 4vw, 2.5rem);
+  font-weight: 900;
+  color: var(--color-navy);
+  margin-bottom: 8px;
+  letter-spacing: -0.02em;
+}
+
+.section-sub {
+  color: var(--color-gray-400);
+  margin-bottom: 32px;
+  font-size: 1rem;
+  line-height: 1.5;
+}
+
+.cert-input {
+  width: 100%;
+  max-width: 480px;
+  padding: 12px 16px;
+  border: 2px solid var(--color-gray-100);
+  border-radius: var(--radius-md);
+  font-size: 1rem;
+  font-family: var(--font-body);
+  margin-bottom: 24px;
+  resize: vertical;
+  min-height: 80px;
+  outline: none;
+  transition: border-color 0.15s ease;
+  color: var(--color-navy);
+  background: #fff;
+}
+
+.cert-input:focus {
+  border-color: var(--color-yellow);
+}
+
+.cert-input::placeholder {
+  color: var(--color-gray-400);
+}
+
+/* ----------------------------------------------------------
+   Certificate Card Preview
+   ---------------------------------------------------------- */
+.cert-card-preview {
+  background: var(--color-yellow);
+  border: 3px double var(--color-navy);
+  border-radius: var(--radius-lg);
+  padding: 32px 28px;
+  max-width: 500px;
+  margin: 0 auto 24px;
+  text-align: center;
+  position: relative;
+  font-family: var(--font-display);
+  overflow: hidden;
+}
+
+.cert-logo {
+  font-size: 2rem;
+  margin-bottom: 8px;
+  line-height: 1;
+}
+
+.cert-title-text {
+  font-size: 0.75rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--color-navy);
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+.cert-headline {
+  font-size: 1.5rem;
+  font-weight: 900;
+  color: var(--color-navy);
+  margin-bottom: 16px;
+  letter-spacing: -0.01em;
+}
+
+.cert-body {
+  font-size: 0.9rem;
+  color: var(--color-navy);
+  line-height: 1.6;
+}
+
+.cert-name-preview {
+  font-weight: 900;
+  font-size: 1.1rem;
+}
+
+.cert-failure-preview {
+  font-weight: 700;
+  text-decoration: underline;
+}
+
+.cert-stempel {
+  position: absolute;
+  bottom: 16px;
+  right: 16px;
+  border: 2px solid var(--color-danger);
+  color: var(--color-danger);
+  padding: 4px 10px;
+  border-radius: 4px;
+  font-size: 0.65rem;
+  font-weight: 900;
+  letter-spacing: 0.1em;
+  transform: rotate(-15deg);
+  background: rgba(255, 255, 255, 0.85);
+  line-height: 1.4;
+  text-align: center;
+}
+
+.cert-watermark {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) rotate(-30deg);
+  font-size: 1.4rem;
+  color: rgba(26, 39, 68, 0.08);
+  font-weight: 900;
+  pointer-events: none;
+  white-space: nowrap;
+  user-select: none;
+  letter-spacing: 0.15em;
+}
+
+/* ----------------------------------------------------------
+   Features Section
+   ---------------------------------------------------------- */
+.features-section {
+  padding: 60px 20px;
+  background: var(--color-gray-100);
+}
+
+.features-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 20px;
+  max-width: 960px;
+  margin: 0 auto;
+}
+
+@media (min-width: 768px) {
+  .features-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+/* ----------------------------------------------------------
+   Feature Cards  (animate-in via IntersectionObserver)
+   ---------------------------------------------------------- */
+.feature-card {
+  background: #fff;
+  border-radius: var(--radius-lg);
+  padding: 28px 24px;
+  text-align: center;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity 0.5s ease, transform 0.5s ease;
+}
+
+.feature-card.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.feature-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+}
+
+/* Keep hover lift only when already visible */
+.feature-card.visible:hover {
+  transform: translateY(-4px);
+}
+
+.feature-icon {
+  font-size: 2.5rem;
+  margin-bottom: 16px;
+  line-height: 1;
+}
+
+.feature-card h3 {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 1.1rem;
+  color: var(--color-navy);
+  margin-bottom: 8px;
+}
+
+.feature-card p {
+  color: var(--color-gray-400);
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+/* ----------------------------------------------------------
+   Footer
+   ---------------------------------------------------------- */
+.landing-footer {
+  background: var(--color-navy);
+  color: #fff;
+  text-align: center;
+  padding: 32px 20px;
+  font-size: 0.85rem;
+  line-height: 1.6;
+}
+
+/* ----------------------------------------------------------
+   Responsive tweaks
+   ---------------------------------------------------------- */
+@media (min-width: 768px) {
+  .hero-section {
+    padding: 60px 40px;
+  }
+
+  .cert-preview-section {
+    padding: 80px 40px;
+  }
+
+  .features-section {
+    padding: 80px 40px;
+  }
+}

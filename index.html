@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SambatIn — Rayakan Kegagalanmu</title>
+  <meta name="description" content="Platform media sosial Anti-LinkedIn — cerita jujur soal ditolak HRD, drama budak korporat, dan kegagalan karier secara anonim dengan avatar lucu." />
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800;900&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+
+  <!-- Stylesheets -->
+  <link rel="stylesheet" href="styles/main.css" />
+  <link rel="stylesheet" href="styles/landing.css" />
+</head>
+<body>
+
+  <!-- ======================================================
+       Top Navigation
+       ====================================================== -->
+  <nav class="top-nav">
+    <div class="nav-logo">SambatIn 💔</div>
+    <a href="app.html" class="btn-secondary" style="padding:8px 18px;font-size:0.85rem;">Coba App →</a>
+  </nav>
+
+  <!-- ======================================================
+       Hero Section
+       ====================================================== -->
+  <section class="hero-section">
+    <div class="hero-badge">🔥 Sudah 858 orang sambat duluan</div>
+
+    <h1 class="hero-headline">LinkedIn untuk Orang yang Lagi Gagal.</h1>
+
+    <p class="hero-subheadline">
+      Cerita jujur soal ditolak HRD, salah kirim chat ke grup kantor, dan drama budak korporat
+      secara anonim dengan avatar lucu. Tanpa takut ketahuan bos.
+    </p>
+
+    <!-- Waitlist Form -->
+    <div class="waitlist-form">
+      <div class="urgency-badge">
+        ⏰ Sisa <strong><span id="quota-count">142</span></strong> dari 1.000 kuota pertama
+        — Dapat gelar &ldquo;Pendiri Sekte Sambat&rdquo; + Paket Avatar Kardus Gratis!
+      </div>
+
+      <input
+        type="text"
+        id="waitlist-input"
+        class="waitlist-input"
+        placeholder="Email atau nomor WhatsApp kamu"
+        autocomplete="off"
+      />
+
+      <button id="waitlist-btn" class="btn-primary btn-full">
+        🎯 Klaim Username &amp; Avatar Awal
+      </button>
+
+      <p id="waitlist-success" class="waitlist-success" hidden>
+        🎉 Kamu masuk daftar! Nantikan undangan eksklusifnya.
+      </p>
+    </div>
+  </section>
+
+  <!-- ======================================================
+       Interactive Certificate Preview Section
+       ====================================================== -->
+  <section class="cert-preview-section">
+    <h2 class="section-title">Coba Sertifikat Kegagalanmu</h2>
+    <p class="section-sub">Ketik kegagalanmu — lihat sertifikatnya langsung!</p>
+
+    <textarea
+      id="cert-input"
+      class="cert-input"
+      placeholder="Contoh: ditolak HRD setelah 5 tahap interview..."
+      maxlength="120"
+    ></textarea>
+
+    <!-- Certificate Card -->
+    <div id="cert-card-preview" class="cert-card-preview">
+      <!-- Watermark (behind everything) -->
+      <div class="cert-watermark">SAMBATIN</div>
+
+      <div class="cert-logo">💔</div>
+      <div class="cert-title-text">Sertifikat Resmi Kegagalan</div>
+      <div class="cert-headline">SambatIn</div>
+
+      <p class="cert-body">
+        Dengan bangga mengumumkan bahwa<br />
+        <span id="cert-name-preview" class="cert-name-preview">Kamu</span><br />
+        telah sukses:<br />
+        <span id="cert-failure-preview" class="cert-failure-preview">[ketik kegagalanmu di atas]</span>
+      </p>
+
+      <!-- Stamp -->
+      <div class="cert-stempel">APPROVED BY<br />HRD NERAKA</div>
+    </div>
+
+    <button id="cert-download-landing" class="btn-secondary">
+      📥 Download PNG
+    </button>
+  </section>
+
+  <!-- ======================================================
+       Feature Cards Section
+       ====================================================== -->
+  <section class="features-section">
+    <h2 class="section-title" style="text-align:center;margin-bottom:8px;">Kenapa SambatIn?</h2>
+    <p class="section-sub" style="text-align:center;margin-bottom:32px;">
+      Karena kadang yang kamu butuhkan bukan motivasi — tapi teman yang paham.
+    </p>
+
+    <div class="features-grid">
+      <!-- Card 1 -->
+      <div class="feature-card">
+        <div class="feature-icon">🎭</div>
+        <h3>100% Anonim dengan Avatar Lucu</h3>
+        <p>
+          Pilih karakter budak korporatmu — Karyawan Kantung Mata Panda, Magang Polos,
+          Korban PHP HRD, atau Freelancer. Tidak ada yang tahu kamu siapa.
+        </p>
+      </div>
+
+      <!-- Card 2 -->
+      <div class="feature-card">
+        <div class="feature-icon">🤖</div>
+        <h3>Dilengkapi AI Sensor Anti-Pamer</h3>
+        <p>
+          Sistem kami secara otomatis mendeteksi dan memblokir segala bentuk pamer.
+          &ldquo;Alhamdulillah diterima&rdquo; tidak akan lolos di sini.
+        </p>
+      </div>
+
+      <!-- Card 3 -->
+      <div class="feature-card">
+        <div class="feature-icon">🏆</div>
+        <h3>Sertifikat Kegagalan Siap Viral</h3>
+        <p>
+          Ubah penolakan HRD-mu jadi konten. Download PNG, posting ke X atau TikTok,
+          dan rayakan bersama.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ======================================================
+       Footer
+       ====================================================== -->
+  <footer class="landing-footer">
+    <p>© 2025 SambatIn — Platform Resmi Perayaan Kegagalan Indonesia 💔</p>
+    <p style="margin-top:8px;opacity:0.7;">Dibuat dengan ☕ dan banyak revisi tengah malam.</p>
+  </footer>
+
+  <!-- ======================================================
+       Scripts
+       ====================================================== -->
+  <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
+  <script src="js/landing.js"></script>
+
+</body>
+</html>
