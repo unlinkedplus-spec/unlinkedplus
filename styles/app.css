@@ -755,6 +755,41 @@
 }
 
 /* ----------------------------------------------------------
+   Polish — hover states, transitions, accessibility
+   ---------------------------------------------------------- */
+
+/* Tab panel fade-in animation */
+.tab-panel.active {
+  animation: fadeInUp 0.25s ease;
+}
+
+/* Post card hover */
+.post-card:hover {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  transition: box-shadow 0.2s;
+}
+
+/* Shop owned card highlight */
+.shop-item-card.owned {
+  border-color: var(--color-success);
+  background: rgba(34, 197, 94, 0.05);
+}
+
+/* Focus-visible outlines for accessibility */
+button:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+input:focus-visible {
+  outline: 2px solid var(--color-yellow);
+  outline-offset: 2px;
+}
+
+/* Safe-area padding for bottom nav (iOS notch / Android nav bar) */
+.bottom-nav {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+/* ----------------------------------------------------------
    Toast
    ---------------------------------------------------------- */
 .toast {
