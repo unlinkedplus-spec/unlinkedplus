@@ -1,5 +1,5 @@
 /* ============================================================
-   Unlinked+ — feed.js
+   unlinked+ — feed.js
    IIFE exposing window.Feed.
    Handles: seed posts, AI sensor, post creation, reactions.
    ============================================================ */
@@ -140,7 +140,7 @@
 
     var rxn = Reactions.getReactions(post.id);
 
-    /* Level based on total reactions for seed posts, or accumulated XP for user posts */
+    /* Level based on total reactions XP */
     var totalRxnXP = (rxn.pukpuk + rxn.ngakak + rxn.sama) * 10;
     var lvlObj = Reactions.getLevel(totalRxnXP);
 
@@ -150,6 +150,11 @@
     var ngakakReacted = rxn.myReactions && rxn.myReactions.ngakak ? ' reacted' : '';
     var samaReacted   = rxn.myReactions && rxn.myReactions.sama   ? ' reacted' : '';
 
+    /* Mockup layout: "BudakKantor · Lv.2 · 2 jam lalu" */
+    var metaLine = post.username +
+      ' <span class="post-meta-dot">·</span> Lv.' + lvlObj.level +
+      ' <span class="post-meta-dot">·</span> ' + _relativeTime(post.timestamp);
+
     return (
       '<div class="post-card" id="post-' + post.id + '">' +
         '<div class="post-header">' +
@@ -157,30 +162,29 @@
             '<svg viewBox="0 0 300 300" xmlns="http://www.w3.org/2000/svg">' + avatarSVG + '</svg>' +
           '</div>' +
           '<div class="post-meta">' +
-            '<div class="post-username">' + post.username + '</div>' +
+            '<div class="post-meta-line">' + metaLine + '</div>' +
             '<div class="post-badges">' +
               '<span class="level-badge" style="background:' + lvlObj.color + '">' +
-                'Lv.' + lvlObj.level + ' ' + lvlObj.name +
+                lvlObj.name +
               '</span>' +
               '<span class="cat-badge" style="background:' + catColor + '22;color:' + catColor + '">' +
                 post.category +
               '</span>' +
             '</div>' +
           '</div>' +
-          '<span class="post-timestamp">' + _relativeTime(post.timestamp) + '</span>' +
         '</div>' +
         '<p class="post-text">' + post.text + '</p>' +
         '<div class="reaction-row">' +
           '<button class="reaction-btn' + pukpukReacted + '" data-post-id="' + post.id + '" data-reaction="pukpuk">' +
-            '🫂 Puk-Puk <span class="rxn-count">' + (rxn.pukpuk || 0) + '</span>' +
+            '🫂 Puk-Puk <span class="rxn-count">(' + (rxn.pukpuk || 0) + ')</span>' +
           '</button>' +
           '<button class="reaction-btn' + ngakakReacted + '" data-post-id="' + post.id + '" data-reaction="ngakak">' +
-            '😂 Ngakak Maaf <span class="rxn-count">' + (rxn.ngakak || 0) + '</span>' +
+            '😂 Ngakak Maaf <span class="rxn-count">(' + (rxn.ngakak || 0) + ')</span>' +
           '</button>' +
           '<button class="reaction-btn' + samaReacted + '" data-post-id="' + post.id + '" data-reaction="sama">' +
-            '🤝 Sama Banget <span class="rxn-count">' + (rxn.sama || 0) + '</span>' +
+            '🤝 Sama Banget <span class="rxn-count">(' + (rxn.sama || 0) + ')</span>' +
           '</button>' +
-          '<button class="cert-btn" data-post-id="' + post.id + '">📜 Buat Sertifikat</button>' +
+          '<button class="cert-btn" data-post-id="' + post.id + '">📜 Sertifikat</button>' +
         '</div>' +
       '</div>'
     );

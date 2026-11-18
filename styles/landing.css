@@ -10,22 +10,29 @@
 .top-nav {
   position: sticky;
   top: 0;
-  background: var(--color-white);
+  background: rgba(250, 250, 250, 0.95);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
   z-index: 50;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 12px 20px;
-  border-bottom: 1px solid var(--color-gray-100);
-  box-shadow: 0 1px 4px rgba(26, 39, 68, 0.06);
+  padding: 12px 24px;
+  border-bottom: 1px solid rgba(23, 43, 77, 0.08);
 }
 
 .nav-logo {
   font-family: var(--font-display);
   font-weight: 900;
-  font-size: 1.4rem;
+  font-size: 1.5rem;
   color: var(--color-navy);
-  letter-spacing: -0.02em;
+  letter-spacing: -0.03em;
+}
+
+.nav-logo .plus {
+  color: var(--color-yellow);
+  display: inline-block;
+  transform: rotate(0deg);
 }
 
 /* ----------------------------------------------------------
@@ -33,43 +40,182 @@
    ---------------------------------------------------------- */
 .hero-section {
   min-height: 100dvh;
-  background: linear-gradient(135deg, #FFF9E6 0%, #FFFDE7 60%, #FFF3CD 100%);
+  background: #FFF8E1;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 40px 20px;
+  padding: 48px 24px 60px;
   text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+
+/* decorative yellow blobs */
+.hero-section::before {
+  content: '';
+  position: absolute;
+  top: -80px;
+  right: -80px;
+  width: 300px;
+  height: 300px;
+  background: var(--color-yellow);
+  border-radius: 50%;
+  opacity: 0.25;
+  pointer-events: none;
+}
+
+.hero-section::after {
+  content: '';
+  position: absolute;
+  bottom: -60px;
+  left: -60px;
+  width: 220px;
+  height: 220px;
+  background: var(--color-orange);
+  border-radius: 50%;
+  opacity: 0.12;
+  pointer-events: none;
+}
+
+.hero-brand {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 20px;
+  position: relative;
+  z-index: 1;
+}
+
+.hero-wordmark {
+  font-family: var(--font-display);
+  font-size: clamp(3rem, 10vw, 5.5rem);
+  font-weight: 900;
+  color: var(--color-navy);
+  letter-spacing: -0.04em;
+  line-height: 1;
+}
+
+.hero-wordmark .plus {
+  color: var(--color-yellow);
+  -webkit-text-stroke: 2px var(--color-navy);
+  text-shadow: 3px 3px 0 var(--color-navy);
+}
+
+.hero-tagline-brush {
+  font-family: var(--font-display);
+  font-size: clamp(0.9rem, 2.5vw, 1.15rem);
+  font-style: italic;
+  font-weight: 800;
+  color: var(--color-navy);
+  background: var(--color-yellow);
+  padding: 4px 18px 6px;
+  border-radius: 4px;
+  margin-top: 10px;
+  display: inline-block;
+  transform: rotate(-1deg);
+  letter-spacing: 0.01em;
+}
+
+.hero-subtagline {
+  font-size: 0.85rem;
+  color: var(--color-navy);
+  opacity: 0.6;
+  font-style: italic;
+  margin-top: 6px;
+  letter-spacing: 0.05em;
 }
 
 .hero-badge {
   display: inline-block;
   background: var(--color-orange);
   color: #fff;
-  padding: 6px 16px;
+  padding: 6px 18px;
   border-radius: var(--radius-pill);
-  font-size: 0.85rem;
+  font-size: 0.82rem;
   font-weight: 700;
-  margin-bottom: 16px;
-  animation: pulse-soft 2s infinite;
+  margin-bottom: 20px;
+  animation: pulse-soft 2.4s infinite;
+  position: relative;
+  z-index: 1;
 }
 
 .hero-headline {
   font-family: var(--font-display);
-  font-size: clamp(2rem, 6vw, 3.75rem);
+  font-size: clamp(1.6rem, 5vw, 2.8rem);
   font-weight: 900;
   color: var(--color-navy);
-  line-height: 1.15;
-  margin-bottom: 16px;
+  line-height: 1.2;
+  margin-bottom: 14px;
   letter-spacing: -0.02em;
+  position: relative;
+  z-index: 1;
 }
 
 .hero-subheadline {
-  font-size: clamp(1rem, 2.5vw, 1.25rem);
+  font-size: clamp(0.95rem, 2.2vw, 1.1rem);
   color: #374151;
-  max-width: 560px;
+  max-width: 520px;
   margin: 0 auto 32px;
-  line-height: 1.6;
+  line-height: 1.65;
+  position: relative;
+  z-index: 1;
+}
+
+/* ----------------------------------------------------------
+   Character Expression Strip
+   ---------------------------------------------------------- */
+.character-strip {
+  display: flex;
+  gap: 12px;
+  overflow-x: auto;
+  padding: 8px 0 4px;
+  margin-bottom: 28px;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  position: relative;
+  z-index: 1;
+  max-width: 560px;
+  width: 100%;
+}
+
+.character-strip::-webkit-scrollbar {
+  display: none;
+}
+
+.char-expression {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.char-expression-bubble {
+  width: 72px;
+  height: 72px;
+  background: white;
+  border-radius: 50%;
+  border: 2.5px solid var(--color-yellow);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+  box-shadow: 0 4px 12px rgba(23, 43, 77, 0.1);
+  transition: transform 0.2s;
+}
+
+.char-expression-bubble:hover {
+  transform: scale(1.08) translateY(-3px);
+}
+
+.char-expression-label {
+  font-size: 0.62rem;
+  font-weight: 700;
+  color: var(--color-navy);
+  text-align: center;
+  max-width: 72px;
+  line-height: 1.3;
 }
 
 /* ----------------------------------------------------------
@@ -79,19 +225,21 @@
   background: #fff;
   border-radius: var(--radius-lg);
   padding: 28px 24px;
-  max-width: 480px;
+  max-width: 460px;
   width: 100%;
   margin: 0 auto;
-  box-shadow: 0 8px 32px rgba(26, 39, 68, 0.12);
+  box-shadow: 0 12px 40px rgba(23, 43, 77, 0.14);
+  position: relative;
+  z-index: 1;
 }
 
 .urgency-badge {
-  background: rgba(255, 107, 53, 0.12);
+  background: rgba(245, 124, 0, 0.1);
   color: var(--color-orange);
-  border: 1px solid var(--color-orange);
+  border: 1.5px solid rgba(245, 124, 0, 0.3);
   border-radius: var(--radius-md);
   padding: 10px 14px;
-  font-size: 0.85rem;
+  font-size: 0.82rem;
   margin-bottom: 16px;
   font-weight: 600;
   line-height: 1.5;
@@ -106,22 +254,50 @@
   font-family: var(--font-body);
   margin-bottom: 12px;
   outline: none;
-  transition: border-color 0.15s ease;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
   background: #fff;
   color: var(--color-navy);
 }
 
 .waitlist-input:focus {
   border-color: var(--color-yellow);
+  box-shadow: 0 0 0 3px rgba(245, 197, 66, 0.2);
 }
 
 .waitlist-input::placeholder {
   color: var(--color-gray-400);
 }
 
+/* CTA button — matches mockup "Gabung Sekarang →" dark pill */
+.btn-cta-hero {
+  display: block;
+  width: 100%;
+  background: var(--color-navy);
+  color: #fff;
+  padding: 15px 24px;
+  border-radius: var(--radius-pill);
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 1.05rem;
+  border: none;
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  text-align: center;
+  letter-spacing: -0.01em;
+}
+
+.btn-cta-hero:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(23, 43, 77, 0.35);
+}
+
+.btn-cta-hero:active {
+  transform: translateY(0);
+}
+
 .waitlist-success {
   color: var(--color-success);
-  font-weight: 600;
+  font-weight: 700;
   margin-top: 12px;
   font-size: 0.95rem;
   text-align: center;
@@ -135,7 +311,7 @@
    Certificate Preview Section
    ---------------------------------------------------------- */
 .cert-preview-section {
-  padding: 60px 20px;
+  padding: 72px 24px;
   max-width: 760px;
   margin: 0 auto;
   text-align: center;
@@ -143,7 +319,7 @@
 
 .section-title {
   font-family: var(--font-display);
-  font-size: clamp(1.5rem, 4vw, 2.5rem);
+  font-size: clamp(1.5rem, 4vw, 2.4rem);
   font-weight: 900;
   color: var(--color-navy);
   margin-bottom: 8px;
@@ -196,6 +372,7 @@
   position: relative;
   font-family: var(--font-display);
   overflow: hidden;
+  box-shadow: 0 8px 32px rgba(23, 43, 77, 0.15);
 }
 
 .cert-logo {
@@ -260,7 +437,7 @@
   left: 50%;
   transform: translate(-50%, -50%) rotate(-30deg);
   font-size: 1.4rem;
-  color: rgba(26, 39, 68, 0.08);
+  color: rgba(23, 43, 77, 0.07);
   font-weight: 900;
   pointer-events: none;
   white-space: nowrap;
@@ -272,7 +449,7 @@
    Features Section
    ---------------------------------------------------------- */
 .features-section {
-  padding: 60px 20px;
+  padding: 72px 24px;
   background: var(--color-gray-100);
 }
 
@@ -296,12 +473,13 @@
 .feature-card {
   background: #fff;
   border-radius: var(--radius-lg);
-  padding: 28px 24px;
+  padding: 32px 24px;
   text-align: center;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
   opacity: 0;
-  transform: translateY(24px);
-  transition: opacity 0.5s ease, transform 0.5s ease;
+  transform: translateY(28px);
+  transition: opacity 0.5s ease, transform 0.5s ease, box-shadow 0.2s ease;
+  border: 2px solid transparent;
 }
 
 .feature-card.visible {
@@ -309,34 +487,37 @@
   transform: translateY(0);
 }
 
-.feature-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
-}
-
-/* Keep hover lift only when already visible */
 .feature-card.visible:hover {
-  transform: translateY(-4px);
+  transform: translateY(-6px);
+  box-shadow: 0 12px 32px rgba(23, 43, 77, 0.12);
+  border-color: var(--color-yellow);
 }
 
 .feature-icon {
-  font-size: 2.5rem;
-  margin-bottom: 16px;
-  line-height: 1;
+  width: 64px;
+  height: 64px;
+  background: var(--color-yellow);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+  margin: 0 auto 20px;
+  box-shadow: 0 4px 12px rgba(245, 197, 66, 0.4);
 }
 
 .feature-card h3 {
   font-family: var(--font-display);
   font-weight: 800;
-  font-size: 1.1rem;
+  font-size: 1.05rem;
   color: var(--color-navy);
-  margin-bottom: 8px;
+  margin-bottom: 10px;
 }
 
 .feature-card p {
   color: var(--color-gray-400);
-  font-size: 0.9rem;
-  line-height: 1.5;
+  font-size: 0.88rem;
+  line-height: 1.6;
 }
 
 /* ----------------------------------------------------------
@@ -344,20 +525,37 @@
    ---------------------------------------------------------- */
 .manifesto-section {
   background: var(--color-navy);
-  padding: 60px 20px;
+  padding: 72px 24px;
+  position: relative;
+  overflow: hidden;
+}
+
+.manifesto-section::before {
+  content: '';
+  position: absolute;
+  top: -100px;
+  right: -100px;
+  width: 400px;
+  height: 400px;
+  background: var(--color-yellow);
+  border-radius: 50%;
+  opacity: 0.05;
+  pointer-events: none;
 }
 
 .manifesto-inner {
   max-width: 760px;
   margin: 0 auto;
+  position: relative;
+  z-index: 1;
 }
 
 .manifesto-text {
-  color: rgba(250, 250, 250, 0.85);
-  font-size: 1rem;
-  line-height: 1.8;
+  color: rgba(250, 250, 250, 0.88);
+  font-size: 1.05rem;
+  line-height: 1.85;
   text-align: center;
-  margin-bottom: 40px;
+  margin-bottom: 48px;
   max-width: 640px;
   margin-left: auto;
   margin-right: auto;
@@ -377,15 +575,17 @@
 
 .pillar-card {
   background: rgba(255, 255, 255, 0.07);
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  border: 1.5px solid rgba(255, 255, 255, 0.14);
   border-radius: var(--radius-lg);
-  padding: 20px 16px;
+  padding: 24px 16px;
   text-align: center;
-  transition: background 0.2s;
+  transition: background 0.2s, transform 0.2s, border-color 0.2s;
 }
 
 .pillar-card:hover {
-  background: rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.13);
+  transform: translateY(-4px);
+  border-color: var(--color-yellow);
 }
 
 .pillar-icon {
@@ -398,7 +598,7 @@
 .pillar-label {
   color: var(--color-white);
   font-weight: 700;
-  font-size: 0.85rem;
+  font-size: 0.82rem;
   line-height: 1.4;
 }
 
@@ -407,11 +607,16 @@
    ---------------------------------------------------------- */
 .landing-footer {
   background: var(--color-navy);
-  color: #fff;
+  border-top: 1px solid rgba(255,255,255,0.08);
+  color: rgba(255,255,255,0.7);
   text-align: center;
   padding: 32px 20px;
   font-size: 0.85rem;
-  line-height: 1.6;
+  line-height: 1.7;
+}
+
+.landing-footer strong {
+  color: var(--color-yellow);
 }
 
 /* ----------------------------------------------------------
@@ -419,14 +624,18 @@
    ---------------------------------------------------------- */
 @media (min-width: 768px) {
   .hero-section {
-    padding: 60px 40px;
+    padding: 72px 40px 80px;
   }
 
   .cert-preview-section {
-    padding: 80px 40px;
+    padding: 88px 40px;
   }
 
   .features-section {
-    padding: 80px 40px;
+    padding: 88px 40px;
+  }
+
+  .manifesto-section {
+    padding: 88px 40px;
   }
 }

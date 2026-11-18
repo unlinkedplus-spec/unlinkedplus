@@ -1,5 +1,5 @@
 /* ============================================================
-   Unlinked+ — certificate.js
+   unlinked+ — certificate.js
    IIFE exposing window.Certificate.
    Uses html2canvas to render #cert-render-target as PNG.
    ============================================================ */

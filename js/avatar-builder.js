@@ -1,5 +1,5 @@
 /* ============================================================
-   Unlinked+ — avatar-builder.js
+   unlinked+ — avatar-builder.js
    IIFE module. Exposes window.AvatarBuilder.
    All character bodies drawn with SVG primitives — no emoji.
    ViewBox: 0 0 300 300
@@ -179,7 +179,7 @@
         /* Slight frown */
         '<path d="M138,140 Q150,145 162,140" fill="none" stroke="#5C4033" stroke-width="2" stroke-linecap="round"/>' +
         /* Laptop hint */
-        '<rect x="108" y="250" width="84" height="52" rx="6" fill="#1a2744" opacity="0.7"/>' +
+        '<rect x="108" y="250" width="84" height="52" rx="6" fill="#172B4D" opacity="0.7"/>' +
         '<rect x="112" y="254" width="76" height="42" rx="3" fill="#60a5fa" opacity="0.5"/>'
       );
     }
@@ -194,7 +194,7 @@
     'id-card': (
       '<g id="acc-id-card">' +
         '<polyline points="150,165 142,188 158,188" fill="none" stroke="#9CA3AF" stroke-width="2"/>' +
-        '<rect x="129" y="188" width="42" height="30" rx="4" fill="white" stroke="#1A2744" stroke-width="2" transform="rotate(12,150,203)"/>' +
+        '<rect x="129" y="188" width="42" height="30" rx="4" fill="white" stroke="#172B4D" stroke-width="2" transform="rotate(12,150,203)"/>' +
         '<line x1="135" y1="198" x2="165" y2="198" stroke="#9CA3AF" stroke-width="1.5" transform="rotate(12,150,203)"/>' +
         '<line x1="135" y1="206" x2="158" y2="206" stroke="#9CA3AF" stroke-width="1" transform="rotate(12,150,203)"/>' +
         '<rect x="133" y="190" width="10" height="8" rx="2" fill="#60A5FA" transform="rotate(12,150,203)"/>' +

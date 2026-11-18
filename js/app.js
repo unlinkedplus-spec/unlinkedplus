@@ -1,5 +1,5 @@
 /* ============================================================
-   Unlinked+ — app.js
+   unlinked+ — app.js
    IIFE main controller.
    Exposes window.showToast and window.closeAllModals.
    ============================================================ */

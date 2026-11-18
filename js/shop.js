@@ -110,7 +110,7 @@
     for (var r = 0; r < 10; r++) {
       for (var c = 0; c < 10; c++) {
         var code = itemId.charCodeAt(r % itemId.length);
-        var fill = ((code * (c + 1) * (r + 1)) % 3 === 0) ? '#1A2744' : 'white';
+        var fill = ((code * (c + 1) * (r + 1)) % 3 === 0) ? '#172B4D' : 'white';
         svg += '<rect x="' + (c * 10) + '" y="' + (r * 10) + '" width="10" height="10" fill="' + fill + '"/>';
       }
     }
@@ -127,7 +127,7 @@
         particleCount: 150,
         spread: 90,
         origin: { y: 0.6 },
-        colors: ['#F5C518', '#FF6B35', '#1A2744', '#ffffff', '#FF6B35']
+        colors: ['#F5C542', '#F57C00', '#172B4D', '#ffffff', '#F5C542']
       });
     }
   }

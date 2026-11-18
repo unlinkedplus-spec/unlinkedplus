@@ -21,8 +21,8 @@
        Top Navigation
        ====================================================== -->
   <nav class="top-nav">
-    <div class="nav-logo">unlinked+ 💔</div>
-    <a href="app.html" class="btn-secondary" style="padding:8px 18px;font-size:0.85rem;">Coba App →</a>
+    <div class="nav-logo">unlinked<span class="logo-plus">+</span></div>
+    <a href="app.html" class="btn-secondary" style="padding:8px 20px;font-size:0.85rem;font-weight:800;">Coba App →</a>
   </nav>
 
   <!-- ======================================================
@@ -31,12 +31,40 @@
   <section class="hero-section">
     <div class="hero-badge">🔥 Sudah 858 orang spill duluan</div>
 
-    <h1 class="hero-headline">LinkedIn untuk Orang yang Lagi Gagal.</h1>
+    <div class="hero-logo" aria-label="unlinked+">unlinked<span class="logo-plus">+</span></div>
+    <div class="hero-tagline">Memutus yang Toksik, Menambah yang Esensial.</div>
+    <div class="hero-tagline-sub"><em>Less Flex, More Human.</em></div>
+
+    <h1 class="hero-headline">LinkedIn untuk<br>Orang yang Lagi Gagal.</h1>
 
     <p class="hero-subheadline">
-      Bisa Spill di Sini ❤️ — cerita jujur soal ditolak HRD, salah kirim chat ke grup kantor, dan drama budak korporat
-      secara anonim dengan avatar lucu. Tanpa takut ketahuan bos.
+      Capek lihat orang pamer pencapaian di sebelah?<br>
+      Saatnya rayakan kegagalan kariermu — Bisa Spill di Sini ❤️
     </p>
+
+    <!-- Character expression strip (5 moods from mockup) -->
+    <div class="expression-strip" aria-label="Ekspresi karakter">
+      <div class="expr-chip">
+        <span class="expr-emoji">🎉</span>
+        <span class="expr-label">Akhirnya<br>Spill Juga!</span>
+      </div>
+      <div class="expr-chip">
+        <span class="expr-emoji">😭</span>
+        <span class="expr-label">Ditolak HRD<br>Lagi...</span>
+      </div>
+      <div class="expr-chip">
+        <span class="expr-emoji">😩</span>
+        <span class="expr-label">Hidup Emang<br>Berat...</span>
+      </div>
+      <div class="expr-chip">
+        <span class="expr-emoji">🤝</span>
+        <span class="expr-label">Sama<br>Banget!</span>
+      </div>
+      <div class="expr-chip">
+        <span class="expr-emoji">❤️</span>
+        <span class="expr-label">Bisa Spill<br>di Sini</span>
+      </div>
+    </div>
 
     <!-- Waitlist Form -->
     <div class="waitlist-form">
@@ -53,8 +81,8 @@
         autocomplete="off"
       />
 
-      <button id="waitlist-btn" class="btn-primary btn-full">
-        🎯 Klaim Username &amp; Avatar Awal
+      <button id="waitlist-btn" class="btn-cta-hero">
+        Gabung Sekarang →
       </button>
 
       <p id="waitlist-success" class="waitlist-success" hidden>
@@ -79,21 +107,16 @@
 
     <!-- Certificate Card -->
     <div id="cert-card-preview" class="cert-card-preview">
-      <!-- Watermark (behind everything) -->
       <div class="cert-watermark">UNLINKEDPLUS.ID</div>
-
       <div class="cert-logo">💔</div>
       <div class="cert-title-text">Sertifikat Resmi Kegagalan</div>
       <div class="cert-headline">unlinked+</div>
-
       <p class="cert-body">
         Dengan bangga mengumumkan bahwa<br />
         <span id="cert-name-preview" class="cert-name-preview">Kamu</span><br />
         telah sukses:<br />
         <span id="cert-failure-preview" class="cert-failure-preview">[ketik kegagalanmu di atas]</span>
       </p>
-
-      <!-- Stamp -->
       <div class="cert-stempel">APPROVED BY<br />HRD NERAKA ✓</div>
     </div>
 
@@ -106,33 +129,30 @@
        Feature Cards Section
        ====================================================== -->
   <section class="features-section">
-    <h2 class="section-title" style="text-align:center;margin-bottom:8px;">Kenapa Unlinked+?</h2>
+    <h2 class="section-title" style="text-align:center;margin-bottom:8px;">Kenapa unlinked+?</h2>
     <p class="section-sub" style="text-align:center;margin-bottom:32px;">
       Karena kadang yang kamu butuhkan bukan motivasi — tapi teman yang paham.
     </p>
 
     <div class="features-grid">
-      <!-- Card 1 -->
       <div class="feature-card">
         <div class="feature-icon">🎭</div>
         <h3>100% Anonim dengan Avatar Lucu</h3>
         <p>
-          Pilih karakter budak korporatmu — Karyawan Kantung Mata Panda, Magang Polos,
+          Pilih karaktermu — Kantung Mata Panda, Magang Polos,
           Korban PHP HRD, atau Freelancer. Tidak ada yang tahu kamu siapa.
         </p>
       </div>
 
-      <!-- Card 2 -->
       <div class="feature-card">
         <div class="feature-icon">🤖</div>
-        <h3>Dilengkapi AI Sensor Anti-Pamer</h3>
+        <h3>AI Sensor Anti-Pamer Aktif</h3>
         <p>
-          Sistem kami secara otomatis mendeteksi dan memblokir segala bentuk pamer.
+          Sistem otomatis memblokir segala bentuk flexing.
           &ldquo;Alhamdulillah diterima&rdquo; tidak akan lolos di sini.
         </p>
       </div>
 
-      <!-- Card 3 -->
       <div class="feature-card">
         <div class="feature-icon">🏆</div>
         <h3>Sertifikat Kegagalan Siap Viral</h3>
@@ -141,16 +161,15 @@
           dan rayakan bersama.
         </p>
       </div>
-
-    </div><!-- /features-grid -->
-  </section><!-- /features-section -->
+    </div>
+  </section>
 
   <!-- ======================================================
        Manifesto / About Section
        ====================================================== -->
   <section class="manifesto-section">
     <div class="manifesto-inner">
-      <h2 class="section-title" style="color:var(--color-white);text-align:center;margin-bottom:24px;">Untuk Siapa unlinked+?</h2>
+      <h2 class="section-title" style="color:var(--color-yellow);text-align:center;margin-bottom:24px;">Untuk Siapa unlinked+?</h2>
       <p class="manifesto-text">
         unlinked+ hadir untuk mereka yang ditolak HRD setelah lima tahap interview. Bagi mereka yang kelelahan mengejar target.
         Bagi freelancer yang belum dibayar. Bagi karyawan yang ingin menyerah tetapi masih harus bekerja besok pagi.
@@ -182,8 +201,9 @@
        Footer
        ====================================================== -->
   <footer class="landing-footer">
-    <p>© 2025 unlinked+ — Memutus yang Toksik, Menambah yang Esensial 💔</p>
-    <p style="margin-top:8px;opacity:0.7;">No Flex. Just Human. — Dibuat dengan ☕ dan banyak revisi tengah malam.</p>
+    <p><strong>unlinked+</strong> — Memutus yang Toksik, Menambah yang Esensial 💔</p>
+    <p style="margin-top:6px;">No Flex. Just Human. — Dibuat dengan ☕ dan banyak revisi tengah malam.</p>
+    <p style="margin-top:16px;font-size:0.75rem;opacity:0.5;">© 2025 unlinked+</p>
   </footer>
 
   <!-- ======================================================
