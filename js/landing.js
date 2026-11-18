@@ -2,7 +2,7 @@
   'use strict';
 
   /* ============================================================
-     SambatIn — landing.js
+     Unlinked+ — landing.js
      Responsibilities:
        (a) Waitlist form — submit, quota decrement, localStorage
        (b) Certificate live preview — input binding + PNG download

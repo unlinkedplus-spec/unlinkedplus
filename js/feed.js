@@ -1,5 +1,5 @@
 /* ============================================================
-   SambatIn — feed.js
+   Unlinked+ — feed.js
    IIFE exposing window.Feed.
    Handles: seed posts, AI sensor, post creation, reactions.
    ============================================================ */

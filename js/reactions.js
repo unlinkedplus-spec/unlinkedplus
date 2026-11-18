@@ -1,5 +1,5 @@
 /* ============================================================
-   SambatIn — reactions.js
+   Unlinked+ — reactions.js
    IIFE exposing window.Reactions.
    LocalStorage keys: sambatin_reactions, sambatin_xp.
    ============================================================ */

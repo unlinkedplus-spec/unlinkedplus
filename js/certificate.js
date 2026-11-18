@@ -1,5 +1,5 @@
 /* ============================================================
-   SambatIn — certificate.js
+   Unlinked+ — certificate.js
    IIFE exposing window.Certificate.
    Uses html2canvas to render #cert-render-target as PNG.
    ============================================================ */

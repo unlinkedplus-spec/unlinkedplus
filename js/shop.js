@@ -1,4 +1,4 @@
-/* SambatIn — shop.js (stub — implemented in FEAT-004) */
+/* Unlinked+ — shop.js (stub — implemented in FEAT-004) */
 (function () {
   'use strict';
 

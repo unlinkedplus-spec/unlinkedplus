@@ -1,5 +1,5 @@
 /* ============================================================
-   SambatIn — avatar-builder.js
+   Unlinked+ — avatar-builder.js
    IIFE module. Exposes window.AvatarBuilder.
    All character bodies drawn with SVG primitives — no emoji.
    ViewBox: 0 0 300 300
