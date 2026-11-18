@@ -1,36 +1,73 @@
 {
   "id": "FEAT-003",
   "type": "feat",
-  "description": "Fail Feed (feed.js), AI Sensor, Reactions + XP leveling system (reactions.js), and Failure Certificate generator (certificate.js). Depends on FEAT-002 (app.html, app.css, avatar-builder.js, app.js must all exist). FEAT-004 depends on this FEAT's reactions.js being complete.",
-  "status": "completed",
+  "description": "Store + Avatar + Certificates backend modules, plus the full Next.js 14 frontend. Backend: AvatarsModule (GET /avatar/items), StoreModule (POST /store/purchase, POST /store/purchase/confirm/:id, GET /store/transactions), CertificatesModule (POST /certificates, GET /certificates/:id), plus BullMQ worker for background jobs. Frontend: Next.js App Router with all 7 components ported from vanilla HTML, connecting to /api/* endpoints. Depends on FEAT-001 (infra) and FEAT-002 (auth+social API) being complete.",
+  "status": "pending",
   "steps": [
-    "Create d:\\Anti-LinkedIn\\js\\reactions.js. IIFE exposing window.Reactions. LocalStorage keys: sambatin_reactions (object keyed by postId), sambatin_xp (number). Internal helpers: _getAll() — JSON.parse(localStorage.getItem('sambatin_reactions')||'{}'); _saveAll(obj) — localStorage.setItem('sambatin_reactions',JSON.stringify(obj)); _getXP() — parseInt(localStorage.getItem('sambatin_xp')||'0'); _saveXP(n) — localStorage.setItem('sambatin_xp',String(n)); _fireXPEvent() — window.dispatchEvent(new CustomEvent('sambatin:xp-changed',{bubbles:true})). LEVEL THRESHOLDS (also used in app.js — keep in sync): var LEVELS=[{min:0,max:49,level:1,name:'Rapuh',color:'#9CA3AF'},{min:50,max:149,level:2,name:'Tahan Banting',color:'#60A5FA'},{min:150,max:299,level:3,name:'Kebal Revisi',color:'#A78BFA'},{min:300,max:499,level:4,name:'Kebal PHP HRD',color:'#F97316'},{min:500,max:999999,level:5,name:'Suhu Sambat',color:'#EF4444'}]. getLevel(xp): return LEVELS entry where xp>=t.min && xp<=t.max (fall back to last). getLevelName(xp): return getLevel(xp).name. getLevelColor(xp): return getLevel(xp).color. addReaction(postId, type): all=_getAll(); if(!all[postId]) all[postId]={pukpuk:0,ngakak:0,sama:0,myReactions:{pukpuk:false,ngakak:false,sama:false}}; var r=all[postId]; if(r.myReactions[type]){r[type]=Math.max(0,r[type]-1);r.myReactions[type]=false;_saveXP(Math.max(0,_getXP()-1));}else{r[type]++;r.myReactions[type]=true;_saveXP(_getXP()+1);} _saveAll(all); _fireXPEvent(); return r. addXP(amount): _saveXP(_getXP()+amount); _fireXPEvent(). getReactions(postId): all=_getAll(); return all[postId]||{pukpuk:0,ngakak:0,sama:0,myReactions:{pukpuk:false,ngakak:false,sama:false}}. window.Reactions={addReaction,addXP,getReactions,getLevel,getLevelName,getLevelColor,LEVELS}.",
-    "Create d:\\Anti-LinkedIn\\js\\feed.js. IIFE exposing window.Feed. SEED POSTS (5 items, inserted only when sambatin_posts not in localStorage): post 1: {id:'seed1',username:'PejuangKubik_87',characterId:'panda',accessories:['id-card'],category:'Ditolak HRD',text:'Udah 5 tahap interview, presentasi proposal 20 halaman, bikin analisis kompetitor, terus HR-nya bilang \"kami akan menghubungi kembali\" — itu 3 bulan lalu. Yang berhasil ngebuka aplikasi LinkedIn mereka sekarang, tolong screenshot fotonya buat aku framing di kamar.',timestamp:Date.now()-3600000*5}. post 2: {id:'seed2',username:'MagangAbadi_Joko',characterId:'intern',accessories:['kopi'],category:'Salah Kirim Chat',text:'Niat mau curhat ke bestie soal bos killer, malah kekirim ke grup kantor \"All Staff\". Pesan aslinya: \"Pak Direktur mirip karakter villain di film kartun tapi lebih jahat\". Pak Direktur baca. Pak Direktur reply dengan 3 kata: \"Senin ke HR.\"',timestamp:Date.now()-3600000*12}. post 3: {id:'seed3',username:'FreelancerKucingTua',characterId:'freelancer',accessories:['kopi','bendera'],category:'Bisnis Boncos',text:'Klien minta revisi ke-17. Jam 23.47. Pesannya: \"Mas, bisa ganti semua warnanya jadi lebih... hidup? Dan fontnya kurang berjiwa.\" Tarif saya Rp150rb, sudah termasuk konseling trauma pasca-revisi. Belum bayar DP.',timestamp:Date.now()-3600000*24}. post 4: {id:'seed4',username:'SarjanaPenganggur',characterId:'php-victim',accessories:[],category:'Salah Jurusan',text:'Kuliah 4 tahun di Teknik Kimia. Lulus dengan IPK 3.7. Sekarang kerja di pabrik — pabrik mie instan divisi quality control rasa. Kata orang tua \"kan masih nyambung sama kimia\". Iya Bu, kimia bumbu kaldu sapi.',timestamp:Date.now()-3600000*36}. post 5: {id:'seed5',username:'KaryawanReguler_02',characterId:'panda',accessories:['kardus'],category:'Dimarahi Bos',text:'Rapat presentasi hasil Q3. Slide ke-7, bos nyela: \"Data ini dari mana? Google? Ini bukan skripsi!\" Semua orang lihat ke saya. Padahal datanya dari laporan internal yang dia kirim sendiri bulan lalu. Nomor halaman 23. Saya tunjukkan. Dia bilang \"Meeting dilanjutkan Senin.\"',timestamp:Date.now()-3600000*48}. AI SENSOR: var BANNED_PHRASES=['alhamdulillah diterima','gaji dua digit','promosi jabatan','bangga mengumumkan','humbled and honored','excited to share','happy to announce','bersyukur diterima','naik jabatan','diterima kerja']. function _hasBanned(text): var t=text.toLowerCase(); return BANNED_PHRASES.some(function(p){return t.includes(p);}). CATEGORY COLORS: {'Ditolak HRD':'#EF4444','Salah Kirim Chat':'#F59E0B','Dimarahi Bos':'#8B5CF6','Bisnis Boncos':'#EF4444','Salah Jurusan':'#3B82F6'}. _relativeTime(ts): var diff=Date.now()-ts; if(diff<60000) return 'baru saja'; if(diff<3600000) return Math.floor(diff/60000)+' menit lalu'; if(diff<86400000) return Math.floor(diff/3600000)+' jam lalu'; return Math.floor(diff/86400000)+' hari lalu'. _renderPost(post): var rxn=Reactions.getReactions(post.id); var xp=0; (we don't have direct xp per post — use 0 for seed posts); var lvl=Reactions.getLevel(0); for seed posts level stays Rapuh. Actually compute from total reactions: var totalRxn=(rxn.pukpuk+rxn.ngakak+rxn.sama)*10; var lvl=Reactions.getLevel(totalRxn); return HTML string: '<div class=\"post-card\" id=\"post-'+post.id+'\">...' containing avatar svg (AvatarBuilder.getAvatarSVG(post.characterId,post.accessories,48)), post-username, level-badge (style using getLevelColor), cat-badge (style using category color), post.text, timestamp, reaction row with 3 buttons (data-post-id, data-reaction, .reacted class if myReactions[type] true, counts), cert button with data-post-id. _bindPost(postId): bind reaction button clicks for that post's card. On click: var updated=Reactions.addReaction(postId,type); re-query all 3 reaction buttons for that post and update their text counts and .reacted class. Bind cert button click: var post=getPosts().find(p=>p.id==postId); Certificate.openModal(post). getPosts(): JSON.parse(localStorage.getItem('sambatin_posts')||'null'). Feed.init(): var posts=getPosts(); if(!posts){posts=SEED_POSTS.slice();localStorage.setItem('sambatin_posts',JSON.stringify(posts));} var container=document.getElementById('feed-container'); container.innerHTML=''; posts.forEach(function(p){container.insertAdjacentHTML('beforeend',_renderPost(p));_bindPost(p.id);}); bind #post-text 'input' event: update #char-count span; run _hasBanned; toggle hidden on #ai-sensor-warning; toggle disabled on #post-submit-btn. bind #post-submit-btn click: validate category and text and !_hasBanned; build post obj {id:'post_'+Date.now(), username: localStorage.getItem('sambatin_username')||'BudakKorporat_'+(Math.floor(Math.random()*900)+100), characterId: (JSON.parse(localStorage.getItem('sambatin_avatar')||'{}')).character||'panda', accessories: (JSON.parse(localStorage.getItem('sambatin_avatar')||'{}')).accessories||[], category: select.value, text: textarea.value.trim(), timestamp:Date.now()}; var allPosts=getPosts()||[]; allPosts.unshift(post); localStorage.setItem('sambatin_posts',JSON.stringify(allPosts)); Reactions.addXP(10); container.insertAdjacentHTML('afterbegin',_renderPost(post)); _bindPost(post.id); clear form; document.getElementById('tab-feed')?.scrollTo(0,0). window.Feed={init,getPosts}.",
-    "Create d:\\Anti-LinkedIn\\js\\certificate.js. IIFE exposing window.Certificate. var _currentPost=null. Certificate.openModal(post): _currentPost=post; document.getElementById('cert-username').textContent=post.username; var catText=post.category+(post.text?' — '+post.text.substring(0,55)+(post.text.length>55?'...':''):''); document.getElementById('cert-category').textContent=catText; var months=['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember']; var d=new Date(); document.getElementById('cert-date').textContent=d.getDate()+' '+months[d.getMonth()]+' '+d.getFullYear(); document.getElementById('modal-cert').removeAttribute('hidden'); document.getElementById('modal-overlay').removeAttribute('hidden'). Certificate.downloadCert(): var target=document.getElementById('cert-render-target'); html2canvas(target,{scale:2,useCORS:true,allowTaint:true,backgroundColor:'#F5C518'}).then(function(canvas){ var link=document.createElement('a'); link.download='sertifikat-sambatin.png'; link.href=canvas.toDataURL('image/png'); document.body.appendChild(link); link.click(); document.body.removeChild(link); }).catch(function(e){ alert('Gagal download: '+e.message); }). DOMContentLoaded: bind #cert-download-btn click to Certificate.downloadCert. bind #cert-close-btn click: document.getElementById('modal-cert').setAttribute('hidden',''); document.getElementById('modal-overlay').setAttribute('hidden','')."
+    "Create apps/api/src/avatars/ module. avatars.service.ts: findAllItems() returns all avatar_items sorted by isPremium asc, price asc. avatars.controller.ts: GET /avatar/items (@Public()). avatars.module.ts.",
+
+    "Create apps/api/src/store/ module. store.service.ts: purchase(userId, dto: PurchaseDto): find item, check not already owned (UserInventory), create Transaction with paymentStatus='pending', return transaction with QRIS simulation data {transactionId, amount, qrisPayload:'SIMULATED_QRIS_'+transactionId}. confirmPurchase(transactionId, userId): find transaction, verify ownership, set paymentStatus='completed', upsert UserInventory row. getTransactions(userId): return user's transactions with item details. store.controller.ts: GET /store/transactions (JWT), POST /store/purchase (JWT), POST /store/purchase/confirm/:transactionId (JWT). store.module.ts.",
+
+    "Create apps/api/src/store/dto/purchase.dto.ts: itemId @IsUUID @IsNotEmpty.",
+
+    "Create apps/api/src/certificates/ module. certificates.service.ts: create(postId, userId): verify post exists and userId owns it, create Certificate row with imagePath=null (image generation is async via worker). findOne(id): return certificate. certificates.controller.ts: POST /certificates (JWT, body:{postId}), GET /certificates/:id (@Public()). certificates.module.ts.",
+
+    "Create apps/api/src/worker/ BullMQ worker. worker.module.ts: BullModule.registerQueue({name:'certificates'}), registers CertificateProcessor. certificate.processor.ts: @Processor('certificates') class with @Process('generate') method — receives job data {certificateId, postContent, username}, generates a simple SVG string (same design as Tahap 1 cert card), saves to STORAGE_PATH/certificates/{id}.svg, updates Certificate.imagePath. worker.ts entrypoint: NestFactory.createApplicationContext(WorkerModule).",
+
+    "Create apps/api/src/certificates/certificate.queue.ts: injects @InjectQueue('certificates') Bull queue, exposes addGenerateJob(certId, postContent, username). CertificatesService calls this after creating the DB row.",
+
+    "Register AvatarsModule, StoreModule, CertificatesModule in AppModule.",
+
+    "Create apps/web/package.json: name @unlinked/web, dependencies: next@14, react@18, react-dom@18, typescript, tailwindcss, postcss, autoprefixer, @types/react, @types/react-dom, @types/node, axios, js-cookie, @types/js-cookie, html2canvas, canvas-confetti, @types/canvas-confetti, lucide-react. Scripts: dev, build, start, lint.",
+
+    "Create apps/web/next.config.ts: output:'standalone' for Docker, images.domains:['192.168.1.20'], env:{NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL}.",
+
+    "Create apps/web/tailwind.config.ts: content ['./src/**/*.{ts,tsx}'], theme.extend.colors: {primary:'#F5C542', accent:'#F57C00', navy:'#172B4D', background:'#FAFAFA'}, fontFamily: {display:['Nunito','sans-serif'], body:['Inter','sans-serif']}.",
+
+    "Create apps/web/Dockerfile: multi-stage. Stage 1 (deps): node:20-alpine, copy package*.json, npm ci. Stage 2 (builder): copy deps, copy src, NEXT_PUBLIC_API_URL build arg, npm run build. Stage 3 (runner): node:20-alpine, copy .next/standalone, .next/static, public. ENV NODE_ENV=production PORT=3000. CMD node server.js.",
+
+    "Create apps/web/src/lib/types.ts: TypeScript interfaces matching all API response shapes — User, Profile, Post, Reaction, AvatarItem, Transaction, Certificate, PaginatedResponse<T>, AuthResponse.",
+
+    "Create apps/web/src/lib/api.ts: axios instance with baseURL=process.env.NEXT_PUBLIC_API_URL, request interceptor adds Authorization: Bearer {token from localStorage/cookie}. Exports typed functions: authRegister, authLogin, authMe, getPosts(page), createPost(data), toggleReaction(postId,type), getReactions(postId), getProfile(username), updateProfile(data), getAvatarItems, purchase(itemId), confirmPurchase(transactionId), getTransactions, createCertificate(postId), getCertificate(id).",
+
+    "Create apps/web/src/app/layout.tsx: root layout with <html lang='id'>, Google Fonts (Nunito + Inter via next/font/google), Tailwind base styles, metadata {title:'unlinked+', description:'No Flex. Just Human.'}.",
+
+    "Create apps/web/src/app/page.tsx: port of index.html landing page as a Next.js Server Component. Sections: hero with waitlist form (client island), certificate preview (client island), feature cards, manifesto, footer. Same color palette and copy as Tahap 1. The waitlist form is a 'use client' Client Component that calls authRegister and stores JWT.",
+
+    "Create apps/web/src/app/app/page.tsx: 'use client' page. 5-tab shell with BottomNav. Renders active tab content: Feed, Create, Avatar, Shop, Profile. On mount: check JWT in localStorage — if missing redirect to /. Manages activeTab state.",
+
+    "Create apps/web/src/components/BottomNav.tsx: 'use client', 5 buttons (Beranda/Feed, Spill/Create, Avatar, Toko/Shop, Profil/Profile), active tab highlighted with primary color, fixed bottom bar matching Tahap 1 design.",
+
+    "Create apps/web/src/components/FailFeed.tsx: 'use client'. Fetches GET /api/posts?page=1 on mount and on scroll near bottom (infinite scroll via IntersectionObserver). Renders PostCard list. PostCard shows: avatar SVG inline, username, level badge, category badge, content, relative timestamp, ReactionBar, 'Buat Sertifikat' button.",
+
+    "Create apps/web/src/components/ReactionBar.tsx: 'use client'. Props: postId, initialReactions, initialUserReactions. Buttons: 🫂 Puk-Puk, 😂 Ngakak Maaf, 🤝 Sama Banget with counts. On click: call toggleReaction API, update local state optimistically.",
+
+    "Create apps/web/src/components/AvatarBuilder.tsx: 'use client'. Inline SVG rendering (port SVG paths from js/avatar-builder.js). Character selector (4 cards), accessory list (5 rows with free/premium status). On save: call PATCH /users/me with {avatarConfig:{character,accessories}}.",
+
+    "Create apps/web/src/components/CertificateModal.tsx: 'use client'. Opens when 'Buat Sertifikat' clicked. Calls POST /certificates, renders cert card div with same layout as Tahap 1, uses html2canvas to download PNG.",
+
+    "Create apps/web/src/components/ShopModal.tsx and QRISModal.tsx: 'use client'. ShopModal shows avatar items grid. QRISModal shows simulated QRIS SVG, 'Konfirmasi Bayar' button calls POST /store/purchase/confirm/:id, fires canvas-confetti on success.",
+
+    "Create apps/web/src/components/AuthModal.tsx: 'use client'. Register/Login form modal. On submit: call authRegister or authLogin, store JWT in localStorage, close modal, reload auth state."
   ],
   "acceptance_criteria": [
-    "Feed tab shows 5 dummy Indonesian posts on first load with avatars, level badges, and category badges",
-    "AI sensor detects all 10 banned phrases in real time, disables post button, shows warning",
-    "AI sensor clears warning and re-enables button when banned text is removed",
-    "Posting a valid post adds it to the top of the feed and awards +10 XP",
-    "Reaction buttons (Puk-Puk, Ngakak Maaf, Sama Banget) increment counters and toggle .reacted class",
-    "Reactions persist in localStorage sambatin_reactions across page reload",
-    "XP in sambatin_xp increases with reactions and posting; header level badge updates",
-    "Clicking Buat Sertifikat on a post opens cert modal with correct username and category text",
-    "Clicking Download PNG downloads a PNG file from the certificate modal",
-    "Certificate modal closes when clicking the close button or modal overlay"
+    "GET /avatar/items returns array of 5 seeded avatar items",
+    "POST /store/purchase creates a pending transaction and returns qrisPayload",
+    "POST /store/purchase/confirm/:id sets transaction to completed and adds item to user inventory",
+    "GET /certificates/:id returns certificate with imagePath (may be null until worker processes it)",
+    "http://192.168.1.20 loads Next.js landing page with correct unlinked+ branding",
+    "http://192.168.1.20/app loads 5-tab app shell, bottom nav works",
+    "FailFeed fetches and displays posts from /api/posts",
+    "ReactionBar toggles reactions and updates counts without page reload",
+    "AvatarBuilder renders SVG avatars and saves to backend via PATCH /users/me",
+    "ShopModal + QRISModal complete a purchase flow end-to-end (pending → confirmed → inventory)"
   ],
   "verification": [
-    "Open app.html, navigate to Beranda tab — confirm 5 posts render with correct Indonesian text",
-    "Open DevTools > Application > localStorage — confirm sambatin_posts has 5 entries after first load",
-    "Navigate to Buat Sambat tab, type 'alhamdulillah diterima' in textarea — button disabled, warning visible",
-    "Clear textarea — button re-enables, warning hides",
-    "Select a category, type valid text, click Posting Sambatan — post appears at top of feed, sambatin_xp increased by 10",
-    "Click Puk-Puk on a post — counter increments, button turns navy (.reacted), sambatin_reactions updated in localStorage",
-    "Click Puk-Puk again — counter decrements, button reverts",
-    "Click Buat Sertifikat on seed post — modal opens with username 'PejuangKubik_87' or similar and category text",
-    "Click Download PNG in cert modal — .png file downloads",
-    "Click X Tutup or modal overlay — cert modal closes"
+    "docker compose up --build — all 7 services healthy",
+    "curl http://192.168.1.20/api/avatar/items | python3 -m json.tool — returns JSON array",
+    "Open http://192.168.1.20 in browser — landing page renders with yellow hero, certificate preview, feature cards",
+    "Open http://192.168.1.20/app in browser — all 5 tabs work, feed loads posts from API",
+    "cd apps/api && npm run test — all unit tests pass"
   ],
   "blocked_reason": null,
   "findings": ""

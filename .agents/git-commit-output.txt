@@ -1,0 +1,25 @@
+﻿[master fcfb031] feat(infra): FEAT-001 infrastructure, Prisma schema, Docker Compose
+ 23 files changed, 1084 insertions(+)
+ create mode 100644 .agents/tasks/features/FEAT-001.json
+ create mode 100644 .env.example
+ create mode 100644 .gitignore
+ create mode 100644 TECHNICAL-BLUEPRINT.md
+ create mode 100644 apps/api/Dockerfile
+ create mode 100644 apps/api/nest-cli.json
+ create mode 100644 apps/api/package.json
+ create mode 100644 apps/api/prisma/schema.prisma
+ create mode 100644 apps/api/src/app.controller.ts
+ create mode 100644 apps/api/src/app.module.ts
+ create mode 100644 apps/api/src/common/decorators/current-user.decorator.ts
+ create mode 100644 apps/api/src/common/decorators/public.decorator.ts
+ create mode 100644 apps/api/src/common/filters/http-exception.filter.ts
+ create mode 100644 apps/api/src/common/guards/jwt-auth.guard.ts
+ create mode 100644 apps/api/src/main.ts
+ create mode 100644 apps/api/src/prisma.service.ts
+ create mode 100644 apps/api/src/prisma/prisma.module.ts
+ create mode 100644 apps/api/src/prisma/prisma.service.ts
+ create mode 100644 apps/api/src/worker/worker.module.ts
+ create mode 100644 apps/api/src/worker/worker.ts
+ create mode 100644 apps/api/tsconfig.json
+ create mode 100644 docker-compose.yml
+ create mode 100644 docker/nginx/default.conf

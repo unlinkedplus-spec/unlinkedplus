@@ -1,0 +1,237 @@
+﻿name: unlinked-plus
+services:
+  backend:
+    build:
+      context: D:\Anti-LinkedIn\apps\api
+      dockerfile: Dockerfile
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+        required: true
+      redis:
+        condition: service_healthy
+        required: true
+    environment:
+      DATABASE_URL: postgresql://unlinked:testpassword@postgres:5432/unlinked
+      DB_PASSWORD: unlinked_local_dev_8f4b7a2c9d1e6f3a
+      NODE_OPTIONS: --max-old-space-size=256
+      REDIS_PASSWORD: redis_local_dev_4c9e2a7b1d8f5a6c
+      REDIS_URL: redis://:testredis@redis:6379
+      STORAGE_PATH: /data
+    healthcheck:
+      test:
+        - CMD
+        - node
+        - -e
+        - fetch('http://127.0.0.1:3001/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))
+      timeout: 5s
+      interval: 15s
+      retries: 10
+      start_period: 30s
+    image: unlinked-plus-api:local
+    init: true
+    mem_limit: "402653184"
+    networks:
+      default: null
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    volumes:
+      - type: volume
+        source: app_storage
+        target: /data
+        volume: {}
+  frontend:
+    build:
+      context: D:\Anti-LinkedIn\apps\web
+      dockerfile: Dockerfile
+    depends_on:
+      backend:
+        condition: service_healthy
+        required: true
+    environment:
+      NODE_OPTIONS: --max-old-space-size=192
+    healthcheck:
+      test:
+        - CMD
+        - node
+        - -e
+        - fetch('http://127.0.0.1:3000').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))
+      timeout: 5s
+      interval: 15s
+      retries: 10
+      start_period: 30s
+    image: unlinked-plus-web:local
+    init: true
+    mem_limit: "268435456"
+    networks:
+      default: null
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+  migrate:
+    build:
+      context: D:\Anti-LinkedIn\apps\api
+      dockerfile: Dockerfile
+    command:
+      - sh
+      - -c
+      - npx prisma migrate deploy && node prisma/seed.cjs
+    depends_on:
+      postgres:
+        condition: service_healthy
+        required: true
+    environment:
+      DATABASE_URL: postgresql://unlinked:testpassword@postgres:5432/unlinked
+      DB_PASSWORD: unlinked_local_dev_8f4b7a2c9d1e6f3a
+      NODE_OPTIONS: --max-old-space-size=256
+      REDIS_PASSWORD: redis_local_dev_4c9e2a7b1d8f5a6c
+      REDIS_URL: redis://:testredis@redis:6379
+      STORAGE_PATH: /data
+    image: unlinked-plus-api:local
+    init: true
+    mem_limit: "402653184"
+    networks:
+      default: null
+    restart: 'no'
+    security_opt:
+      - no-new-privileges:true
+    volumes:
+      - type: volume
+        source: app_storage
+        target: /data
+        volume: {}
+  nginx:
+    depends_on:
+      backend:
+        condition: service_healthy
+        required: true
+      frontend:
+        condition: service_healthy
+        required: true
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - wget -q -O /dev/null http://127.0.0.1/api/health
+      timeout: 5s
+      interval: 15s
+      retries: 5
+    image: nginx:alpine
+    mem_limit: "67108864"
+    networks:
+      default: null
+    ports:
+      - mode: ingress
+        host_ip: 127.0.0.1
+        target: 80
+        published: "8080"
+        protocol: tcp
+    restart: unless-stopped
+    volumes:
+      - type: bind
+        source: D:\Anti-LinkedIn\docker\nginx
+        target: /etc/nginx/conf.d
+        read_only: true
+        bind: {}
+  postgres:
+    environment:
+      POSTGRES_DB: unlinked
+      POSTGRES_PASSWORD: testpassword
+      POSTGRES_USER: unlinked
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - pg_isready -U unlinked -d unlinked
+      timeout: 5s
+      interval: 10s
+      retries: 10
+    image: postgres:17-alpine
+    mem_limit: "268435456"
+    networks:
+      default: null
+    restart: unless-stopped
+    volumes:
+      - type: volume
+        source: postgres_data
+        target: /var/lib/postgresql/data
+        volume: {}
+  redis:
+    command:
+      - sh
+      - -c
+      - exec redis-server --appendonly yes --requirepass "$$REDIS_PASSWORD" --maxmemory
+        128mb --maxmemory-policy noeviction
+    environment:
+      REDIS_PASSWORD: testredis
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - REDISCLI_AUTH="$$REDIS_PASSWORD" redis-cli ping | grep -q PONG
+      timeout: 5s
+      interval: 10s
+      retries: 10
+    image: redis:7-alpine
+    mem_limit: "201326592"
+    networks:
+      default: null
+    restart: unless-stopped
+    volumes:
+      - type: volume
+        source: redis_data
+        target: /data
+        volume: {}
+  worker:
+    build:
+      context: D:\Anti-LinkedIn\apps\api
+      dockerfile: Dockerfile
+    command:
+      - node
+      - dist/worker/worker.js
+    depends_on:
+      backend:
+        condition: service_healthy
+        required: true
+    environment:
+      DATABASE_URL: postgresql://unlinked:testpassword@postgres:5432/unlinked
+      DB_PASSWORD: unlinked_local_dev_8f4b7a2c9d1e6f3a
+      NODE_OPTIONS: --max-old-space-size=256
+      REDIS_PASSWORD: redis_local_dev_4c9e2a7b1d8f5a6c
+      REDIS_URL: redis://:testredis@redis:6379
+      STORAGE_PATH: /data
+    image: unlinked-plus-api:local
+    init: true
+    mem_limit: "268435456"
+    networks:
+      default: null
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    volumes:
+      - type: volume
+        source: app_storage
+        target: /data
+        volume: {}
+networks:
+  default:
+    name: unlinked-plus_default
+volumes:
+  app_storage:
+    name: unlinked-plus_app_storage
+  postgres_data:
+    name: unlinked-plus_postgres_data
+  redis_data:
+    name: unlinked-plus_redis_data
+x-api:
+  build: ./apps/api
+  env_file: .env
+  environment:
+    DATABASE_URL: postgresql://unlinked:testpassword@postgres:5432/unlinked
+    NODE_OPTIONS: --max-old-space-size=256
+    REDIS_URL: redis://:testredis@redis:6379
+    STORAGE_PATH: /data
+  image: unlinked-plus-api:local
+  init: true
+  security_opt:
+    - no-new-privileges:true
+  volumes:
+    - app_storage:/data

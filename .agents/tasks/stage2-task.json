@@ -1,0 +1,7 @@
+{
+  "task_id": "task-unlinked-stage2-social-core",
+  "task_description": "Build unlinked+ Tahap 2 — Social Core. Full-stack rewrite from vanilla HTML/JS to NestJS (TypeScript) backend + Next.js 14 (TypeScript) + Tailwind CSS frontend, PostgreSQL 17, Redis 7 + BullMQ, Docker Compose, Prisma ORM, JWT auth, Nginx reverse proxy. Tahap 1 vanilla files at root stay untouched. All new code goes into apps/ and config files at root.",
+  "status": "pending",
+  "feature_order": ["FEAT-001", "FEAT-002", "FEAT-003", "FEAT-004"],
+  "blocked_reason": null
+}

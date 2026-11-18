@@ -1,0 +1,7 @@
+{
+  "task_id": "task-sambatin-anti-linkedin",
+  "task_description": "Build SambatIn — a complete, fully interactive mobile-first vanilla HTML/CSS/JS Anti-LinkedIn Indonesian social media platform celebrating career failures. Two HTML pages (index.html landing/waitlist + app.html main app), three CSS files, seven JS modules. Five core features: custom SVG avatar builder, fail feed with AI sensor, reactions + XP leveling, failure certificate generator, and shop with QRIS simulation.",
+  "status": "pending",
+  "feature_order": ["FEAT-001", "FEAT-002", "FEAT-003", "FEAT-004"],
+  "blocked_reason": null
+}
