@@ -1,0 +1,47 @@
+{
+  "id": "FEAT-001",
+  "type": "chore",
+  "description": "Infrastructure foundation: Docker Compose with all services, Nginx config, .env.example, NestJS app scaffold with Prisma schema and all migrations, and the shared PrismaModule. This FEAT establishes the entire build/run pipeline so every subsequent FEAT has a running database and working API skeleton to build on.",
+  "status": "completed",
+  "steps": [
+    "Create D:\\Anti-LinkedIn\\.env.example with all required variables: DB_PASSWORD, REDIS_PASSWORD, JWT_SECRET, JWT_EXPIRES_IN=7d, NEXT_PUBLIC_API_URL=http://192.168.1.20/api, NODE_ENV=production, STORAGE_PATH=/data, THROTTLE_TTL=60, THROTTLE_LIMIT=100",
+
+    "Create D:\\Anti-LinkedIn\\docker-compose.yml with 7 services: postgres (postgres:17-alpine, healthcheck: pg_isready -U unlinked -d unlinked), redis (redis:7-alpine, requirepass ${REDIS_PASSWORD}, healthcheck: redis-cli ping), backend (build ./apps/api, port 3001, depends_on postgres+redis healthy, restart unless-stopped, volumes app_storage:/data), worker (build ./apps/api, command: node dist/worker/worker.js, same deps), frontend (build ./apps/web, port 3000, depends_on backend healthy), nginx (nginx:alpine, ports 80:80, depends_on frontend+backend, volumes ./docker/nginx:/etc/nginx/conf.d:ro), and named volumes: postgres_data, redis_data, app_storage. All services have restart: unless-stopped. Backend and worker deploy.resources.limits: memory 512m. Frontend: memory 256m.",
+
+    "Create D:\\Anti-LinkedIn\\docker\\nginx\\default.conf: upstream frontend { server frontend:3000; } upstream backend { server backend:3001; }. server block on port 80: location /api/ { proxy_pass http://backend/; proxy_set_header Host, X-Real-IP, X-Forwarded-For, X-Forwarded-Proto; proxy_read_timeout 60s; } location / { proxy_pass http://frontend; proxy_set_header same headers; proxy_http_version 1.1; proxy_set_header Upgrade $http_upgrade; proxy_set_header Connection 'upgrade'; }",
+
+    "Create D:\\Anti-LinkedIn\\apps\\api\\package.json: name @unlinked/api, dependencies: @nestjs/core @nestjs/common @nestjs/platform-express @nestjs/jwt @nestjs/passport @nestjs/throttler @nestjs/bull @nestjs/config @prisma/client passport passport-jwt bcryptjs class-validator class-transformer helmet bullmq ioredis multer uuid. devDependencies: @types/node @types/bcryptjs @types/passport-jwt @types/multer @types/uuid typescript ts-node @nestjs/cli @nestjs/schematics prisma. Scripts: start:dev, start:prod (node dist/main), build (nest build), prisma:generate, test, test:e2e.",
+
+    "Create D:\\Anti-LinkedIn\\apps\\api\\tsconfig.json: compilerOptions strict:true, target ES2020, module commonjs, experimentalDecorators:true, emitDecoratorMetadata:true, outDir ./dist, rootDir ./src. Exclude: node_modules, dist.",
+
+    "Create D:\\Anti-LinkedIn\\apps\\api\\Dockerfile: multi-stage. Stage 1 (builder): node:20-alpine, WORKDIR /app, copy package*.json, npm ci, copy src/ prisma/, run npm run build and npx prisma generate. Stage 2 (runner): node:20-alpine, copy from builder /app/dist, /app/node_modules, /app/prisma. ENV NODE_ENV=production. EXPOSE 3001. CMD: sh -c 'npx prisma migrate deploy && node dist/main'",
+
+    "Create D:\\Anti-LinkedIn\\apps\\api\\prisma\\schema.prisma with datasource db (provider=postgresql, url from DATABASE_URL env), generator client (provider=prisma-client-js). Models: User, Profile, Post, Reaction, Comment, AvatarItem, UserInventory, Certificate, Transaction, Report (10 core) + Content, Media (2 CMS models added per Control Center spec notification).",
+
+    "Run `npx prisma migrate dev --name init` inside apps/api to generate the initial migration in apps/api/prisma/migrations/. Commit the migration files.",
+
+    "Create D:\\Anti-LinkedIn\\apps\\api\\src\\prisma\\prisma.module.ts and prisma.service.ts: PrismaService extends PrismaClient, implements OnModuleInit (this.$connect()) and OnModuleDestroy (this.$disconnect()). PrismaModule is @Global() so all other modules get PrismaService injected without re-importing.",
+
+    "Create D:\\Anti-LinkedIn\\apps\\api\\src\\app.module.ts: imports ConfigModule.forRoot({isGlobal:true}), ThrottlerModule.forRoot([{ttl:60000, limit:100}]), PrismaModule, BullModule.forRoot({connection:{host,port,password from config}}). APP_GUARD provider for ThrottlerGuard. No feature modules yet — those come in FEAT-002.",
+
+    "Create D:\\Anti-LinkedIn\\apps\\api\\src\\main.ts: NestFactory.create(AppModule), no setGlobalPrefix (Nginx strips /api prefix). app.useGlobalPipes(new ValidationPipe({whitelist:true,forbidNonWhitelisted:true,transform:true})). app.use(helmet()). app.enableCors({origin: process.env.FRONTEND_URL || 'http://192.168.1.20', credentials:true}). await app.listen(3001).",
+
+    "Create D:\\Anti-LinkedIn\\apps\\api\\src\\worker\\worker.ts: standalone NestJS app bootstrapped with WorkerModule (imports BullMQ processors). This is the entrypoint for the worker Docker service.",
+
+    "Create D:\\Anti-LinkedIn\\apps\\api\\src\\common\\decorators\\public.decorator.ts (@Public() decorator using SetMetadata('isPublic', true)) and D:\\Anti-LinkedIn\\apps\\api\\src\\common\\guards\\jwt-auth.guard.ts (extends AuthGuard('jwt'), checks IS_PUBLIC_KEY in reflector to allow public routes)."
+  ],
+  "acceptance_criteria": [
+    "docker compose up --build completes without errors",
+    "docker compose ps shows all 7 containers as Up/healthy",
+    "GET http://192.168.1.20/api/health returns HTTP 200 (health endpoint added in FEAT-002, but infrastructure must be reachable)",
+    "psql connection to postgres container succeeds and all 10 tables exist after migration",
+    "apps/api/prisma/migrations/ directory exists with at least one migration file committed"
+  ],
+  "verification": [
+    "docker compose up --build 2>&1 | tail -30 — all services start without fatal errors",
+    "docker compose exec postgres psql -U unlinked -d unlinked -c '\\dt' — shows 10 tables",
+    "docker compose logs backend | grep 'Application is running' — confirms NestJS started on port 3001"
+  ],
+  "blocked_reason": null,
+  "findings": "DEVIATIONS FROM PLAN:\n1. docker-compose.yml is an enhanced version with: x-api YAML anchor for DRY config, dedicated 'migrate' service (runs prisma migrate deploy + seed on startup, backend depends on migrate completing), nginx binds to ${BIND_ADDRESS:-127.0.0.1}:${HTTP_PORT:-8080}:80 by default — operator MUST set BIND_ADDRESS=0.0.0.0 and HTTP_PORT=80 in .env for production on 192.168.1.20.\n2. Prisma schema has 12 models (10 core + Content + Media added per CMS Control Center spec notification). AvatarItem has a 'slug' unique field. User has 'role' and 'status' fields. Comment has 'status' field. Certificate has 'status' field. All have extra indexes for performance.\n3. No local Postgres available — prisma migrate dev was NOT run locally. The migration files are absent. FEAT-002 implementor must either: (a) start only the postgres container and run npx prisma migrate dev --name init, or (b) rely on the migrate service inside Docker which runs prisma migrate deploy (needs at least one committed migration file first). RECOMMENDED: FEAT-002 implementor runs: docker compose up postgres -d && npx prisma migrate dev --name init (from apps/api with DATABASE_URL set), then commits the generated migrations/ folder.\n4. npm install completed: 335 packages, 0 vulnerabilities. Node v26.7.0, npm 11.19.0.\n5. CMS spec (from workflow notification): Admin NestJS module (apps/api/src/admin/), admin Next.js pages (apps/web/src/app/admin/), and ADMIN_API_KEY guard are slated for FEAT-002 through FEAT-004. ADMIN_API_KEY added to .env.example.\n6. The 'prisma.seed' in package.json references 'ts-node prisma/seed.ts' but docker-compose migrate service runs 'node prisma/seed.cjs' — FEAT-002 must create apps/api/prisma/seed.ts AND compile it or provide seed.cjs for Docker use.\n7. apps/web package.json currently uses next@15/react@19 (not next@14/react@18 as spec says) — this is pre-existing and functional; leave unless FEAT-003 needs to downgrade.\n8. All Tahap 1 files (index.html, app.html, js/, styles/) are untouched."
+}

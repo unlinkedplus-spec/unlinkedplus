@@ -1,0 +1,126 @@
+name: unlinked-plus
+
+x-api: &api
+  image: unlinked-plus-api:local
+  build: ./apps/api
+  env_file: .env
+  environment:
+    DATABASE_URL: postgresql://unlinked:${DB_PASSWORD:?Set DB_PASSWORD}@postgres:5432/unlinked
+    REDIS_URL: redis://:${REDIS_PASSWORD:?Set REDIS_PASSWORD}@redis:6379
+    STORAGE_PATH: /data
+    NODE_OPTIONS: --max-old-space-size=256
+  volumes:
+    - app_storage:/data
+  init: true
+  security_opt:
+    - no-new-privileges:true
+
+services:
+  postgres:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: unlinked
+      POSTGRES_USER: unlinked
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?Set DB_PASSWORD}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U unlinked -d unlinked"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    mem_limit: 256m
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    environment:
+      REDIS_PASSWORD: ${REDIS_PASSWORD:?Set REDIS_PASSWORD}
+    command: ["sh", "-c", "exec redis-server --appendonly yes --requirepass \"$$REDIS_PASSWORD\" --maxmemory 128mb --maxmemory-policy noeviction"]
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD-SHELL", "REDISCLI_AUTH=\"$$REDIS_PASSWORD\" redis-cli ping | grep -q PONG"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    mem_limit: 192m
+
+  migrate:
+    <<: *api
+    restart: "no"
+    command: ["sh", "-c", "npx prisma migrate deploy && node prisma/seed.cjs"]
+    depends_on:
+      postgres:
+        condition: service_healthy
+    mem_limit: 384m
+
+  backend:
+    <<: *api
+    restart: unless-stopped
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3001/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    mem_limit: 384m
+
+  worker:
+    <<: *api
+    restart: unless-stopped
+    command: ["node", "dist/worker/worker.js"]
+    depends_on:
+      backend:
+        condition: service_healthy
+    mem_limit: 256m
+
+  frontend:
+    image: unlinked-plus-web:local
+    build: ./apps/web
+    restart: unless-stopped
+    init: true
+    environment:
+      NODE_OPTIONS: --max-old-space-size=192
+    depends_on:
+      backend:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3000').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    mem_limit: 256m
+    security_opt:
+      - no-new-privileges:true
+
+  nginx:
+    image: nginx:alpine
+    restart: unless-stopped
+    ports:
+      - "${BIND_ADDRESS:-127.0.0.1}:${HTTP_PORT:-8080}:80"
+    volumes:
+      - ./docker/nginx:/etc/nginx/conf.d:ro
+    depends_on:
+      frontend:
+        condition: service_healthy
+      backend:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O /dev/null http://127.0.0.1/api/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+    mem_limit: 64m
+
+volumes:
+  postgres_data:
+  redis_data:
+  app_storage:

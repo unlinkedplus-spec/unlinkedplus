@@ -1,0 +1,173 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id             String          @id @default(uuid())
+  username       String          @unique @db.VarChar(50)
+  emailHash      String?         @unique @map("email_hash") @db.VarChar(255)
+  passwordHash   String          @map("password_hash") @db.VarChar(255)
+  createdAt      DateTime        @default(now()) @map("created_at")
+  role           String          @default("user") @db.VarChar(20)
+  status         String          @default("active") @db.VarChar(20)
+  profile        Profile?
+  posts          Post[]
+  reactions      Reaction[]
+  comments       Comment[]
+  transactions   Transaction[]
+  reports        Report[]        @relation("reporter")
+  inventoryItems UserInventory[]
+
+  @@map("users")
+}
+
+model Profile {
+  userId      String   @id @map("user_id")
+  avatarConfig Json?   @map("avatar_config")
+  mentalLevel  Int     @default(1) @map("mental_level")
+  mentalXp     Int     @default(0) @map("mental_xp")
+  bio          String?
+  isAnonymous  Boolean @default(true) @map("is_anonymous")
+  user         User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("profiles")
+}
+
+model Post {
+  id           String        @id @default(uuid())
+  userId       String?       @map("user_id")
+  category     String        @db.VarChar(50)
+  content      String
+  createdAt    DateTime      @default(now()) @map("created_at")
+  status       String        @default("active") @db.VarChar(20)
+  user         User?         @relation(fields: [userId], references: [id], onDelete: SetNull)
+  reactions    Reaction[]
+  comments     Comment[]
+  certificates Certificate[]
+
+  @@index([status, createdAt, id])
+  @@index([userId, status])
+  @@map("posts")
+}
+
+model Reaction {
+  id           String @id @default(uuid())
+  postId       String @map("post_id")
+  userId       String @map("user_id")
+  reactionType String @map("reaction_type") @db.VarChar(20)
+  post         Post   @relation(fields: [postId], references: [id], onDelete: Cascade)
+  user         User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([postId, userId, reactionType])
+  @@map("reactions")
+}
+
+model Comment {
+  id        String   @id @default(uuid())
+  postId    String   @map("post_id")
+  userId    String?  @map("user_id")
+  content   String
+  status    String   @default("active") @db.VarChar(20)
+  createdAt DateTime @default(now()) @map("created_at")
+  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([postId, status, createdAt, id])
+  @@map("comments")
+}
+
+model AvatarItem {
+  id             String          @id @default(uuid())
+  name           String          @db.VarChar(100)
+  slug           String          @unique @db.VarChar(50)
+  itemType       String?         @map("item_type") @db.VarChar(50)
+  price          Int             @default(0)
+  isPremium      Boolean         @default(false) @map("is_premium")
+  transactions   Transaction[]
+  inventoryItems UserInventory[]
+
+  @@map("avatar_items")
+}
+
+model UserInventory {
+  userId     String     @map("user_id")
+  itemId     String     @map("item_id")
+  unlockedAt DateTime   @default(now()) @map("unlocked_at")
+  user       User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  item       AvatarItem @relation(fields: [itemId], references: [id], onDelete: Cascade)
+
+  @@id([userId, itemId])
+  @@map("user_inventory")
+}
+
+model Certificate {
+  id        String   @id @default(uuid())
+  postId    String   @map("post_id")
+  imagePath String?  @map("image_path") @db.VarChar(500)
+  status    String   @default("pending") @db.VarChar(20)
+  createdAt DateTime @default(now()) @map("created_at")
+  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  @@index([postId])
+  @@map("certificates")
+}
+
+model Transaction {
+  id            String      @id @default(uuid())
+  userId        String?     @map("user_id")
+  itemId        String?     @map("item_id")
+  amount        Int
+  paymentStatus String      @default("pending") @map("payment_status") @db.VarChar(20)
+  createdAt     DateTime    @default(now()) @map("created_at")
+  user          User?       @relation(fields: [userId], references: [id], onDelete: SetNull)
+  item          AvatarItem? @relation(fields: [itemId], references: [id], onDelete: SetNull)
+
+  @@map("transactions")
+}
+
+model Report {
+  id         String   @id @default(uuid())
+  reporterId String?  @map("reporter_id")
+  targetType String   @map("target_type") @db.VarChar(20)
+  targetId   String   @map("target_id")
+  reason     String?
+  status     String   @default("pending") @db.VarChar(20)
+  createdAt  DateTime @default(now()) @map("created_at")
+  reporter   User?    @relation("reporter", fields: [reporterId], references: [id], onDelete: SetNull)
+
+  @@index([status, createdAt])
+  @@map("reports")
+}
+
+// CMS / Control Center models
+
+model Content {
+  id        String   @id @default(uuid())
+  title     String
+  type      String   @db.VarChar(50)
+  body      String?
+  imagePath String?  @map("image_path")
+  status    String   @default("draft") @db.VarChar(20)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@index([type, status])
+  @@map("contents")
+}
+
+model Media {
+  id           String   @id @default(uuid())
+  filename     String
+  originalName String   @map("original_name")
+  mimeType     String   @map("mime_type")
+  size         Int
+  path         String
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  @@map("media")
+}

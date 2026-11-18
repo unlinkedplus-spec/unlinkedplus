@@ -1,0 +1,62 @@
+{
+  "name": "@unlinked/api",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "build": "nest build",
+    "start": "node dist/main.js",
+    "start:dev": "nest start --watch",
+    "start:prod": "node dist/main.js",
+    "prisma:generate": "prisma generate",
+    "prisma:migrate": "prisma migrate dev",
+    "test": "npm run build && node --test test/*.test.cjs",
+    "test:e2e": "node --test test/e2e.cjs",
+    "worker": "node dist/worker/worker.js"
+  },
+  "prisma": { "seed": "node prisma/seed.cjs" },
+  "dependencies": {
+    "@nestjs/common": "^12.5.1",
+    "@nestjs/config": "^12.1.1",
+    "@nestjs/core": "^12.5.1",
+    "@nestjs/jwt": "^12.0.5",
+    "@nestjs/passport": "^12.0.2",
+    "@nestjs/platform-express": "^12.5.1",
+    "@nestjs/throttler": "^6.8.0",
+    "@nestjs/bull": "^12.0.2",
+    "@prisma/client": "6.19.3",
+    "bcryptjs": "^2.4.3",
+    "bullmq": "^5.37.0",
+    "class-transformer": "^0.5.1",
+    "class-validator": "^0.14.1",
+    "cookie-parser": "^1.4.7",
+    "express": "^5.3.0",
+    "sharp": "^0.35.5",
+    "helmet": "^8.0.0",
+    "ioredis": "^5.4.2",
+    "multer": "^2.5.0",
+    "passport": "^0.7.0",
+    "passport-jwt": "^4.0.1",
+    "reflect-metadata": "^0.2.2",
+    "rxjs": "^7.8.1",
+    "uuid": "^11.1.1"
+  },
+  "devDependencies": {
+    "@nestjs/cli": "^12.0.13",
+    "@nestjs/schematics": "^12.0.13",
+    "@types/bcryptjs": "^2.4.6",
+    "@types/multer": "^2.0.0",
+    "@types/node": "^22.10.2",
+    "@types/cookie-parser": "^1.4.10",
+    "@types/express": "^5.0.0",
+    "@types/passport-jwt": "^4.0.1",
+    "@types/uuid": "^10.0.0",
+    "prisma": "6.19.3",
+    "rimraf": "^6.0.1",
+    "ts-node": "^10.9.2",
+    "typescript": "^6.0.0"
+  },
+  "overrides": {
+    "deepmerge-ts": "^8.0.0",
+    "bull": { "uuid": "^11.1.1" }
+  }
+}
