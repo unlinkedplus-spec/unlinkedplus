@@ -213,7 +213,7 @@
             var b = allBtns[j];
             var t = b.getAttribute('data-reaction');
             var countEl = b.querySelector('.rxn-count');
-            if (countEl) countEl.textContent = updated[t] || 0;
+            if (countEl) countEl.textContent = '(' + (updated[t] || 0) + ')';
             if (updated.myReactions && updated.myReactions[t]) {
               b.classList.add('reacted');
             } else {

@@ -17,6 +17,8 @@
     accessories: []
   };
 
+  var _bound = false;
+
   var _PREMIUM = ['kacamata'];
 
   /* --------------------------------------------------------
@@ -338,6 +340,9 @@
     _render();
     _updateCharacterCards();
     _updateAccessoryRows();
+
+    if (_bound) return;
+    _bound = true;
 
     /* Character card clicks */
     var cards = document.querySelectorAll('.character-card');
