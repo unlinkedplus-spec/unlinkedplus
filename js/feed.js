@@ -1,114 +1,127 @@
-/* SambatIn — feed.js (stub — implemented in FEAT-003) */
+/* ============================================================
+   SambatIn — feed.js
+   IIFE exposing window.Feed.
+   Handles: seed posts, AI sensor, post creation, reactions.
+   ============================================================ */
 (function () {
   'use strict';
 
+  /* --------------------------------------------------------
+     AI Sensor — 10 banned phrases
+     -------------------------------------------------------- */
   var BANNED_PHRASES = [
     'alhamdulillah diterima',
     'gaji dua digit',
     'promosi jabatan',
     'bangga mengumumkan',
     'humbled and honored',
-    'excited to announce',
-    'thrilled to share',
-    'blessed to',
-    'naik gaji',
-    'dapat offer'
+    'excited to share',
+    'happy to announce',
+    'bersyukur diterima',
+    'naik jabatan',
+    'diterima kerja'
   ];
 
+  /* --------------------------------------------------------
+     Category Colors
+     -------------------------------------------------------- */
   var CATEGORY_COLORS = {
-    'Ditolak HRD':    '#EF4444',
-    'Salah Kirim Chat': '#F97316',
-    'Dimarahi Bos':   '#8B5CF6',
-    'Bisnis Boncos':  '#06B6D4',
-    'Salah Jurusan':  '#10B981'
+    'Ditolak HRD':      '#EF4444',
+    'Salah Kirim Chat': '#F59E0B',
+    'Dimarahi Bos':     '#8B5CF6',
+    'Bisnis Boncos':    '#EF4444',
+    'Salah Jurusan':    '#3B82F6'
   };
 
+  /* --------------------------------------------------------
+     Seed Posts (5 exact posts from FEAT-003 spec)
+     -------------------------------------------------------- */
   var SEED_POSTS = [
     {
-      id: 1,
-      username: 'GhoibJobseeker',
+      id: 'seed1',
+      username: 'PejuangKubik_87',
       characterId: 'panda',
       accessories: ['id-card'],
       category: 'Ditolak HRD',
-      text: 'Sudah 5 tahap interview, dari psikotes sampai wawancara user, terus HR-nya bilang "kami akan menghubungi kembali" — itu 3 bulan lalu. HP ku masih on, Bu HR 😭',
-      timestamp: Date.now() - 1000 * 60 * 15
+      text: 'Udah 5 tahap interview, presentasi proposal 20 halaman, bikin analisis kompetitor, terus HR-nya bilang "kami akan menghubungi kembali" — itu 3 bulan lalu. Yang berhasil ngebuka aplikasi LinkedIn mereka sekarang, tolong screenshot fotonya buat aku framing di kamar.',
+      timestamp: Date.now() - 3600000 * 5
     },
     {
-      id: 2,
-      username: 'MagangAbadi99',
+      id: 'seed2',
+      username: 'MagangAbadi_Joko',
       characterId: 'intern',
       accessories: ['kopi'],
       category: 'Salah Kirim Chat',
-      text: 'Niat ngirim meme bos jelek ke grup teman, malah kekirim ke grup kantor. Pak Direktur likenya duluan. Saya sedang mempertimbangkan pindah ke dimensi lain.',
-      timestamp: Date.now() - 1000 * 60 * 60 * 2
+      text: 'Niat mau curhat ke bestie soal bos killer, malah kekirim ke grup kantor "All Staff". Pesan aslinya: "Pak Direktur mirip karakter villain di film kartun tapi lebih jahat". Pak Direktur baca. Pak Direktur reply dengan 3 kata: "Senin ke HR."',
+      timestamp: Date.now() - 3600000 * 12
     },
     {
-      id: 3,
-      username: 'RevisiJamSatu',
+      id: 'seed3',
+      username: 'FreelancerKucingTua',
       characterId: 'freelancer',
-      accessories: [],
-      category: 'Dimarahi Bos',
-      text: 'Klien minta revisi jam 11 malam hari Minggu. Bilangnya "sebentar aja". 4 jam kemudian saya masih di depan laptop sambil nangis dalam hati ngerjain slide deck-nya.',
-      timestamp: Date.now() - 1000 * 60 * 60 * 5
-    },
-    {
-      id: 4,
-      username: 'StartupDreamer',
-      characterId: 'php-victim',
-      accessories: ['bendera'],
+      accessories: ['kopi', 'bendera'],
       category: 'Bisnis Boncos',
-      text: 'Modal 15 juta, bakar 12 juta buat iklan, dapat 1 customer — dan itu teman sendiri yang kasihan. Pivot ke usaha lain katanya, tapi saya masih menatap kosong spreadsheet kerugian.',
-      timestamp: Date.now() - 1000 * 60 * 60 * 24
+      text: 'Klien minta revisi ke-17. Jam 23.47. Pesannya: "Mas, bisa ganti semua warnanya jadi lebih... hidup? Dan fontnya kurang berjiwa." Tarif saya Rp150rb, sudah termasuk konseling trauma pasca-revisi. Belum bayar DP.',
+      timestamp: Date.now() - 3600000 * 24
     },
     {
-      id: 5,
-      username: 'TeknikNyasar',
-      characterId: 'intern',
-      accessories: ['kardus'],
+      id: 'seed4',
+      username: 'SarjanaPenganggur',
+      characterId: 'php-victim',
+      accessories: [],
       category: 'Salah Jurusan',
-      text: 'Kuliah 4 tahun di Teknik Mesin, sekarang kerja jadi admin media sosial. Bukan salah siapa-siapa. Jurusan, orang tua, dan pasar kerja sama-sama bersalah.',
-      timestamp: Date.now() - 1000 * 60 * 60 * 48
+      text: 'Kuliah 4 tahun di Teknik Kimia. Lulus dengan IPK 3.7. Sekarang kerja di pabrik — pabrik mie instan divisi quality control rasa. Kata orang tua "kan masih nyambung sama kimia". Iya Bu, kimia bumbu kaldu sapi.',
+      timestamp: Date.now() - 3600000 * 36
+    },
+    {
+      id: 'seed5',
+      username: 'KaryawanReguler_02',
+      characterId: 'panda',
+      accessories: ['kardus'],
+      category: 'Dimarahi Bos',
+      text: 'Rapat presentasi hasil Q3. Slide ke-7, bos nyela: "Data ini dari mana? Google? Ini bukan skripsi!" Semua orang lihat ke saya. Padahal datanya dari laporan internal yang dia kirim sendiri bulan lalu. Nomor halaman 23. Saya tunjukkan. Dia bilang "Meeting dilanjutkan Senin."',
+      timestamp: Date.now() - 3600000 * 48
     }
   ];
 
+  /* --------------------------------------------------------
+     Helpers
+     -------------------------------------------------------- */
+  function _hasBanned(text) {
+    var t = text.toLowerCase();
+    return BANNED_PHRASES.some(function (p) {
+      return t.indexOf(p) !== -1;
+    });
+  }
+
   function _relativeTime(ts) {
     var diff = Date.now() - ts;
-    var mins = Math.floor(diff / 60000);
-    if (mins < 1)  return 'baru saja';
-    if (mins < 60) return mins + ' menit lalu';
-    var hrs = Math.floor(mins / 60);
-    if (hrs < 24)  return hrs + ' jam lalu';
-    var days = Math.floor(hrs / 24);
-    return days + ' hari lalu';
+    if (diff < 60000)   return 'baru saja';
+    if (diff < 3600000) return Math.floor(diff / 60000) + ' menit lalu';
+    if (diff < 86400000) return Math.floor(diff / 3600000) + ' jam lalu';
+    return Math.floor(diff / 86400000) + ' hari lalu';
   }
 
-  function _getLevelInfo(username) {
-    /* Deterministic level from username hash for seed posts */
-    var n = 0;
-    for (var i = 0; i < username.length; i++) n += username.charCodeAt(i);
-    var xp = n % 500;
-    return window.Reactions ? window.Reactions.getLevel(xp) : 1;
-  }
-
-  function _levelColor(level) {
-    var colors = ['', '#9CA3AF', '#60A5FA', '#A78BFA', '#F97316', '#EF4444'];
-    return colors[level] || '#9CA3AF';
-  }
-
-  function _levelName(level) {
-    var names = ['', 'Rapuh', 'Tahan Banting', 'Kebal Revisi', 'Kebal PHP HRD', 'Suhu Sambat'];
-    return names[level] || 'Rapuh';
-  }
-
-  function renderPost(post) {
+  /* --------------------------------------------------------
+     Render a post card to HTML string
+     -------------------------------------------------------- */
+  function _renderPost(post) {
     var avatarSVG = '';
     if (window.AvatarBuilder) {
       avatarSVG = window.AvatarBuilder.getAvatarSVG(post.characterId || 'panda', post.accessories || []);
     }
 
-    var reactions = window.Reactions ? window.Reactions.getReactions(post.id) : { pukpuk: 0, ngakak: 0, sama: 0, myReactions: {} };
-    var level = _getLevelInfo(post.username);
+    var rxn = Reactions.getReactions(post.id);
+
+    /* Level based on total reactions for seed posts, or accumulated XP for user posts */
+    var totalRxnXP = (rxn.pukpuk + rxn.ngakak + rxn.sama) * 10;
+    var lvlObj = Reactions.getLevel(totalRxnXP);
+
     var catColor = CATEGORY_COLORS[post.category] || '#9CA3AF';
+
+    var pukpukReacted = rxn.myReactions && rxn.myReactions.pukpuk ? ' reacted' : '';
+    var ngakakReacted = rxn.myReactions && rxn.myReactions.ngakak ? ' reacted' : '';
+    var samaReacted   = rxn.myReactions && rxn.myReactions.sama   ? ' reacted' : '';
 
     return (
       '<div class="post-card" id="post-' + post.id + '">' +
@@ -119,42 +132,58 @@
           '<div class="post-meta">' +
             '<div class="post-username">' + post.username + '</div>' +
             '<div class="post-badges">' +
-              '<span class="level-badge" style="background:' + _levelColor(level) + '">Lv.' + level + ' ' + _levelName(level) + '</span>' +
-              '<span class="cat-badge" style="background:' + catColor + '22;color:' + catColor + '">' + post.category + '</span>' +
+              '<span class="level-badge" style="background:' + lvlObj.color + '">' +
+                'Lv.' + lvlObj.level + ' ' + lvlObj.name +
+              '</span>' +
+              '<span class="cat-badge" style="background:' + catColor + '22;color:' + catColor + '">' +
+                post.category +
+              '</span>' +
             '</div>' +
           '</div>' +
           '<span class="post-timestamp">' + _relativeTime(post.timestamp) + '</span>' +
         '</div>' +
         '<p class="post-text">' + post.text + '</p>' +
         '<div class="reaction-row">' +
-          '<button class="reaction-btn' + (reactions.myReactions && reactions.myReactions.pukpuk ? ' reacted' : '') + '" data-post-id="' + post.id + '" data-reaction="pukpuk">🫂 Puk-Puk <span class="rxn-count">' + (reactions.pukpuk || 0) + '</span></button>' +
-          '<button class="reaction-btn' + (reactions.myReactions && reactions.myReactions.ngakak ? ' reacted' : '') + '" data-post-id="' + post.id + '" data-reaction="ngakak">😂 Ngakak <span class="rxn-count">' + (reactions.ngakak || 0) + '</span></button>' +
-          '<button class="reaction-btn' + (reactions.myReactions && reactions.myReactions.sama ? ' reacted' : '') + '" data-post-id="' + post.id + '" data-reaction="sama">🤝 Sama Banget <span class="rxn-count">' + (reactions.sama || 0) + '</span></button>' +
-          '<button class="cert-btn" data-post-id="' + post.id + '">🏆 Sertifikat</button>' +
+          '<button class="reaction-btn' + pukpukReacted + '" data-post-id="' + post.id + '" data-reaction="pukpuk">' +
+            '🫂 Puk-Puk <span class="rxn-count">' + (rxn.pukpuk || 0) + '</span>' +
+          '</button>' +
+          '<button class="reaction-btn' + ngakakReacted + '" data-post-id="' + post.id + '" data-reaction="ngakak">' +
+            '😂 Ngakak Maaf <span class="rxn-count">' + (rxn.ngakak || 0) + '</span>' +
+          '</button>' +
+          '<button class="reaction-btn' + samaReacted + '" data-post-id="' + post.id + '" data-reaction="sama">' +
+            '🤝 Sama Banget <span class="rxn-count">' + (rxn.sama || 0) + '</span>' +
+          '</button>' +
+          '<button class="cert-btn" data-post-id="' + post.id + '">📜 Buat Sertifikat</button>' +
         '</div>' +
       '</div>'
     );
   }
 
-  function _bindPostEvents(postEl, post) {
+  /* --------------------------------------------------------
+     Bind reaction + cert buttons for a rendered post
+     -------------------------------------------------------- */
+  function _bindPost(postId) {
+    var postEl = document.getElementById('post-' + postId);
+    if (!postEl) return;
+
     /* Reaction buttons */
     var rxnBtns = postEl.querySelectorAll('.reaction-btn[data-post-id]');
     for (var i = 0; i < rxnBtns.length; i++) {
       (function (btn) {
         btn.addEventListener('click', function () {
-          var pid = btn.getAttribute('data-post-id');
+          var pid  = btn.getAttribute('data-post-id');
           var type = btn.getAttribute('data-reaction');
-          if (window.Reactions) window.Reactions.addReaction(pid, type);
+          Reactions.addReaction(pid, type);
 
-          /* Update counts in-place */
-          var r = window.Reactions ? window.Reactions.getReactions(pid) : { pukpuk: 0, ngakak: 0, sama: 0, myReactions: {} };
-          var allBtns = document.querySelectorAll('.reaction-btn[data-post-id="' + pid + '"]');
+          /* Refresh counts + reacted state for all 3 buttons on this post */
+          var updated = Reactions.getReactions(pid);
+          var allBtns = postEl.querySelectorAll('.reaction-btn[data-post-id="' + pid + '"]');
           for (var j = 0; j < allBtns.length; j++) {
             var b = allBtns[j];
             var t = b.getAttribute('data-reaction');
             var countEl = b.querySelector('.rxn-count');
-            if (countEl) countEl.textContent = r[t] || 0;
-            if (r.myReactions && r.myReactions[t]) {
+            if (countEl) countEl.textContent = updated[t] || 0;
+            if (updated.myReactions && updated.myReactions[t]) {
               b.classList.add('reacted');
             } else {
               b.classList.remove('reacted');
@@ -168,12 +197,31 @@
     var certBtn = postEl.querySelector('.cert-btn[data-post-id]');
     if (certBtn) {
       certBtn.addEventListener('click', function () {
-        if (window.Certificate) window.Certificate.openModal(post);
+        var pid  = certBtn.getAttribute('data-post-id');
+        var post = _findPost(pid);
+        if (post && window.Certificate) {
+          window.Certificate.openModal(post);
+        }
       });
     }
   }
 
-  function _loadPosts() {
+  /* --------------------------------------------------------
+     Find a post by id across current localStorage
+     -------------------------------------------------------- */
+  function _findPost(postId) {
+    var posts = getPosts();
+    if (!posts) return null;
+    for (var i = 0; i < posts.length; i++) {
+      if (String(posts[i].id) === String(postId)) return posts[i];
+    }
+    return null;
+  }
+
+  /* --------------------------------------------------------
+     Persistence
+     -------------------------------------------------------- */
+  function getPosts() {
     try {
       var raw = localStorage.getItem('sambatin_posts');
       if (raw) return JSON.parse(raw);
@@ -182,28 +230,27 @@
   }
 
   function _savePosts(posts) {
-    try { localStorage.setItem('sambatin_posts', JSON.stringify(posts)); } catch (e) {}
+    try {
+      localStorage.setItem('sambatin_posts', JSON.stringify(posts));
+    } catch (e) {}
   }
 
+  /* --------------------------------------------------------
+     AI Sensor binding (create tab)
+     -------------------------------------------------------- */
   function _bindAISensor() {
-    var textarea = document.getElementById('post-text');
-    var warning = document.getElementById('ai-sensor-warning');
+    var textarea  = document.getElementById('post-text');
+    var warning   = document.getElementById('ai-sensor-warning');
     var submitBtn = document.getElementById('post-submit-btn');
     var charCount = document.getElementById('char-count');
 
     if (!textarea) return;
 
     textarea.addEventListener('input', function () {
-      var text = textarea.value.toLowerCase();
-      if (charCount) charCount.textContent = textarea.value.length;
+      var text = textarea.value;
+      if (charCount) charCount.textContent = text.length;
 
-      var blocked = false;
-      for (var i = 0; i < BANNED_PHRASES.length; i++) {
-        if (text.indexOf(BANNED_PHRASES[i]) !== -1) {
-          blocked = true;
-          break;
-        }
-      }
+      var blocked = _hasBanned(text);
 
       if (warning) {
         if (blocked) {
@@ -218,60 +265,62 @@
     });
   }
 
+  /* --------------------------------------------------------
+     Create-form submit binding
+     -------------------------------------------------------- */
   function _bindCreateForm(posts) {
     var submitBtn = document.getElementById('post-submit-btn');
     if (!submitBtn) return;
 
     submitBtn.addEventListener('click', function () {
-      var category = document.getElementById('post-category');
-      var textarea = document.getElementById('post-text');
+      var catSelect = document.getElementById('post-category');
+      var textarea  = document.getElementById('post-text');
 
-      if (!category || !textarea) return;
-      if (!category.value) { alert('Pilih kategori dulu ya!'); return; }
-      if (!textarea.value.trim()) { alert('Ceritakan kegagalanmu dulu!'); return; }
+      if (!catSelect || !textarea) return;
+      if (!catSelect.value)        { alert('Pilih kategori dulu ya!'); return; }
+      var trimmed = textarea.value.trim();
+      if (!trimmed)                { alert('Ceritakan kegagalanmu dulu!'); return; }
+      if (_hasBanned(trimmed))     return; /* sensor guard */
 
-      /* Get current avatar state */
+      /* Current avatar state */
       var charId = 'panda';
-      var accs = [];
+      var accs   = [];
       try {
         var avState = JSON.parse(localStorage.getItem('sambatin_avatar') || '{}');
         charId = avState.character || 'panda';
-        accs = avState.accessories || [];
+        accs   = avState.accessories || [];
       } catch (e) {}
 
       var username = localStorage.getItem('sambatin_username') ||
-        ('BudakKorporat_' + Math.floor(Math.random() * 9000 + 1000));
+        ('BudakKorporat_' + (Math.floor(Math.random() * 900) + 100));
       localStorage.setItem('sambatin_username', username);
 
       var post = {
-        id: Date.now(),
+        id: 'post_' + Date.now(),
         username: username,
         characterId: charId,
         accessories: accs,
-        category: category.value,
-        text: textarea.value.trim(),
+        category: catSelect.value,
+        text: trimmed,
         timestamp: Date.now()
       };
 
-      posts.unshift(post);
-      _savePosts(posts);
+      /* Save and prepend */
+      var allPosts = getPosts() || [];
+      allPosts.unshift(post);
+      _savePosts(allPosts);
 
-      if (window.Reactions) window.Reactions.addXP(10);
+      Reactions.addXP(10);
 
-      /* Prepend to feed */
       var container = document.getElementById('feed-container');
       if (container) {
-        var tempDiv = document.createElement('div');
-        tempDiv.innerHTML = renderPost(post);
-        var postEl = tempDiv.firstChild;
-        _bindPostEvents(postEl, post);
-        container.insertBefore(postEl, container.firstChild);
-        container.scrollTop = 0;
+        container.insertAdjacentHTML('afterbegin', _renderPost(post));
+        _bindPost(post.id);
       }
 
       /* Clear form */
-      category.value = '';
-      textarea.value = '';
+      catSelect.value = '';
+      textarea.value  = '';
       var charCount = document.getElementById('char-count');
       if (charCount) charCount.textContent = '0';
       var warning = document.getElementById('ai-sensor-warning');
@@ -279,13 +328,19 @@
       submitBtn.disabled = false;
 
       if (window.showToast) window.showToast('Sambatan diposting! 📢');
+
+      /* Scroll feed to top */
+      var feedTab = document.getElementById('tab-feed');
+      if (feedTab) feedTab.scrollTop = 0;
     });
   }
 
+  /* --------------------------------------------------------
+     Init
+     -------------------------------------------------------- */
   function init() {
-    var posts = _loadPosts();
-    var isFirst = posts === null;
-    if (isFirst) {
+    var posts = getPosts();
+    if (!posts) {
       posts = SEED_POSTS.slice();
       _savePosts(posts);
     }
@@ -293,24 +348,22 @@
     var container = document.getElementById('feed-container');
     if (container) {
       container.innerHTML = '';
-      var fragment = document.createDocumentFragment();
       for (var i = 0; i < posts.length; i++) {
-        var tempDiv = document.createElement('div');
-        tempDiv.innerHTML = renderPost(posts[i]);
-        var postEl = tempDiv.firstChild;
-        _bindPostEvents(postEl, posts[i]);
-        fragment.appendChild(postEl);
+        container.insertAdjacentHTML('beforeend', _renderPost(posts[i]));
+        _bindPost(posts[i].id);
       }
-      container.appendChild(fragment);
     }
 
     _bindAISensor();
     _bindCreateForm(posts);
   }
 
+  /* --------------------------------------------------------
+     Export
+     -------------------------------------------------------- */
   window.Feed = {
     init: init,
-    renderPost: renderPost
+    getPosts: getPosts
   };
 
 })();
