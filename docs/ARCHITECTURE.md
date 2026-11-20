@@ -1,76 +1,79 @@
-# Blueprint Arsitektur — Unlinked Plus (High Concurrency, HA, Aman)
+# Blueprint Arsitektur — Creative Partner AI
 
-Dokumen ini melengkapi `TECHNICAL-BLUEPRINT.md` dengan fokus **ketahanan
-production**: lonjakan traffic, keamanan dasar, ketersediaan tinggi, dan
-degradasi bertingkat.
+**Peran:** Principal System Architect & Senior DevOps Engineer
+**Konteks:** aplikasi SaaS AI creative (konten, video, affiliate, advertiser,
+wallet, automation) yang sudah berjalan di Node.js + Express + Prisma +
+PostgreSQL + Redis + Nginx.
 
-**Batasan:** landing page statis (`index.html`, `app.html`, `js/`, `styles/`,
-`images/`) **tidak diubah**. Seluruh perubahan berada di `apps/api`,
-konfigurasi Docker/Nginx, dan dokumen ini.
+**Batasan yang dipegang:** *landing page / frontend tidak diubah sama sekali.*
+Seluruh hardening ada di backend, konfigurasi infrastruktur, dan dokumentasi.
+
+**Tujuan non-fungsional:**
+
+| Properti | Target |
+|---|---|
+| Throughput baca | 5.000+ RPS dengan cache (3 pod) |
+| p95 latency API | < 200 ms (cache hit < 20 ms) |
+| Ketersediaan | 99,9% (rolling deploy tanpa downtime) |
+| Integritas stok/saldo | 0 oversell, 0 saldo minus |
+| Pemulihan dependency | degradasi bertingkat, bukan total outage |
 
 ---
 
 ## 1. Diagram alur arsitektur
 
 ```
-                              INTERNET
-                                 │
-                 ┌───────────────▼────────────────┐
-                 │ Cloudflare (opsional)          │
-                 │ TLS · WAF · DDoS L3/L4         │
-                 └───────────────┬────────────────┘
-                                 │
-                 ┌───────────────▼────────────────┐
-                 │ Nginx host (port 80)           │
-                 │ · serve landing statis         │  ← TIDAK DIUBAH
-                 │ · /api → Nginx aplikasi        │
-                 │ · limit_req per IP             │
-                 └───────────────┬────────────────┘
-                                 │
-                 ┌───────────────▼────────────────┐
-                 │ Nginx aplikasi (compose)       │
-                 │ resolver DNS dinamis           │
-                 │ limit_req · limit_conn         │
-                 └───┬───────────┬────────────┬───┘
-                     │           │            │
-            ┌────────▼──┐  ┌─────▼─────┐  ┌───▼────────┐
-            │ backend 1 │  │ backend 2 │  │ backend N  │  stateless
-            │ NestJS    │  │ NestJS    │  │ NestJS     │  (scale bebas)
-            └─┬──┬──┬───┘  └───────────┘  └────────────┘
-              │  │  │
-     ┌────────┘  │  └───────────────┐
-     │           │                  │
-┌────▼──────┐ ┌──▼───────────┐ ┌────▼──────────────┐
-│ Redis 7   │ │ PostgreSQL 17│ │ BullMQ (Redis)    │
-│ · cache   │ │ PRIMARY      │ │ queue:            │
-│ · rate lim│ │ tulis + baca │ │ certificates      │
-│ · lock    │ │ konsisten    │ └────┬──────────────┘
-└───────────┘ └──┬───────────┘      │ job
-                 │ WAL              │
-           ┌─────▼─────────┐  ┌─────▼──────────────┐
-           │ Read replica  │  │ worker container   │
-           │ (opsional)    │  │ render sertifikat  │
-           └───────────────┘  └────────────────────┘
+                                  INTERNET
+                                     │
+                    ┌────────────────▼─────────────────┐
+                    │ Cloudflare (opsional, sangat     │
+                    │ disarankan)                      │
+                    │ TLS · WAF · DDoS L3/L4 · cache   │
+                    └────────────────┬─────────────────┘
+                                     │ HTTPS
+                    ┌────────────────▼─────────────────┐
+                    │ Nginx (edge)                     │
+                    │ limit_req 50 r/s · limit_conn 50 │
+                    │ resolver DNS → replica backend   │
+                    │ keepalive · X-Request-Id         │
+                    └───┬───────────┬───────────┬──────┘
+                        │           │           │
+              ┌─────────▼──┐ ┌──────▼─────┐ ┌───▼────────┐
+              │ API pod 1  │ │ API pod 2  │ │ API pod N  │  stateless
+              │ Express    │ │ Express    │ │ Express    │  (scale bebas)
+              └─┬───┬───┬──┘ └────────────┘ └────────────┘
+                │   │   │
+      ┌─────────┘   │   └──────────────┐
+      │             │                  │
+┌─────▼──────┐ ┌────▼─────────┐ ┌──────▼──────────┐
+│ Redis      │ │ PostgreSQL   │ │ BullMQ (Redis)  │
+│ · cache    │ │ PRIMARY      │ │ queue:          │
+│ · rate lim │ │ tulis + baca │ │ flashsale-jobs  │
+│ · stok gate│ │ konsisten    │ └──────┬──────────┘
+└────────────┘ └────┬─────────┘        │ job
+                    │ WAL streaming    │
+              ┌─────▼─────────┐  ┌─────▼──────────┐
+              │ Read replica  │  │ Worker pods    │
+              │ query berat,  │  │ invoice, email │
+              │ listing, agg. │  │ retry+backoff  │
+              └───────────────┘  └────────────────┘
 
-Setiap instance backend mengekspos /metrics ──► Prometheus ──► Grafana/Alert
+Observability: setiap pod mengekspos /metrics ──► Prometheus ──► Grafana/Alertmanager
 ```
 
 ### Perjalanan satu request
 
-1. **Cloudflare** (opsional) menyaring DDoS/WAF sebelum ke server.
-2. **Nginx host** melayani landing statis dan meneruskan `/api` ke Nginx
-   aplikasi. Landing tetap file statis — tidak ada perubahan perilaku.
-3. **Nginx aplikasi** membatasi laju per IP, lalu memilih instance backend.
-   Dengan `resolver 127.0.0.11 valid=10s`, instance baru hasil scaling langsung
-   terpakai tanpa reload.
-4. **NestJS** menjalankan: rate limit (Redis Lua) → JWT guard → controller →
-   service.
-5. **CacheService** mencoba Redis. Cache miss memakai distributed lock agar
-   hanya satu instance menembak PostgreSQL.
-6. **PostgreSQL** adalah sumber kebenaran. Operasi yang rawan balapan memakai
-   `SELECT ... FOR UPDATE` atau `UPDATE ... WHERE` bersyarat.
-7. Pekerjaan lambat (render sertifikat) dikirim ke **BullMQ** dan diproses
-   worker, bukan ditahan di request HTTP.
+1. **Cloudflare** menyaring DDoS/WAF sebelum menyentuh infrastruktur.
+2. **Nginx** membatasi laju per IP (`limit_req`) dan meneruskan ke pod backend
+   mana pun. Karena memakai `resolver`, replica baru hasil auto-scaling langsung
+   terpakai tanpa restart Nginx.
+3. **Pod backend** (stateless) menjalankan urutan: `requestContext` →
+   `httpMetrics` → rate limit global → auth → rate limit endpoint → handler.
+4. **Redis** melayani cache dan counter rate limit; untuk stok menjadi gerbang
+   cepat. **PostgreSQL** tetap sumber kebenaran.
+5. Pekerjaan lambat (invoice, email) dikirim ke **BullMQ**, bukan ditunggu di
+   request.
+6. **Prometheus** menarik `/metrics` dari semua replica; alert memicu Grafana.
 
 ---
 
@@ -78,36 +81,37 @@ Setiap instance backend mengekspos /metrics ──► Prometheus ──► Grafa
 
 | Komponen | Pilihan | Alasan |
 |---|---|---|
-| Framework | **NestJS 12 + Express 5** (dipertahankan) | Sudah menjadi fondasi aplikasi; modul, guard, DI, dan BullMQ terintegrasi. Menulis ulang ke Go/Fastify berisiko tinggi tanpa bottleneck terukur. NestJS sanggup ribuan RPS bila cache & pooling benar. |
-| Database | **PostgreSQL 17** | ACID, constraint, row lock, `FOR UPDATE`, replikasi streaming. Sudah dipakai dan sesuai untuk transaksi saldo/inventori. |
-| Cache & counter | **Redis 7** | Sub-milidetik, Lua atomik untuk rate limit dan lock, TTL. Satu Redis melayani cache, limiter, dan antrean. |
-| Antrean | **BullMQ 5 (Redis)** | Sudah ada untuk sertifikat; mendukung retry, backoff, dedupe `jobId`, dan worker terpisah. Tidak perlu Kafka pada skala ini. |
-| Load balancer | **Nginx** | Ringan, `limit_req`/`limit_conn`, proxy keepalive, DNS dinamis. Cloudflare di depan untuk DDoS. |
-| Observability | **prom-client + Prometheus/Grafana** | Standar de-facto; histogram untuk p95, counter untuk hit ratio & error. |
+| Bahasa/framework | **Node.js 20 + Express** (dipertahankan) | Seluruh route, Prisma, dan worker sudah ada. Rewrite ke Fastify/Go berisiko tinggi tanpa manfaat proporsional; dengan cache + pooling, Express sanggup 1.500–3.000 RPS/pod. Jalur upgrade: Fastify (drop-in per router) bila profiling menunjukkan bottleneck framework. |
+| Database | **PostgreSQL 15** | Transaksi ACID, constraint, `UPDATE ... WHERE stok >= n` atomik, JSONB, replikasi streaming. Sudah dipakai. |
+| Cache & counter | **Redis 7** | Sub-milidetik, operasi atomik via Lua, TTL, struktur sorted-set/hash. Satu Redis melayani cache, rate limit, dan gerbang stok — mengurangi komponen baru. |
+| Antrean | **BullMQ (Redis)** | Sudah ada di stack (`ai-jobs`), mendukung retry, backoff eksponensial, jobId dedupe, concurrency. Tidak perlu Kafka untuk volume ini. |
+| Load balancer | **Nginx** | Ringan, `limit_req`/`limit_conn` bawaan, proxy keepalive, DNS dinamis. Cloudflare di depannya untuk DDoS. |
+| Metrik | **Prometheus + Grafana** | Standar de-facto, pull-based, histogram untuk p95, alerting ringkas. |
+| Container | **Docker Compose** → **Kubernetes/HPA** | Compose cukup untuk 1 host; manifest siap untuk auto-scaling horizontal. |
 
-> Jika kelak butuh >20k RPS atau isolasi bahasa, pecah domain terpanas
-> (feed/checkout) ke service Go/Rust di belakang Nginx yang sama.
+> Jika suatu saat butuh >20.000 RPS atau isolasi Bahasa: pecah domain panas
+> (checkout/stok) ke Go/Rust, tetap di belakang Nginx dan DB yang sama.
 
 ---
 
 ## 3. Caching & pengurangan beban database
 
-Implementasi: `apps/api/src/common/cache/cache.service.ts`.
+Implementasi: `backend/src/lib/cache.ts`, dipakai `modules/flashsale/service.ts`.
 
 ### Pola Cache-Aside
 
 ```
-GET /api/posts?page=1
+GET /items
    │
-   ├─► Redis GET posts:feed:<versi>:1:20
-   │      ├─ FRESH  ─────────────────────► 200 (p95 < 20 ms)
+   ├─► Redis GET fs:items:v1
+   │      ├─ FRESH  ──────────────────────► 200 (p95 < 20 ms)
    │      ├─ STALE  ──► 200 data lama ──┐
    │      │                             └─► refresh di background
    │      └─ MISS
    │             │
-   │        SET cache:lock:<key> NX PX 3000   (1 instance saja)
+   │        SET lock NX (hanya 1 pod menembak DB)
    │             │
-   │        SELECT ... (PostgreSQL)
+   │        SELECT ... FROM read replica
    │             │
    │        SET key + TTL + jitter
    │             ▼
@@ -116,108 +120,132 @@ GET /api/posts?page=1
 
 ### Empat mekanisme anti–cache stampede
 
-1. **Single-flight per proses** (`Map<key, Promise>`) — request paralel di satu
-   instance hanya menjalankan loader sekali.
-2. **Distributed lock** — `SET NX PX` + release via Lua compare-and-delete.
-   Instance lain menunggu maksimal 400 ms, lalu memakai data stale.
-3. **Stale-While-Revalidate** — data lama tetap disajikan sampai `hardUntil`,
-   sementara satu proses memperbarui cache.
-4. **TTL jitter ±10%** — mencegah semua key kedaluwarsa bersamaan.
+1. **Single-flight per proses** — `Map<key, Promise>`; 1.000 request paralel di
+   satu pod hanya menjalankan loader sekali.
+2. **Distributed lock** — `SET lock:<key> <token> NX PX 3000`. Antar pod hanya
+   satu yang mengisi cache; pod lain menunggu hasilnya (maks. 400 ms) lalu
+   memakai nilai stale bila ada.
+3. **Stale-While-Revalidate** — data disajikan sampai `hardUntil` sementara satu
+   proses memperbarui. Pengguna tidak pernah menunggu refresh.
+4. **TTL jitter ±10%** — mencegah semua key kedaluwarsa serempak.
 
-Tambahan:
+Tambahan: **negative caching** (`negativeTtlSeconds`) mencegah cache penetration
+untuk ID yang tidak ada, dan semua operasi Redis **fail-open** (Redis mati →
+loader tetap jalan, aplikasi tidak ikut mati).
 
-- **Version key** (`cache:ver:posts-feed`) — saat ada post baru/dihapus, versi
-  dinaikkan. Semua halaman feed otomatis memakai namespace baru tanpa `SCAN`.
-- **Negative caching** — hasil `null` disimpan singkat (2 detik) agar query
-  kosong tidak menghantam DB berulang.
-- **Fail-open** — semua operasi Redis dibungkus circuit breaker; Redis mati
-  berarti cache dilewati, bukan aplikasi mati.
+### Pola pakai
 
-### Data apa yang di-cache
+```ts
+const items = await cached(
+  'fs:items:v1',
+  { ttlSeconds: 10, staleSeconds: 20, negativeTtlSeconds: 5 },
+  () => prismaReplica.flashSaleItem.findMany({ where: { active: true } }),
+);
+```
 
-| Endpoint | Key | TTL | Invalidasi |
-|---|---|---|---|
-| `GET /api/posts` | `posts:feed:<ver>:<page>:<limit>` | 5 s (+10 s stale) | bump versi saat create/delete |
-| `GET /api/polls/active` | `polls:active:v1` | 3 s (+5 s stale) | hapus saat vote/create |
+### Apa yang layak di-cache
 
-Jangan cache: saldo, stok, status order, data pribadi yang berubah cepat.
-Endpoint tersebut harus selalu membaca primary.
+| Data | TTL | Catatan |
+|---|---|---|
+| Listing katalog/plan | 30–120 s | stale 2× TTL, aman |
+| Profil user & permission | 60 s | invalidasi saat role berubah |
+| Dashboard aggregate | 15–30 s | hitung ulang di background |
+| Stok | **jangan** di-cache sebagai kebenaran | hanya gerbang Redis + validasi DB |
+| Saldo wallet | **jangan** di-cache | selalu primary, transaksional |
+
+Invalidasi eksplisit setelah write: `invalidate('fs:items:v1')`.
 
 ---
 
 ## 4. Antrean & pemrosesan asinkron
 
-Implementasi yang sudah ada: `certificates/certificate.queue.ts` +
-`worker/certificate.processor.ts`.
+Implementasi: `modules/flashsale/queue.ts` (producer) dan
+`modules/flashsale/invoiceWorker.ts` (consumer).
 
 ```
-POST /api/certificates
-   │
-   ├─ validasi + buat row Certificate (status=pending)
-   ├─ queue.add(job, jobId=certificateId)   ← dedupe request paralel
-   └─ 202/201 ke klien (tidak menunggu render)
-
-Worker (concurrency 2)
-   ├─ lock post + certificate (FOR UPDATE)
-   ├─ render SVG → PNG (sharp)
-   ├─ tulis file .tmp → rename (atomik)
-   └─ update status=ready
+POST /reserve ──► COMMIT order ──► queue.add('order.confirmed', jobId=order:<id>)
+                                          │
+                                          ▼
+                          Worker (concurrency 10)
+                          ├─ tulis AuditLog id deterministik
+                          ├─ buat Notification id deterministik
+                          └─ (integrasi email/PDF di sini)
 ```
 
 Prinsip yang dipakai:
 
-- **Retry eksponensial** (3 percobaan) dan `removeOnFail: false` sebagai DLQ
-  sederhana untuk inspeksi.
-- **Idempotensi**: `jobId` deterministik + status `ready` tidak dirender ulang.
-- **Graceful shutdown**: worker menunggu job aktif selesai sebelum Prisma
-  ditutup (`SIGTERM` → `processor.close()`).
-- **Backpressure**: concurrency dibatasi 2 karena render CPU/disk-heavy.
+- **Response tidak menunggu** pekerjaan lambat. Checkout cukup commit + enqueue.
+- **Retry eksponensial**: 5 percobaan, delay 1 s → 2 s → 4 s → 8 s.
+- **Deduplikasi**: `jobId` deterministik + ID efek samping deterministik
+  (`notif:invoice:<orderId>`) ⇒ aman terhadap at-least-once delivery.
+- **DLQ praktis**: job gagal disimpan 24 jam (`removeOnFail`), bisa diinspeksi
+  dan di-retry dari Bull Board.
+- **Backpressure**: `concurrency` dibatasi agar provider email/DB tidak tumbang.
 
-Untuk kebutuhan berikutnya (email, invoice, notifikasi pembelian), gunakan pola
-yang sama: tulis state `pending` di DB dalam transaksi, enqueue setelah commit,
-dan buat consumer idempotent. Jika kehilangan job saat Redis mati harus
-mustahil, tambahkan **outbox table** dan relay.
+**Outbox pattern (implementasi).** Tabel `Outbox` ditulis dalam transaksi yang
+sama dengan commit order; setelah commit, enqueue dikirim lewat relay
+(`relayPendingOutbox`). Jika enqueue gagal, baris tetap `status = 'pending'`
+dan relay berikutnya akan mencoba mengirimnya kembali. `jobId` `order:<id>`
+memastikan idempotensi. Untuk volume saat ini, ini sudah cukup kuat untuk
+invoice/email.
+
+**Kapan pindah ke Kafka/RabbitMQ?** Jika butuh replay historis, ordering per
+partisi, fan-out ke banyak konsumen, atau >50k pesan/detik. Untuk invoice/email,
+BullMQ lebih sederhana dan sudah ada.
 
 ---
 
 ## 5. Rate limiting & keamanan
 
-Implementasi: `apps/api/src/common/guards/rate-limit.guard.ts`.
+Implementasi: `backend/src/lib/rateLimit.ts`, dipasang di `index.ts` dan
+`modules/flashsale/routes.ts`.
 
-### Sliding Window Log (Redis ZSET + Lua)
+### Dua algoritma, dua kebutuhan
 
-```
-ZREMRANGEBYSCORE  buang anggota di luar jendela 60 s
-ZCARD             hitung request dalam jendela
-ZADD              catat request bila masih di bawah limit
-PEXPIRE           key kedaluwarsa sendiri
-```
-
-Keunggulan dibanding fixed window: tidak ada burst ganda di pergantian menit.
-Seluruh operasi atomik dalam satu skrip Lua, sehingga 10 instance tidak bisa
-saling menipu kuota.
-
-| Bucket | Limit | Perilaku saat Redis down |
+| Algoritma | Karakter | Dipakai untuk |
 |---|---|---|
-| `read` (GET) | 180/menit | **fail-open** — situs tetap terbaca |
-| `write` (POST/PUT/DELETE) | 30/menit | fail-closed (503) — lindungi DB |
-| `auth` (login/register) | 10/menit | fail-closed — cegah brute force |
+| **Sliding Window Log** (ZSET + Lua) | presisi per jendela, memori O(limit) | auth (30/menit), checkout (10/10 s) |
+| **Token Bucket** (Hash + Lua) | O(1) memori, burst terkontrol | limiter global per IP berskala besar |
 
-Respons menyertakan `RateLimit-Limit`, `RateLimit-Remaining`,
+Keduanya atomik: skrip Lua menjalankan *cek + catat* dalam satu operasi Redis,
+sehingga 100 pod tidak bisa "saling menipu" kuota.
+
+```lua
+-- inti sliding window
+redis.call('ZREMRANGEBYSCORE', key, 0, now - window)
+local count = redis.call('ZCARD', key)
+if count < limit then
+  redis.call('ZADD', key, now, member)
+  return {1, limit - count - 1, 0}
+end
+-- ... hitung retry_after dari anggota tertua
+```
+
+Respons memakai header `RateLimit-Limit`, `RateLimit-Remaining`,
 `RateLimit-Reset`, dan `Retry-After` saat 429.
 
-### Lapisan keamanan lain yang sudah/baru aktif
+**Fail-open vs fail-closed.** Limiter ini `failOpen: true`: Redis bermasalah tidak
+boleh mematikan aplikasi. Integritas tetap dijaga DB (conditional update +
+constraint). Untuk endpoint yang benar-benar sensitif (mis. OTP), set
+`failOpen: false` agar 503 — pilih sesuai risiko.
 
-- `helmet`, `x-powered-by` dimatikan, body limit **16 KB**.
-- Validasi DTO `class-validator` + `whitelist` + `forbidNonWhitelisted`.
-- Cek `Origin` untuk request non-GET (CSRF dasar) + CORS terbatas ke
-  `FRONTEND_URL`.
-- JWT + `bcryptjs`; `JWT_SECRET` divalidasi minimal 48 karakter dan bukan
-  placeholder.
-- Prisma menggunakan query parameter (aman SQL injection).
-- `trust proxy = 1`; jangan dinaikkan tanpa proxy tepercaya.
-- `.env` tidak di-commit; gunakan secret manager saat pindah host.
-- Nginx: `client_max_body_size 16k`, `server_tokens off`, blokir dotfile.
+### Lapisan keamanan lain
+
+- **Nginx**: `limit_req` 50 r/s burst 100, `limit_conn` 50 per IP — menahan
+  flood sebelum Node.js.
+- **Cloudflare**: WAF, bot fight, DDoS L3/L4/L7, rate limit edge.
+- **Helmet** + `x-powered-by` dimatikan.
+- **Validasi input** dengan Zod di setiap endpoint baru.
+- **SQL injection**: Prisma memakai prepared statement/parameter binding.
+- **JWT**: `JWT_SECRET` wajib dirotasi dan disimpan di secret manager, bukan
+  `.env` yang ter-commit.
+- **Body limit** 10 MB; endpoint upload sebaiknya dipisah ke object storage.
+- **`trust proxy = 1`**: jangan dinaikkan tanpa proxy tepercaya, karena
+  `X-Forwarded-For` bisa dipalsukan dan rate limit per-IP bisa dilewati.
+- **CORS** saat ini permisif (`cors()`); di production batasi ke domain frontend:
+  `cors({ origin: process.env.WEB_ORIGIN!.split(','), credentials: true })`.
+- **Container**: jalankan sebagai non-root, image di-scan (Trivy), dependency
+  diaudit (`npm audit --omit=dev`).
 
 ---
 
@@ -225,319 +253,312 @@ Respons menyertakan `RateLimit-Limit`, `RateLimit-Remaining`,
 
 ### 6.1 Connection pooling
 
-- Prisma default: `num_cpu * 2 + 1`. Batasi eksplisit lewat URL:
+- Prisma default: `num_cpus * 2 + 1`. **Set eksplisit** agar tidak meledak saat
+  auto-scaling:
 
 ```
-DATABASE_URL=postgresql://.../unlinked?schema=public&connection_limit=10&pool_timeout=10
+DATABASE_URL=postgresql://.../creative_partner?schema=public&connection_limit=10&pool_timeout=10
 ```
 
-- Anggaran: `jumlah_instance_backend × connection_limit + worker < max_connections`.
-  Contoh 3 × 10 + 5 = 35 (Postgres default 100).
-- Bila instance > 20, tambahkan **PgBouncer** mode `transaction`
-  (`?pgbouncer=true`).
+- Anggaran koneksi: `replicas × connection_limit + workers + admin < max_connections`.
+  Contoh: `3 × 10 + 2 × 5 + 20 = 60` dari `max_connections=200` — aman.
+- Untuk >20 replica, tambahkan **PgBouncer** mode `transaction`
+  (`?pgbouncer=true`). Catatan: advisory lock/`SET` sesi tidak berlaku lintas
+  transaksi.
+- Query lambat > 500 ms dicatat (`log_min_duration_statement=500`) dan ditinjau
+  dengan `EXPLAIN (ANALYZE, BUFFERS)`.
 
 ### 6.2 Indexing
 
-Index yang sudah ada sudah baik (feed, komentar, poll, transaksi). Yang
-ditambahkan di migrasi `20261120120000_hardening_indexes`:
+Index yang sudah ada di schema dipertahankan. Yang ditambahkan untuk modul baru:
 
 ```sql
--- agregasi reaksi per post (reactionCountsByPost)
-CREATE INDEX "Reaction_postId_reactionType_idx"
-  ON "reactions"("post_id", "reaction_type");
-
--- pencarian order pending per user+item (StoreService.purchase)
-CREATE INDEX "Transaction_userId_itemId_paymentStatus_idx"
-  ON "transactions"("user_id", "item_id", "payment_status");
+CREATE UNIQUE INDEX "FlashSaleOrder_idempotencyKey_key"
+  ON "FlashSaleOrder"("idempotencyKey");           -- idempotensi O(log n)
+CREATE INDEX "FlashSaleOrder_userId_createdAt_idx"
+  ON "FlashSaleOrder"("userId", "createdAt");      -- riwayat user
+CREATE INDEX "FlashSaleOrder_itemId_status_idx"
+  ON "FlashSaleOrder"("itemId", "status");         -- rekap per item
 ```
 
-Prinsip: index komposit mengikuti `WHERE` lalu `ORDER BY`; partial index untuk
-status minoritas (mis. payout pending); hindari index berlebih karena
-memperlambat write.
+Rekomendasi lanjutan (ukur dulu dengan `pg_stat_statements`):
 
-### 6.3 Mencegah race condition (contoh nyata di aplikasi ini)
+```sql
+-- payout yang menunggu verifikasi (hot, sangat selektif)
+CREATE INDEX "Payout_pending_idx" ON "Payout"("requestedAt")
+  WHERE "status" = 'pending';
 
-**A. Pembelian avatar — `StoreService`**
-
-```
-BEGIN
-  SELECT id FROM users WHERE id=$user FOR UPDATE   ← serialisasi per pembeli
-  cek item & kepemilikan
-  pakai order pending yang sama (anti duplikat)
-COMMIT
+-- audit log per user (belum ada index)
+CREATE INDEX "AuditLog_userId_createdAt_idx" ON "AuditLog"("userId", "createdAt" DESC);
 ```
 
-Konfirmasi pembelian juga mengunci baris transaksi:
-`SELECT ... FOR UPDATE`, lalu `userInventory.upsert` dengan primary key
-komposit `(userId, itemId)` sebagai jaring terakhir. Ini **pessimistic locking**
-yang tepat karena keputusan melibatkan beberapa baris.
+Prinsip: index **komposit** mengikuti urutan `WHERE` lalu `ORDER BY`; hindari
+index berlebih karena memperlambat write; partial index untuk status minoritas.
 
-**B. Reaksi & komentar — `lockPost`**
+### 6.3 Race condition: stok tidak boleh minus
 
-Semua penulisan sosial mengunci baris post lebih dulu (`FOR UPDATE`) dengan
-urutan lock yang konsisten, mencegah deadlock dan update XP yang hilang.
+Tiga lapis pertahanan (implementasi: `modules/flashsale/service.ts`):
 
-**C. Voting — `PollVote`**
+```
+Lapis 1  Redis Lua        DECRBY hanya jika stok >= qty
+         (gerbang cepat)  → menolak 90%+ request habis tanpa menyentuh DB
 
-`upsert` pada `@@unique([pollId, userId])` membuat satu user hanya punya satu
-suara; perhitungan hasil memakai agregasi `_count` di dalam transaksi yang sama.
+Lapis 2  PostgreSQL       UPDATE ... SET availableStock = availableStock - $1
+         (kebenaran)      WHERE sku = $2 AND availableStock >= $1
+                          → baris dikunci selama update; 0 row = kalah balapan
 
-**Perbandingan strategi**
+Lapis 3  Constraint       CHECK (availableStock >= 0)
+         (jaring aman)    → mustahil minus walau ada bug aplikasi
+```
 
-| Strategi | Dipakai untuk | Trade-off |
+Kuncinya: **jangan pernah** `SELECT stok` lalu `UPDATE` dalam dua langkah —
+itu pola baca-ubah-tulis yang race. Lakukan pengurangan **dalam satu statement
+bersyarat**.
+
+Perbandingan strategi:
+
+| Strategi | Kapan dipakai | Trade-off |
 |---|---|---|
-| **Pessimistic** `FOR UPDATE` | pembelian, reaksi, sertifikat | benar untuk multi-baris; lock lebih lama |
-| **Atomic conditional UPDATE** | counter/stok (`WHERE saldo >= n`) | 1 round-trip; update menunggu row lock |
-| **Optimistic** (`version`) | update jarang bentrok | perlu retry loop |
-| **Redis Lua** | rate limit, cache lock | cepat; bukan sumber kebenaran |
+| **Atomic conditional UPDATE** (dipakai) | counter tunggal (stok, saldo, kuota) | 1 round-trip, tanpa retry; update menunggu row lock |
+| **Pessimistic** `SELECT ... FOR UPDATE` | keputusan butuh beberapa baris/validasi kompleks | lock lebih lama, risiko deadlock |
+| **Optimistic** (`version`) | kontensi rendah, update jarang bentrok | perlu loop retry |
+| **Redis atomic** (Lua) | gerbang burst, bukan sumber kebenaran | bisa drift; wajib validasi DB |
 
-Aturan emas: **jangan** `SELECT` lalu `UPDATE` dalam dua langkah untuk nilai
-yang diperebutkan. Lakukan pengurangan/pengecekan dalam satu statement
-bersyarat atau di dalam lock yang sama.
+**Idempotensi.** `Idempotency-Key` unik di DB ⇒ retry jaringan tidak
+menghasilkan order ganda. Jika dua request paralel memakai key sama, satu
+menang (`P2002`), yang lain mengembalikan order yang sama; stok Redis
+dikompensasi.
+
+**Kompensasi.** Jika transaksi DB gagal setelah Redis `DECRBY`, stok
+dikembalikan via Lua `INCRBY` (hanya jika key masih ada, agar tidak
+"menghidupkan" stok yang sudah kedaluwarsa). TTL 1 jam membatasi drift.
+
+**Contoh nyata yang sudah ada:** `routes/wallet.ts` memakai pola yang sama —
+`updateMany({ where: { balance: { gte: amount } }, data: { decrement } })`
+sebelum membuat payout. Itu sudah benar; jangan diubah menjadi baca-lalu-tulis.
+
+**Kuota AI (`Subscription.tokenQuota`)** saat ini dihitung dari agregasi
+`TokenUsage`, sehingga dua job paralel bisa melewati kuota. Perbaikan yang
+disarankan: tambah kolom `tokensUsed` di `Subscription` dan lakukan
+`UPDATE ... SET tokensUsed = tokensUsed + $1 WHERE userId = $2 AND tokensUsed + $1 <= tokenQuota`.
+Alternatif cepat: `pg_advisory_xact_lock(hashtext(userId))` di dalam transaksi.
 
 ---
 
 ## 7. Skalabilitas & infrastruktur
 
-### Checklist stateless
+### Checklist stateless (sudah dipenuhi)
 
+- Tidak ada state di memori proses yang harus dibagi (cache hanya akselerasi,
+  sumber kebenaran di DB).
+- Tidak ada file lokal untuk data penting; `video-storage` adalah volume bersama
+  — untuk multi-host, pindahkan ke S3/MinIO.
 - Sesi memakai JWT, bukan sticky session.
-- Cache hanya akselerasi; sumber kebenaran di PostgreSQL.
-- **Catatan:** sertifikat disimpan di volume `app_storage`. Untuk multi-host,
-  pindahkan ke S3/MinIO agar benar-benar stateless.
-- `SIGTERM` → Nest shutdown hooks → worker drain → Prisma/Redis ditutup.
-- `/health` memeriksa DB, Redis, dan storage (dipakai healthcheck container).
+- Graceful shutdown: `SIGTERM` → stop terima koneksi → tunggu 25 s → tutup
+  queue/Prisma/Redis. `stop_grace_period: 30s`.
+- `/health` = liveness (tanpa dependency), `/readyz` = readiness (DB + Redis).
+  LB hanya mengirim traffic ke pod yang ready; pod tidak dibunuh hanya karena
+  DB sesaat lambat.
 
-### Menjalankan lebih dari satu instance
+### Docker & auto-scaling
 
 ```bash
-# 1 instance (default, sesuai RAM host saat ini)
-docker compose up -d
+# 3 replica backend + 2 worker + observability
+docker compose -f docker-compose.yml -f deploy/docker-compose.prod.yml up -d --build
 
-# 3 instance backend + 2 worker
-API_REPLICAS=3 WORKER_REPLICAS=2 \
-  docker compose -f docker-compose.yml -f docker-compose.hardening.yml up -d
+# migrasi dijalankan sekali, bukan dari setiap replica
+docker compose -f docker-compose.yml -f deploy/docker-compose.prod.yml \
+  run --rm backend npx prisma migrate deploy
+
+# scale dinamis
+docker compose -f docker-compose.yml -f deploy/docker-compose.prod.yml \
+  up -d --scale backend=5 --scale worker=4
 ```
 
-Overlay `docker-compose.hardening.yml` menambahkan:
+Nginx memakai `resolver 127.0.0.11 valid=10s` + `proxy_pass` variabel, sehingga
+replica baru terdeteksi tanpa reload. Trade-off: koneksi upstream tidak
+di-pool antar request (biaya ~1 ms di jaringan Docker). Untuk pola keepalive
+penuh, gunakan upstream statis dan reload Nginx saat scale.
 
-- `deploy.replicas` + resource limit,
-- `stop_grace_period` (backend 30 s, worker 60 s),
-- rotasi log JSON (maks. 10 MB × 3 file),
-- `init: true` sudah ada di compose dasar.
+**Kubernetes (ringkas):**
 
-Nginx aplikasi memakai resolver Docker + `proxy_pass` variabel, sehingga
-instance baru terdeteksi tanpa reload. Untuk Kubernetes, gunakan HPA CPU 65%
-dan KEDA berbasis panjang antrean BullMQ untuk worker.
+```yaml
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata: { name: backend }
+spec:
+  scaleTargetRef: { apiVersion: apps/v1, kind: Deployment, name: backend }
+  minReplicas: 3
+  maxReplicas: 20
+  metrics:
+    - type: Resource
+      resource: { name: cpu, target: { type: Utilization, averageUtilization: 65 } }
+```
 
-> **Peringatan kapasitas:** host saat ini memiliki RAM 1,6 GB. Total `mem_limit`
-> di compose dasar sudah mendekati/melebihi kapasitas tersebut. Jalankan
-> `API_REPLICAS=1` di host ini, atau tambah RAM sebelum scale-out. Swap 2 GB
-> membantu tetapi bukan pengganti RAM.
+Untuk antrean, pakai **KEDA** dengan trigger panjang antrean BullMQ, sehingga
+worker ikut scale saat backlog naik.
 
 ### High availability
 
 | Lapisan | Strategi |
 |---|---|
-| Edge | Cloudflare + TLS |
-| Nginx | 2 instance / VIP, atau LB cloud |
-| API | ≥3 replica, rolling update `maxUnavailable: 0` |
-| PostgreSQL | backup PITR harian; replica + failover (Patroni/managed) |
-| Redis | Sentinel/Cluster; AOF `everysec` |
+| Edge | Cloudflare + 2 IP/anycast |
+| Nginx | >1 instance di belakang LB cloud, atau keepalived VIP |
+| API | ≥3 replica, anti-affinity, rolling update `maxUnavailable: 0` |
+| PostgreSQL | Managed HA / Patroni + streaming replica; backup PITR harian |
+| Redis | Sentinel/Cluster; AOF `everysec`; jangan jadikan satu-satunya sumber kebenaran |
 | Worker | ≥2 replica; job idempotent |
 
-Read replica: tambahkan `DATABASE_REPLICA_URL` dan arahkan query listing/agregat
-ke client read-only. Data yang baru ditulis (saldo, stok, status order) tetap ke
-primary untuk menghindari lag.
+**Read replica** diaktifkan lewat `DATABASE_REPLICA_URL`. Query listing/agregat
+memakai `prismaReplica`; data yang baru ditulis (saldo, stok, status order)
+tetap ke primary untuk menghindari lag.
 
 ---
 
 ## 8. Observability & graceful degradation
 
-### Metrik (`GET /metrics`, internal)
+### Metrik (sudah diekspos di `/metrics`)
 
 | Metrik | Fungsi |
 |---|---|
-| `http_request_duration_seconds` | p50/p95/p99 per route |
+| `http_request_duration_seconds` (histogram) | p50/p95/p99 per route |
 | `http_requests_total{status}` | error rate |
-| `cache_events_total{result}` | hit ratio, stampede, lock wait |
-| `rate_limit_decisions_total{bucket,decision}` | bot/DDoS, limit terlalu ketat |
-| `circuit_breaker_state{name}` | Redis sedang bermasalah |
-| `queue_jobs_total{queue,result}` | kesehatan worker |
-| `process_*`, `nodejs_*` | CPU, memory, event loop, GC |
+| `cache_events_total{result}` | hit ratio, stampede, error |
+| `rate_limit_decisions_total{decision}` | bot/DDoS, limit terlalu ketat |
+| `circuit_breaker_state{name}` | dependency sedang down |
+| `flashsale_orders_total{result}` | accepted / sold_out |
+| `queue_jobs_total{result}` | kesehatan worker |
+| `nodejs_*`, `process_*` | CPU, memory, event loop, GC |
 
-Contoh alert:
-
-- `up{job="backend"} == 0` selama 1 menit → **critical**
-- rasio 5xx > 2% selama 5 menit → **critical**
-- p95 > 500 ms selama 10 menit → **warning**
-- `circuit_breaker_state == 2` → **warning**
-- cache hit ratio < 50% → **warning**
-- rate limit blocked > 20/s → **warning** (bot atau limit terlalu ketat)
-- job gagal > 1/5 menit → **warning**
+Alert contoh ada di `deploy/prometheus/alerts.yml`: `BackendDown`,
+`HighErrorRate` (>2% 5xx), `HighLatencyP95` (>500 ms), `CircuitBreakerOpen`,
+`CacheHitRatioLow`, `RateLimitBlockSpike`, `QueueJobFailures`.
 
 ### Circuit breaker
 
-`apps/api/src/common/resilience/circuit-breaker.ts`:
+Implementasi: `backend/src/lib/circuitBreaker.ts`.
 
 ```
-closed ──(5 gagal)──► open ──(10 s)──► half_open ──(2 sukses)──► closed
-                                              └──(1 gagal)──► open
+closed ──(5 gagal beruntun)──► open ──(10 s)──► half_open ──(2 sukses)──► closed
+                                                            └─(1 gagal)──► open
 ```
 
-Dipakai `CacheService` untuk semua operasi Redis. Saat terbuka, request langsung
-melewati cache dan memakai database — tidak menunggu timeout berulang.
+Dipakai untuk dependency eksternal (provider AI, email, payment). Saat `open`,
+request langsung memakai fallback (cache stale / antrean) tanpa menambah beban
+layanan yang sedang down — mencegah **cascading failure**.
 
 ### Matriks degradasi
 
-| Gangguan | Perilaku |
+| Gangguan | Perilaku sistem |
 |---|---|
-| Redis down | Cache dilewati; rate limit read fail-open, write/auth 503; aplikasi tetap hidup. |
-| PostgreSQL down | `/health` 503 → container dianggap tidak sehat; response cache masih mungkin sampai TTL habis. |
-| Worker mati | Request tetap dibuat; sertifikat `pending` diproses ulang saat worker hidup (jobId idempotent). |
-| Satu instance backend mati | Nginx/DNS mengarahkan ke instance lain. |
-| Traffic 10× | Nginx menolak kelebihan; cache menyerap mayoritas read; DB hanya menerima miss/write. |
+| Redis down | Cache & rate limit fail-open; checkout tetap aman via DB + constraint. Latensi naik, fitur tetap hidup. |
+| Read replica down | `DATABASE_REPLICA_URL` dikosongkan → query kembali ke primary (butuh restart/deploy kecil). |
+| Provider AI/email down | Circuit breaker membuka; job masuk retry/backlog; user tetap bisa menjelajah & checkout. |
+| PostgreSQL down | `/readyz` 503 → LB mengeluarkan pod; endpoint baca yang masih ter-cache tetap merespons sampai TTL habis. |
+| Satu pod mati | Nginx/DNS mengarahkan ke pod lain; rolling update tanpa downtime. |
+| Traffic flash sale 100× | Nginx menolak kelebihan; Redis gate menolak cepat; DB hanya menerima request yang lolos. |
 
-### Logging
+### Logging & tracing
 
-- Format log Nest sudah menyertakan konteks; tambahkan `requestId` bila butuh
-  korelasi lintas service (langkah berikutnya: OpenTelemetry).
-- Jangan log isi confession/pesan pribadi; gunakan ID.
-
----
-
-## 9. Kapasitas (perkiraan)
-
-- Host 2 vCPU / 1,6 GB: **1 instance backend** (NestJS ~150–250 MB) + worker
-  (~100–200 MB) + Postgres (256 MB) + Redis (128 MB).
-- Cache hit 90% pada feed → DB hanya menerima ~10% read + seluruh write.
-- Redis 1 node: 50–100k ops/s; rate limit + cache jauh di bawah itu.
-- Bottleneck pertama biasanya koneksi DB dan query tanpa index — bukan CPU.
+- Setiap response membawa `X-Request-Id`; Nginx mencatat `rid=` sehingga log
+  edge dan aplikasi bisa dikorelasikan.
+- Langkah berikutnya: OpenTelemetry → Tempo/Jaeger untuk trace lintas
+  API → Redis → DB → worker.
 
 ---
 
-## 10. Runbook deploy & pemulihan
+## 9. Kapasitas (contoh perhitungan)
 
-### 10.1 Blocker saat ini: `migrate` gagal `P3005`
+Asumsi: 1 pod = 1 vCPU / 768 MB, cache hit 90%, rasio baca:tulis 95:5.
 
-Gejala:
+- 3 pod × ~2.000 RPS ringan ≈ **6.000 RPS**; 90% dilayani Redis.
+- DB hanya menerima ~600 RPS (10% miss + semua write) — nyaman untuk primary
+  dengan pool 10/pod.
+- Redis 1 node menangani 50–100k ops/s; rate limit + cache masih jauh di bawah.
+- Flash sale 100 unit: Redis menolak ribuan request dalam <1 ms; DB hanya
+  memproses ~100 transaksi pemenang.
 
-```
-Error: P3005
-The database schema is not empty.
-```
-
-Artinya database sudah berisi tabel (kemungkinan dibuat dengan `prisma db push`)
-tetapi `_prisma_migrations` kosong. **Jangan** langsung `migrate deploy`.
-
-Prosedur aman:
-
-```bash
-# 1. Backup wajib
-docker compose exec -T postgres pg_dump -U unlinked unlinked > backup-$(date +%F).sql
-
-# 2. Bandingkan schema DB dengan schema.prisma
-docker compose run --rm --entrypoint sh migrate -c \
-  "npx prisma migrate diff --from-url \"\$DATABASE_URL\" \
-   --to-schema-datamodel prisma/schema.prisma --script"
-```
-
-- Jika diff **hanya** berisi dua index baru (dan tidak ada perubahan tabel),
-  schema sudah sinkron → baseline semua migrasi lama, lalu deploy:
-
-```bash
-for m in 20261119000000_init 20261119000001_add_indexes \
-         20261119030000_add_polls 20261119050000_add_polls_cms \
-         20261119060000_add_confession_fields; do
-  docker compose run --rm --entrypoint sh migrate -c \
-    "npx prisma migrate resolve --applied $m"
-done
-docker compose run --rm migrate
-```
-
-- Jika diff berisi perubahan struktur lain, **jangan** baseline. Terapkan diff
-  secara manual setelah review, atau buat database baru dan migrasikan data.
-
-### 10.2 Deploy normal
-
-```bash
-cd /var/www/unlinked-plus
-docker compose build backend worker
-docker compose up -d postgres redis
-docker compose run --rm migrate
-docker compose up -d backend worker frontend nginx
-```
-
-Verifikasi:
-
-```bash
-curl -fsS localhost:8080/api/health
-curl -fsS localhost:8080/api/posts?page=1
-curl -fsS localhost:8080/metrics | head   # dari jaringan internal
-```
-
-Landing tetap:
-
-```bash
-curl -fsS localhost/ | head -5
-```
-
-### 10.3 Rollback
-
-- Backup source sebelum patch: `/root/backups/unlinked-plus-*.tgz`.
-- Image diberi tag; kembali ke tag sebelumnya dengan `docker compose up -d`.
-- Migrasi index bersifat aditif (`CREATE INDEX IF NOT EXISTS`); rollback aplikasi
-  tidak perlu drop index.
+Bottleneck pertama biasanya **koneksi DB** dan **query tanpa index**, bukan CPU
+Node.js. Karena itu pooling + index + cache diukur sebelum menambah replica.
 
 ---
 
-## 11. Peta file perubahan
+## 10. Deployment & verifikasi
 
+```bash
+# 1. Siapkan env (JANGAN commit secret)
+cp .env.example .env
+
+# 2. Build & jalankan
+docker compose -f docker-compose.yml -f deploy/docker-compose.prod.yml up -d --build
+
+# 3. Migrasi (termasuk tabel flash sale + seed)
+docker compose -f docker-compose.yml -f deploy/docker-compose.prod.yml \
+  run --rm backend npx prisma migrate deploy
+
+# 4. Verifikasi
+curl -s localhost/health
+curl -s localhost/readyz
+curl -s localhost/api/v1/flashsale/items
+curl -s localhost:9090/-/ready
 ```
-apps/api/src/common/cache/cache.service.ts        cache-aside + anti-stampede
-apps/api/src/common/cache/cache.module.ts
-apps/api/src/common/metrics/metrics.service.ts    registry Prometheus
-apps/api/src/common/metrics/http-metrics.interceptor.ts
-apps/api/src/common/metrics/metrics.controller.ts GET /metrics
-apps/api/src/common/metrics/metrics.module.ts
-apps/api/src/common/resilience/circuit-breaker.ts
-apps/api/src/common/guards/rate-limit.guard.ts    sliding window Lua
-apps/api/src/posts/posts.service.ts               feed cache + versi
-apps/api/src/polls/polls.service.ts               cache polling aktif
-apps/api/src/app.module.ts                        wiring modul & interceptor
-apps/api/prisma/schema.prisma                     index baru
-apps/api/prisma/migrations/20261120120000_hardening_indexes/migration.sql
-docker-compose.hardening.yml                      replica, limit, log
-docker/nginx/default.conf                         resolver + limit_req
-deploy/sync-to-server.ps1                         kirim patch + backup otomatis
-docs/ARCHITECTURE.md                              dokumen ini
+
+Uji oversell:
+
+```bash
+k6 run -e BASE_URL=http://localhost -e TOKEN=<jwt> loadtest/flashsale.js
+# lalu cek: SELECT "availableStock" FROM "FlashSaleItem" WHERE sku='credits-2000';
+#harus >= 0, dan COUNT(order) <= totalStock
 ```
+
+### Rollback
+
+- Image diberi tag versi; `docker compose up -d` dengan tag sebelumnya.
+- Migrasi bersifat **aditif** (tabel baru) sehingga aman di-rollback aplikasi
+  tanpa drop data.
+- Jika perlu drop: `DROP TABLE "FlashSaleOrder", "FlashSaleItem";` (hanya jika
+  modul demo tidak dipakai).
 
 ---
 
-## 12. Status verifikasi
+## 11. Batasan & langkah berikutnya
 
-| Langkah | Status |
-|---|---|
-| `npm install` (regenerasi lockfile) | ✅ |
-| `npx prisma generate` | ✅ |
-| `nest build` (TypeScript) | ✅ exit 0 |
-| Sinkron ke server | ⏳ menunggu host `192.168.1.20` hidup |
-| `nginx -t` untuk `docker/nginx/default.conf` | ⏳ harus dijalankan di server |
-| Migrasi index | ⏳ **setelah** P3005 dibereskan |
+1. **CORS masih permisif** — batasi ke origin frontend sebelum go-live.
+2. **Rate limiter per-IP** bergantung pada `trust proxy` yang benar.
+3. **Outbox pattern** untuk menjamin enqueue tidak pernah hilang.
+4. **Kuota AI** belum atomik (lihat 6.3) — perbaiki sebelum trafik tinggi.
+5. **PgBouncer** jika replica > 20.
+6. **Object storage** (S3/MinIO) untuk video agar benar-benar stateless
+   multi-host.
+7. **Tracing** OpenTelemetry untuk analisis lintas service.
+8. **Uji beban berkala** (k6) di staging dengan data mirip production.
 
-**Catatan tooling:** build diverifikasi dengan Node 24.15 karena
-`@nestjs/cli@12` mensyaratkan `^22.22.3 || ^24.15.0`. Image runtime tetap
-`node:22-bookworm-slim`; yang perlu dipastikan hanyalah versi Node di tahap
-*build* image memenuhi `engines`, atau turunkan `@nestjs/cli` ke 11.x bila
-ingin tetap di Node 22.14.
+---
 
-**Catatan dependency:** `prom-client@15.1.3` kini ditandai deprecated di npm
-(diarahkan ke `@prometheus-io/client`). Tetap dipakai karena versi 15 adalah
-lini stabil yang matang; migrasi bisa dilakukan terpisah tanpa mengubah kode
-selain import.
+## 12. Peta file implementasi
 
-`docker/nginx/default.conf` **belum divalidasi** — jalankan
-`docker compose exec nginx nginx -t` sebelum reload. Bila konfigurasi lama
-memiliki location khusus (mis. penyajian file sertifikat), gabungkan location
-tersebut ke file baru; jangan menimpanya buta.
+```
+backend/src/
+  lib/redis.ts                 koneksi Redis terkelola
+  lib/cache.ts                 cache-aside + anti-stampede + SWR
+  lib/rateLimit.ts             sliding window & token bucket (Lua)
+  lib/circuitBreaker.ts        circuit breaker + metrik
+  lib/metrics.ts               registry Prometheus + middleware HTTP
+  lib/prismaReplica.ts         routing baca ke read replica
+  middleware/requestContext.ts request id untuk korelasi log
+  modules/flashsale/
+    routes.ts                  GET /items, POST /reserve, GET /orders
+    service.ts                 reservasi atomik + idempotensi + kompensasi
+    queue.ts                   producer BullMQ
+    invoiceWorker.ts           consumer idempotent (invoice/email)
+  index.ts                     wiring, limiter, readiness, graceful shutdown
+prisma/
+  schema.prisma                + FlashSaleItem, FlashSaleOrder
+  migrations/20261120000000_add_flashsale/migration.sql
+deploy/
+  docker-compose.prod.yml      replica, resource limit, observability
+  prometheus/{prometheus,alerts}.yml
+  grafana/provisioning/datasources/prometheus.yml
+nginx.conf                     edge rate limit + DNS dinamis
+loadtest/flashsale.js          uji oversell
+```

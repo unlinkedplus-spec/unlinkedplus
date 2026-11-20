@@ -1,0 +1,396 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String   @id @default(uuid())
+  email        String   @unique
+  passwordHash String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  roleId       String
+  role         Role     @relation(fields: [roleId], references: [id])
+  creatorProfile    CreatorProfile?
+  advertiserProfile AdvertiserProfile?
+  teamMembers       TeamMember[]
+  ownedTeams        Team[]
+  wallet            Wallet?
+  subscription      Subscription?
+  campaigns         Campaign[]
+  affiliateLinks    AffiliateLink[]
+  commissions       Commission[]
+  tokenUsages       TokenUsage[]
+  aiJobs            AIJob[]
+  generatedContents GeneratedContent[]
+  generatedVideos   GeneratedVideo[]
+  workflows         Workflow[]
+  automations       Automation[]
+  notifications     Notification[]
+  auditLogs         AuditLog[]
+  flashSaleOrders   FlashSaleOrder[]
+}
+
+model Role {
+  id          String   @id @default(uuid())
+  name        String   @unique
+  permissions Permission[]
+  users       User[]
+}
+
+model Permission {
+  id   String @id @default(uuid())
+  name String @unique
+  roles Role[]
+}
+
+model CreatorProfile {
+  id          String @id @default(uuid())
+  userId      String @unique
+  user        User   @relation(fields: [userId], references: [id])
+  bio         String?
+  socialLinks Json?
+}
+
+model AdvertiserProfile {
+  id          String @id @default(uuid())
+  userId      String @unique
+  user        User   @relation(fields: [userId], references: [id])
+  companyName String
+  website     String?
+}
+
+model Team {
+  id          String   @id @default(uuid())
+  name        String
+  ownerId     String
+  createdAt   DateTime @default(now())
+  owner       User     @relation(fields: [ownerId], references: [id])
+  members     TeamMember[]
+
+  @@index([ownerId])
+}
+
+model TeamMember {
+  id        String @id @default(uuid())
+  teamId    String
+  userId    String
+  role      String
+  team      Team   @relation(fields: [teamId], references: [id])
+  user      User   @relation(fields: [userId], references: [id])
+
+  @@unique([teamId, userId])
+  @@index([userId])
+}
+
+model Campaign {
+  id               String   @id @default(uuid())
+  advertiserId     String
+  name             String
+  budget           Decimal  @default(0)
+  commissionRate   Float    @default(0)
+  startDate        DateTime?
+  endDate          DateTime?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  advertiser       User     @relation(fields: [advertiserId], references: [id])
+  products         Product[]
+
+  @@index([advertiserId])
+}
+
+model Product {
+  id          String @id @default(uuid())
+  campaignId  String
+  name        String
+  price       Decimal @default(0)
+  affiliateCommission Float @default(0)
+  url         String?
+  createdAt   DateTime @default(now())
+  campaign    Campaign @relation(fields: [campaignId], references: [id])
+  affiliateLinks AffiliateLink[]
+
+  @@index([campaignId])
+}
+
+model AffiliateLink {
+  id        String @id @default(uuid())
+  productId String
+  creatorId String
+  token     String @unique
+  createdAt DateTime @default(now())
+  product   Product @relation(fields: [productId], references: [id])
+  creator   User    @relation(fields: [creatorId], references: [id])
+  clicks    Click[]
+  conversions Conversion[]
+
+  @@index([creatorId])
+  @@index([productId])
+}
+
+model Click {
+  id             String @id @default(uuid())
+  affiliateLinkId String
+  createdAt      DateTime @default(now())
+  affiliateLink  AffiliateLink @relation(fields: [affiliateLinkId], references: [id])
+
+  @@index([affiliateLinkId, createdAt])
+}
+
+model Conversion {
+  id               String @id @default(uuid())
+  affiliateLinkId  String
+  orderId          String?  @unique
+  amount           Decimal @default(0)
+  createdAt        DateTime @default(now())
+  affiliateLink    AffiliateLink @relation(fields: [affiliateLinkId], references: [id])
+  commission       Commission?
+
+  @@index([affiliateLinkId, createdAt])
+}
+
+model Commission {
+  id          String @id @default(uuid())
+  userId      String
+  conversionId String? @unique
+  amount      Decimal @default(0)
+  description String?
+  createdAt   DateTime @default(now())
+  user        User @relation(fields: [userId], references: [id])
+  conversion  Conversion? @relation(fields: [conversionId], references: [id])
+
+  @@index([userId, createdAt])
+}
+
+model Wallet {
+  id        String @id @default(uuid())
+  userId    String @unique
+  balance   Decimal @default(0)
+  pending   Decimal @default(0)
+  user      User @relation(fields: [userId], references: [id])
+  transactions Transaction[]
+  payouts   Payout[]
+}
+
+model Transaction {
+  id        String @id @default(uuid())
+  walletId  String
+  amount    Decimal @default(0)
+  type      String // credit/debit
+  note      String?
+  createdAt DateTime @default(now())
+  wallet    Wallet @relation(fields: [walletId], references: [id])
+
+  @@index([walletId, createdAt])
+}
+
+model Payout {
+  id        String @id @default(uuid())
+  walletId  String
+  amount    Decimal @default(0)
+  status    String @default("pending") // pending, approved, paid, rejected
+  note      String?
+  requestedAt DateTime @default(now())
+  processedAt DateTime?
+  wallet    Wallet @relation(fields: [walletId], references: [id])
+
+  @@index([walletId, requestedAt])
+  @@index([status])
+}
+
+model Subscription {
+  id        String @id @default(uuid())
+  userId    String   @unique
+  plan      String
+  startDate DateTime @default(now())
+  endDate   DateTime?
+  tokenQuota Int @default(0)
+  user      User @relation(fields: [userId], references: [id])
+}
+
+model TokenUsage {
+  id        String @id @default(uuid())
+  userId    String
+  jobId     String?  @unique
+  usedTokens Int @default(0)
+  date      DateTime @default(now())
+  user      User @relation(fields: [userId], references: [id])
+
+  @@index([userId, date])
+}
+
+model AIProvider {
+  id          String @id @default(uuid())
+  name        String @unique
+  type        String // text, image, video, voice
+  config      Json
+  enabled     Boolean @default(true)
+  jobs        AIJob[]
+
+  @@index([type, enabled])
+}
+
+model AIJob {
+  id          String @id @default(uuid())
+  userId      String
+  providerId  String
+  type        String // e.g., text_generation, video_render
+  status      String @default("queued") // queued, running, success, failed
+  input       Json
+  output      Json?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  user        User @relation(fields: [userId], references: [id])
+  provider    AIProvider @relation(fields: [providerId], references: [id])
+  generatedContent GeneratedContent?
+  generatedVideo   GeneratedVideo?
+
+  @@index([userId, createdAt])
+  @@index([status])
+}
+
+model GeneratedContent {
+  id        String @id @default(uuid())
+  userId    String
+  jobId     String   @unique
+  content   Json
+  createdAt DateTime @default(now())
+  user      User @relation(fields: [userId], references: [id])
+  job       AIJob @relation(fields: [jobId], references: [id])
+
+  @@index([userId, createdAt])
+}
+
+model GeneratedVideo {
+  id        String @id @default(uuid())
+  userId    String
+  jobId     String   @unique
+  url       String?
+  metadata  Json?
+  createdAt DateTime @default(now())
+  user      User @relation(fields: [userId], references: [id])
+  job       AIJob @relation(fields: [jobId], references: [id])
+
+  @@index([userId, createdAt])
+}
+
+model Workflow {
+  id          String @id @default(uuid())
+  userId      String
+  name        String
+  description String?
+  isTemplate  Boolean @default(false)
+  steps       WorkflowStep[]
+  createdAt   DateTime @default(now())
+  user        User @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+}
+
+model WorkflowStep {
+  id          String @id @default(uuid())
+  workflowId  String
+  order       Int
+  type        String // e.g., generate_script, render_video
+  config      Json?
+  workflow    Workflow @relation(fields: [workflowId], references: [id], onDelete: Cascade)
+
+  @@index([workflowId])
+}
+
+model Automation {
+  id           String    @id @default(uuid())
+  userId       String
+  name         String
+  scheduleType String // daily | weekly
+  timeOfDay    String // HH:MM in Asia/Jakarta
+  dayOfWeek    Int? // 0 = Sunday ... 6 = Saturday
+  input        Json
+  enabled      Boolean   @default(true)
+  lastRunAt    DateTime?
+  lastJobId    String?
+  nextRunAt    DateTime?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  user         User      @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+  @@index([enabled, nextRunAt])
+}
+
+model Notification {
+  id        String @id @default(uuid())
+  userId    String
+  title     String
+  body      String
+  read      Boolean @default(false)
+  createdAt DateTime @default(now())
+  user      User @relation(fields: [userId], references: [id])
+}
+
+model AuditLog {
+  id        String @id @default(uuid())
+  userId    String?
+  action    String
+  details   Json?
+  createdAt DateTime @default(now())
+  user      User? @relation(fields: [userId], references: [id])
+}
+
+
+// ---------------------------------------------------------------------------
+// Flash sale / inventory (modul contoh high-concurrency)
+// Sumber kebenaran stok ada di PostgreSQL; Redis hanya gerbang cepat.
+// ---------------------------------------------------------------------------
+
+model FlashSaleItem {
+  id             String   @id @default(uuid())
+  sku            String   @unique
+  name           String
+  price          Decimal  @default(0)
+  totalStock     Int
+  availableStock Int
+  version        Int      @default(0)
+  active         Boolean  @default(true)
+  createdAt      DateTime @default(now())
+  orders         FlashSaleOrder[]
+
+  @@index([active])
+}
+
+model FlashSaleOrder {
+  id             String   @id @default(uuid())
+  idempotencyKey String   @unique
+  userId         String
+  itemId         String
+  sku            String
+  quantity       Int
+  unitPrice      Decimal  @default(0)
+  status         String   @default("reserved") // reserved, confirmed, cancelled
+  createdAt      DateTime @default(now())
+  user           User         @relation(fields: [userId], references: [id])
+  item           FlashSaleItem @relation(fields: [itemId], references: [id])
+
+  @@index([userId, createdAt])
+  @@index([itemId, status])
+}
+
+// ---------------------------------------------------------------------------
+// Outbox: job yang gagal enqueue tetap ter-catat untuk relay berikutnya.
+// ---------------------------------------------------------------------------
+
+model Outbox {
+  id        String   @id @default(uuid())
+  type      String
+  payload   Json
+  status    String   @default("pending") // pending | sent
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  orderId   String?
+
+  @@index([status, createdAt])
+}

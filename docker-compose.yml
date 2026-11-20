@@ -1,132 +1,97 @@
-name: unlinked-plus
-
-x-api: &api
-  image: unlinked-plus-api:local
-  build: ./apps/api
-  env_file: .env
-  environment:
-    DATABASE_URL: postgresql://unlinked:${DB_PASSWORD:?Set DB_PASSWORD}@postgres:5432/unlinked
-    REDIS_URL: redis://:${REDIS_PASSWORD:?Set REDIS_PASSWORD}@redis:6379
-    STORAGE_PATH: /data
-    NODE_OPTIONS: --max-old-space-size=256
-  volumes:
-    - app_storage:/data
-  init: true
-  security_opt:
-    - no-new-privileges:true
-
 services:
   postgres:
-    image: postgres:17-alpine
+    image: postgres:15-alpine
     restart: unless-stopped
     environment:
-      POSTGRES_DB: unlinked
-      POSTGRES_USER: unlinked
-      POSTGRES_PASSWORD: ${DB_PASSWORD:?Set DB_PASSWORD}
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      POSTGRES_DB: ${POSTGRES_DB:-creative_partner}
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - pgdata:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U unlinked -d unlinked"]
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER}"]
       interval: 10s
       timeout: 5s
-      retries: 10
-    mem_limit: 256m
+      retries: 5
 
   redis:
     image: redis:7-alpine
     restart: unless-stopped
-    environment:
-      REDIS_PASSWORD: ${REDIS_PASSWORD:?Set REDIS_PASSWORD}
-    command: ["sh", "-c", "exec redis-server --appendonly yes --requirepass \"$$REDIS_PASSWORD\" --maxmemory 128mb --maxmemory-policy noeviction"]
-    volumes:
-      - redis_data:/data
+    ports:
+      - "6379:6379"
     healthcheck:
-      test: ["CMD-SHELL", "REDISCLI_AUTH=\"$$REDIS_PASSWORD\" redis-cli ping | grep -q PONG"]
+      test: ["CMD", "redis-cli", "ping"]
       interval: 10s
       timeout: 5s
-      retries: 10
-    mem_limit: 192m
+      retries: 5
 
-  migrate:
-    <<: *api
-    restart: "no"
-    command: ["sh", "-c", "npx prisma migrate deploy && node prisma/seed.cjs"]
+  backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@postgres:5432/${POSTGRES_DB:-creative_partner}?schema=public&connection_limit=10&pool_timeout=10
+      REDIS_URL: redis://redis:6379
+      JWT_SECRET: ${JWT_SECRET:-super_secret_key_change_me}
+      PORT: 3000
+      DEFAULT_TEXT_PROVIDER_ID: ${DEFAULT_TEXT_PROVIDER_ID:-}
+      DEFAULT_VIDEO_PROVIDER_ID: ${DEFAULT_VIDEO_PROVIDER_ID:-}
+      VIDEO_STORAGE_DIR: /app/storage
+    volumes:
+      - video-storage:/app/storage
     depends_on:
       postgres:
         condition: service_healthy
-    mem_limit: 384m
-
-  backend:
-    <<: *api
-    restart: unless-stopped
-    # Hanya loopback: host nginx lokal yang menjadi entrypoint publik.
-    ports:
-      - "127.0.0.1:3001:3001"
-    depends_on:
-      migrate:
-        condition: service_completed_successfully
       redis:
         condition: service_healthy
-    healthcheck:
-      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3001/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
-      interval: 15s
-      timeout: 5s
-      retries: 10
-      start_period: 30s
-    mem_limit: 384m
+    ports:
+      - "3000:3000"
 
   worker:
-    <<: *api
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
     restart: unless-stopped
-    command: ["node", "dist/worker/worker.js"]
+    command: ["node", "dist/worker.js"]
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@postgres:5432/${POSTGRES_DB:-creative_partner}?schema=public&connection_limit=10&pool_timeout=10
+      REDIS_URL: redis://redis:6379
+      JWT_SECRET: ${JWT_SECRET:-super_secret_key_change_me}
+      VIDEO_STORAGE_DIR: /app/storage
+    volumes:
+      - video-storage:/app/storage
     depends_on:
-      backend:
+      postgres:
         condition: service_healthy
-    mem_limit: 256m
+      redis:
+        condition: service_healthy
+      backend:
+        condition: service_started
 
   frontend:
-    image: unlinked-plus-web:local
-    build: ./apps/web
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile
+      args:
+        VITE_API_BASE_URL: /api/v1
     restart: unless-stopped
-    init: true
-    # Hanya loopback, dipakai host nginx untuk /admin.
     ports:
-      - "127.0.0.1:3000:3000"
-    environment:
-      NODE_OPTIONS: --max-old-space-size=192
-    depends_on:
-      backend:
-        condition: service_healthy
-    healthcheck:
-      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3000').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
-      interval: 15s
-      timeout: 5s
-      retries: 10
-      start_period: 30s
-    mem_limit: 256m
-    security_opt:
-      - no-new-privileges:true
+      - "5173:80"
 
   nginx:
-    image: nginx:alpine
+    image: nginx:stable-alpine
     restart: unless-stopped
     ports:
-      - "${BIND_ADDRESS:-127.0.0.1}:${HTTP_PORT:-8080}:80"
+      - "80:80"
     volumes:
-      - ./docker/nginx:/etc/nginx/conf.d:ro
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
     depends_on:
-      frontend:
-        condition: service_healthy
-      backend:
-        condition: service_healthy
-    healthcheck:
-      test: ["CMD-SHELL", "wget -q -O /dev/null http://127.0.0.1/api/health"]
-      interval: 15s
-      timeout: 5s
-      retries: 5
-    mem_limit: 64m
+      - backend
+      - frontend
 
 volumes:
-  postgres_data:
-  redis_data:
-  app_storage:
+  pgdata:
+  video-storage:
