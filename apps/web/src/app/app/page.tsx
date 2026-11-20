@@ -44,6 +44,10 @@ export default function AppPage() {
     if (token) {
       setResetToken(token);
       setAuthModal(true);
+      // Consume the token from history/referrer once the modal has it.
+      const clean = new URL(window.location.href);
+      clean.searchParams.delete('reset');
+      window.history.replaceState({}, '', clean.pathname + clean.search + clean.hash);
     }
     // Landing-page navigation links deep-link into the correct tab.
     const requestedTab = params.get('tab');
