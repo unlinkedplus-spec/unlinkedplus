@@ -12,7 +12,7 @@ const { RateLimitGuard } = require('../dist/common/guards/rate-limit.guard');
 const { validateEnvironment } = require('../dist/common/environment');
 const { calculateLevel, getLevelProgress } = require('../dist/common/helpers/xp-level.helper');
 const { renderCertificateSvg } = require('../dist/certificates/certificate-renderer');
-const sharp = require('sharp');
+const { Resvg } = require('@resvg/resvg-js');
 const pipe = new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true, transform: true });
 const validate = (value, metatype) => pipe.transform(value, { type: 'body', metatype });
 const status = expected => error => error.getStatus?.() === expected;
@@ -174,7 +174,7 @@ test('Mental Armor boundaries are deterministic and max level progress stops at1
 test('certificate renderer escapes user XML and rasterizes an actual PNG', async () => {
   const svg = renderCertificateSvg({ id: randomUUID(), createdAt: new Date(), category: 'Ditolak HRD', content: '<script>alert(1)</script> & masih bertahan' });
   assert.ok(!svg.includes('<script>'));
-  const bytes = await sharp(Buffer.from(svg)).png().toBuffer();
+  const bytes = new Resvg(svg, { font: { loadSystemFonts: true } }).render().asPng();
   assert.equal(bytes.subarray(1, 4).toString(), 'PNG');
   assert.ok(bytes.length > 1000);
 });

@@ -3,7 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import { Job, UnrecoverableError, Worker } from 'bullmq';
 import { isUUID } from 'class-validator';
 import { mkdir, rename, unlink, writeFile } from 'node:fs/promises';
-import sharp = require('sharp');
+import { Resvg } from '@resvg/resvg-js';
 import {
   CERTIFICATE_ATTEMPTS,
   CERTIFICATE_JOB,
@@ -90,7 +90,9 @@ export class CertificateProcessor implements OnModuleInit, OnModuleDestroy {
           category: certificate.post.category,
           content: certificate.post.content,
         });
-        const png = await sharp(Buffer.from(svg)).png().toBuffer();
+        // Render with resvg: sharp's native libvips binary requires SSE4.2 and
+        // aborts with SIGILL on older x86-64 hosts used for development/VPS.
+        const png = new Resvg(svg, { font: { loadSystemFonts: true } }).render().asPng();
         const imagePath = newCertificateBasename(certificate.id);
         outputPath = certificateFilePath(storagePath, certificate.id, imagePath);
         temporaryPath = `${outputPath}.tmp`;
