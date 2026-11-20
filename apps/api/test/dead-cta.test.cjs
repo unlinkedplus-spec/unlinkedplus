@@ -13,12 +13,20 @@ const landing = fs.readFileSync(path.join(webRoot, 'app', 'page.tsx'), 'utf8');
 const appPage = fs.readFileSync(path.join(webRoot, 'app', 'app', 'page.tsx'), 'utf8');
 const waitlist = fs.readFileSync(path.join(webRoot, 'components', 'WaitlistForm.tsx'), 'utf8');
 
-test('H4 regression: landing renders the real registration form and navigable CTAs', () => {
-  assert.match(landing, /import Link from ['"]next\/link['"]/);
-  assert.match(landing, /<WaitlistForm mode="hero" \/>/);
-  assert.match(landing, /href="\/app\?tab=spill"/);
-  assert.match(landing, /href="\/app"/);
-  assert.ok(!landing.includes('<button'), 'landing CTAs must navigate or open the real auth form');
+test('H4 regression: root serves the two-state Beranda with navigable CTAs', () => {
+  assert.match(landing, /import \{ cookies \} from ['"]next\/headers['"]/);
+  assert.match(landing, /jar\.get\('unlinked_session'\)/);
+  assert.match(landing, /<DashboardPixel variant=/);
+  assert.match(landing, /authenticated \? 'sameboat' : 'chibi'/);
+  assert.ok(fs.existsSync(path.join(webRoot, 'components', 'DashboardPixel.tsx')),
+    'pixel-faithful Beranda component must exist');
+  const dash = fs.readFileSync(path.join(webRoot, 'components', 'DashboardPixel.tsx'), 'utf8');
+  assert.match(dash, /mockup-sameboat\.png/);
+  assert.match(dash, /mockup-chibi\.png/);
+  assert.match(dash, /['"]\/app\?tab=spill['"]/);
+  assert.match(dash, /['"]\/app['"]/);
+  assert.match(dash, /<AuthModal/);
+  assert.match(dash, /createPost\(/);
 });
 
 test('H4 regression: app honours landing deep links', () => {

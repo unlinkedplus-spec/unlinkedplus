@@ -83,23 +83,19 @@ test('Spill Without Judgment: Gate 1 anonymous identity remains intact', () => {
   assert.ok(!postType.includes('userId'));
 });
 
-test('Spill Without Judgment: landing mockup stays frozen and root stays static', () => {
+test('Spill Without Judgment: two-state root proxies to Next.js and keeps static assets', () => {
   const rootBlock = nginx.slice(nginx.indexOf('location / {'));
-  assert.match(rootBlock, /root \/var\/www\/unlinked-plus/);
-  assert.match(rootBlock, /try_files \$uri \$uri\/ \/index\.html/);
-  assert.ok(!rootBlock.includes('proxy_pass'), 'public root must keep serving the static mockup');
+  assert.match(rootBlock, /proxy_pass http:\/\/127\.0\.0\.1:3000/);
+  assert.match(nginx, /location ~ \^\/\(styles\|js\|images\|fonts\)\//);
+  assert.match(nginx, /root \/var\/www\/unlinked-plus/);
+  assert.match(nginx, /location = \/preview/);
   const landing = [
     path.join(repoRoot, 'index.html'),
     path.join(repoRoot, '..', '..', 'index.html'),
   ].find((p) => fs.existsSync(p));
   if (landing) {
     const html = fs.readFileSync(landing, 'utf8');
-    assert.ok(!html.includes('spillMode'), 'landing must not contain feature code');
-    // The public landing must match the supplied landing mockup exactly.
-    assert.ok(html.includes('Tempatnya'), 'landing headline must match the mockup');
-    assert.ok(html.includes('Spill Without'));
-    assert.ok(html.includes('Judgment'));
-    assert.ok(html.includes('Lebih dari'));
-    assert.ok(html.includes('Mental Reset'));
+    assert.ok(!html.includes('spillMode'), 'static landing must not contain feature code');
+    assert.ok(html.includes('Tempatnya'), 'static landing mockup is retained for rollback');
   }
 });
