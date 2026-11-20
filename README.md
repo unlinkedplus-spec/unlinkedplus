@@ -158,6 +158,18 @@ Mail delivery is configurable through `apps/api/.env`:
 - `MAIL_DRIVER=console` — log the reset link to the API console (local development)
 - `MAIL_DRIVER=webhook` — POST the message to `MAIL_WEBHOOK_URL`
 
+### Admin access and reverse proxy
+
+`prisma/seed.cjs` creates an idempotent admin account on every `docker compose up`. Override it with `ADMIN_USERNAME` / `ADMIN_PASSWORD` in `.env`; the default is `admin` / `UnlinkedAdmin2026!`. **Change the password before exposing the app publicly.** The seed never overwrites an existing admin password.
+
+`docker/host-nginx.conf` is the host-level reverse proxy. It must route the Next.js paths to the frontend container:
+
+- `/_next/` → `127.0.0.1:3000` (otherwise JS/CSS chunks are served as the static landing page's HTML and the UI never hydrates)
+- `/app` and `/admin` (including `/admin/dashboard`) → `127.0.0.1:3000`
+- `/api` → `127.0.0.1:3001` with the `/api` prefix stripped
+
+It also allows `'unsafe-inline'` in `script-src` because Next.js/Turbopack renders inline flight-data bootstrap scripts; without it the browser blocks hydration. All other CSP directives stay restrictive.
+
 ---
 
 ## Browser Compatibility

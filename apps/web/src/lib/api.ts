@@ -23,7 +23,9 @@ import type {
   UserStats,
 } from './types';
 
-const BASE = process.env.NEXT_PUBLIC_API_URL ?? '/api';
+// Dockerfile sets this ARG to "" when no build arg is passed, so use `||`
+// (not `??`) to guarantee the same-origin /api fallback.
+const BASE = process.env.NEXT_PUBLIC_API_URL || '/api';
 
 async function req<T>(
   method: string,
