@@ -1,97 +1,142 @@
+# Compose utama — sumber kebenaran yang sama dengan deployment live.
+#
+# Semua layanan binding ke loopback; host nginx menjadi satu-satunya pintu
+# publik. Total memori default ~1.4 GB, aman untuk laptop dev 2 GB.
+#
+#   cp .env.example .env   # isi kredensial lokal
+#   docker compose up -d --build
+#
+# Untuk VPS, tambahkan overlay monitoring:
+#   docker compose -f docker-compose.yml -f deploy/docker-compose.prod.yml up -d --build
+
+name: unlinked-plus
+
+x-api: &api
+  image: unlinked-plus-api:local
+  build: ./apps/api
+  env_file: .env
+  environment:
+    DATABASE_URL: postgresql://unlinked:${DB_PASSWORD:?Set DB_PASSWORD}@postgres:5432/unlinked
+    REDIS_URL: redis://:${REDIS_PASSWORD:?Set REDIS_PASSWORD}@redis:6379
+    STORAGE_PATH: /data
+    NODE_OPTIONS: --max-old-space-size=256
+  volumes:
+    - app_storage:/data
+  init: true
+  security_opt:
+    - no-new-privileges:true
+
 services:
   postgres:
-    image: postgres:15-alpine
+    image: postgres:17-alpine
     restart: unless-stopped
     environment:
-      POSTGRES_USER: ${POSTGRES_USER:-postgres}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
-      POSTGRES_DB: ${POSTGRES_DB:-creative_partner}
+      POSTGRES_DB: unlinked
+      POSTGRES_USER: unlinked
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?Set DB_PASSWORD}
     volumes:
-      - pgdata:/var/lib/postgresql/data
-    ports:
-      - "5432:5432"
+      - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER}"]
+      test: ["CMD-SHELL", "pg_isready -U unlinked -d unlinked"]
       interval: 10s
       timeout: 5s
-      retries: 5
+      retries: 10
+    mem_limit: 256m
 
   redis:
     image: redis:7-alpine
     restart: unless-stopped
-    ports:
-      - "6379:6379"
+    environment:
+      REDIS_PASSWORD: ${REDIS_PASSWORD:?Set REDIS_PASSWORD}
+    command: ["sh", "-c", "exec redis-server --appendonly yes --requirepass \"$$REDIS_PASSWORD\" --maxmemory 128mb --maxmemory-policy noeviction"]
+    volumes:
+      - redis_data:/data
     healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
+      test: ["CMD-SHELL", "REDISCLI_AUTH=\"$$REDIS_PASSWORD\" redis-cli ping | grep -q PONG"]
       interval: 10s
       timeout: 5s
-      retries: 5
+      retries: 10
+    mem_limit: 192m
+
+  migrate:
+    <<: *api
+    restart: "no"
+    command: ["sh", "-c", "npx prisma migrate deploy && node prisma/seed.cjs"]
+    depends_on:
+      postgres:
+        condition: service_healthy
+    mem_limit: 384m
 
   backend:
-    build:
-      context: .
-      dockerfile: backend/Dockerfile
+    <<: *api
     restart: unless-stopped
-    environment:
-      DATABASE_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@postgres:5432/${POSTGRES_DB:-creative_partner}?schema=public&connection_limit=10&pool_timeout=10
-      REDIS_URL: redis://redis:6379
-      JWT_SECRET: ${JWT_SECRET:-super_secret_key_change_me}
-      PORT: 3000
-      DEFAULT_TEXT_PROVIDER_ID: ${DEFAULT_TEXT_PROVIDER_ID:-}
-      DEFAULT_VIDEO_PROVIDER_ID: ${DEFAULT_VIDEO_PROVIDER_ID:-}
-      VIDEO_STORAGE_DIR: /app/storage
-    volumes:
-      - video-storage:/app/storage
+    ports:
+      - "127.0.0.1:3001:3001"
     depends_on:
-      postgres:
-        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
       redis:
         condition: service_healthy
-    ports:
-      - "3000:3000"
+    healthcheck:
+      # /health is the real endpoint served by HealthController.
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3001/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    mem_limit: 384m
 
   worker:
-    build:
-      context: .
-      dockerfile: backend/Dockerfile
+    <<: *api
     restart: unless-stopped
-    command: ["node", "dist/worker.js"]
-    environment:
-      DATABASE_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@postgres:5432/${POSTGRES_DB:-creative_partner}?schema=public&connection_limit=10&pool_timeout=10
-      REDIS_URL: redis://redis:6379
-      JWT_SECRET: ${JWT_SECRET:-super_secret_key_change_me}
-      VIDEO_STORAGE_DIR: /app/storage
-    volumes:
-      - video-storage:/app/storage
+    command: ["node", "dist/worker/worker.js"]
     depends_on:
-      postgres:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
       backend:
-        condition: service_started
+        condition: service_healthy
+    mem_limit: 256m
 
   frontend:
-    build:
-      context: .
-      dockerfile: frontend/Dockerfile
-      args:
-        VITE_API_BASE_URL: /api/v1
+    image: unlinked-plus-web:local
+    build: ./apps/web
     restart: unless-stopped
+    init: true
     ports:
-      - "5173:80"
+      - "127.0.0.1:3000:3000"
+    environment:
+      NODE_OPTIONS: --max-old-space-size=192
+    depends_on:
+      backend:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3000').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    mem_limit: 256m
+    security_opt:
+      - no-new-privileges:true
 
   nginx:
-    image: nginx:stable-alpine
+    image: nginx:alpine
     restart: unless-stopped
     ports:
-      - "80:80"
+      - "${BIND_ADDRESS:-127.0.0.1}:${HTTP_PORT:-8080}:80"
     volumes:
-      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./docker/nginx:/etc/nginx/conf.d:ro
     depends_on:
-      - backend
-      - frontend
+      frontend:
+        condition: service_healthy
+      backend:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O /dev/null http://127.0.0.1/api/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+    mem_limit: 64m
 
 volumes:
-  pgdata:
-  video-storage:
+  postgres_data:
+  redis_data:
+  app_storage:

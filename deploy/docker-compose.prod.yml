@@ -1,153 +1,70 @@
-# Konfigurasi production (overlay/standalone).
+# Overlay VPS — menambahkan observability ke compose dasar.
 #
-# Pakai dari root repo:
 #   docker compose -f docker-compose.yml -f deploy/docker-compose.prod.yml up -d --build
 #
-# Yang ditambahkan overlay ini:
-# - backend di-scale (stateless) + resource limit + grace period 30s
-# - port DB/Redis tidak diekspos ke host
-# - healthcheck berbasis /readyz untuk backend
-# - Prometheus + Grafana
+# Compose dasar tetap memakai 1 backend + 1 worker dan total <2 GB. Overlay ini
+# hanya menambah Prometheus/Grafana untuk VPS; tidak ada file konfigurasi yang
+# hilang dan healthcheck memakai endpoint /health yang benar-benar tersedia.
 #
-# Catatan: Compose tidak bisa menghapus `ports` dari file dasar. Jalankan
-# overlay ini sebagai file utama (lihat docs/ARCHITECTURE.md) atau hapus
-# mapping 5432/6379 di docker-compose.yml untuk production.
+# Skala horizontal backend/worker sengaja tidak diaktifkan di sini: rute live
+# /api di host nginx mengarah ke 127.0.0.1:3001, jadi backend harus tetap satu
+# instance kecuali host nginx diubah untuk memakai nginx internal (:8080).
 
 services:
-  postgres:
-    restart: always
-    # Compose >= 2.24: hapus mapping port host agar DB tidak terekspos publik.
-    ports: !reset []
-    shm_size: 256mb
-    command:
-      - postgres
-      - -c
-      - max_connections=200
-      - -c
-      - shared_buffers=512MB
-      - -c
-      - effective_cache_size=1536MB
-      - -c
-      - work_mem=8MB
-      - -c
-      - maintenance_work_mem=128MB
-      - -c
-      - random_page_cost=1.1
-      - -c
-      - log_min_duration_statement=500
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 20s
-
-  redis:
-    restart: always
-    ports: !reset []
-    command:
-      - redis-server
-      - --appendonly
-      - "yes"
-      - --maxmemory
-      - 512mb
-      - --maxmemory-policy
-      - allkeys-lru
-      - --save
-      - "900 1"
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 10s
-      timeout: 3s
-      retries: 5
-
   backend:
-    restart: always
-    # Wajib dihapus saat replicas > 1 (bind port host akan bentrok).
-    ports: !reset []
-    # Stateless: tidak ada volume aplikasi; aman di-scale horizontal.
-    deploy:
-      replicas: ${BACKEND_REPLICAS:-3}
-      resources:
-        limits:
-          cpus: "1.0"
-          memory: 768M
-        reservations:
-          cpus: "0.25"
-          memory: 256M
     stop_grace_period: 30s
-    environment:
-      NODE_ENV: production
-      TRUST_PROXY: "1"
-      DATABASE_REPLICA_URL: ${DATABASE_REPLICA_URL:-}
-      RATE_LIMIT_GLOBAL_PER_MIN: ${RATE_LIMIT_GLOBAL_PER_MIN:-600}
-      RATE_LIMIT_AUTH_PER_MIN: ${RATE_LIMIT_AUTH_PER_MIN:-30}
-      ENABLE_FLASHSALE_DEMO: ${ENABLE_FLASHSALE_DEMO:-true}
-      RATE_LIMIT_AFFILIATE_TRACK_PER_MIN: ${RATE_LIMIT_AFFILIATE_TRACK_PER_MIN:-120}
-      RATE_LIMIT_AFFILIATE_CONVERT_PER_MIN: ${RATE_LIMIT_AFFILIATE_CONVERT_PER_MIN:-20}
-      RATE_LIMIT_VIDEO_FILE_PER_MIN: ${RATE_LIMIT_VIDEO_FILE_PER_MIN:-120}
-    healthcheck:
-      test:
-        - CMD
-        - node
-        - -e
-        - "fetch('http://127.0.0.1:3000/readyz').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"
-      interval: 15s
-      timeout: 5s
-      retries: 3
-      start_period: 30s
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
 
   worker:
-    restart: always
-    deploy:
-      replicas: ${WORKER_REPLICAS:-2}
-      resources:
-        limits:
-          cpus: "1.0"
-          memory: 1G
     stop_grace_period: 60s
-    environment:
-      NODE_ENV: production
-      FLASHSALE_WORKER_CONCURRENCY: ${FLASHSALE_WORKER_CONCURRENCY:-10}
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
 
   nginx:
-    restart: always
-    deploy:
-      resources:
-        limits:
-          cpus: "0.5"
-          memory: 256M
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
 
   prometheus:
     image: prom/prometheus:v2.53.0
     restart: unless-stopped
     volumes:
-      - ./deploy/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
-      - ./deploy/prometheus/alerts.yml:/etc/prometheus/alerts.yml:ro
-      - prometheus-data:/prometheus
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ./prometheus/alerts.yml:/etc/prometheus/alerts.yml:ro
+      - prometheus_data:/prometheus
     command:
       - --config.file=/etc/prometheus/prometheus.yml
       - --storage.tsdb.retention.time=15d
-      - --web.enable-lifecycle
     ports:
-      - "9090:9090"
+      - "127.0.0.1:${PROMETHEUS_PORT:-9090}:9090"
     depends_on:
       - backend
+    mem_limit: 384m
 
   grafana:
     image: grafana/grafana:11.1.0
     restart: unless-stopped
     environment:
-      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:-admin}
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:?Set GRAFANA_ADMIN_PASSWORD}
       GF_USERS_ALLOW_SIGN_UP: "false"
     volumes:
-      - grafana-data:/var/lib/grafana
-      - ./deploy/grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./grafana/provisioning:/etc/grafana/provisioning:ro
+      - grafana_data:/var/lib/grafana
     ports:
-      - "3001:3000"
+      - "127.0.0.1:${GRAFANA_PORT:-3002}:3000"
     depends_on:
       - prometheus
+    mem_limit: 256m
 
 volumes:
-  prometheus-data:
-  grafana-data:
+  prometheus_data:
+  grafana_data:

@@ -1,0 +1,10 @@
+groups:
+  - name: unlinked-plus
+    rules:
+      - alert: ApiDown
+        expr: up{job="unlinked-api"} == 0
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Backend unlinked+ tidak dapat di-scrape"
