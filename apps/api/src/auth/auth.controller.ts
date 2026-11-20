@@ -1,6 +1,6 @@
-import { Body, Controller, Get, HttpCode, Post, Res } from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, Post, Req, Res } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { Response } from 'express';
+import { Request, Response } from 'express';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
 import { Public } from '../common/decorators/public.decorator';
 import { AuthService, SESSION_COOKIE, SESSION_SECONDS } from './auth.service';
@@ -16,18 +16,26 @@ export class AuthController {
 
   @Public()
   @Post('register')
-  async register(@Body() dto: RegisterDto, @Res({ passthrough: true }) response: Response) {
+  async register(
+    @Body() dto: RegisterDto,
+    @Req() request: Request,
+    @Res({ passthrough: true }) response: Response,
+  ) {
     const { user, token, recoveryCode } = await this.auth.register(dto);
-    response.cookie(SESSION_COOKIE, token, this.cookieOptions());
+    response.cookie(SESSION_COOKIE, token, this.cookieOptions(request));
     return { user, recoveryCode };
   }
 
   @Public()
   @HttpCode(200)
   @Post('login')
-  async login(@Body() dto: LoginDto, @Res({ passthrough: true }) response: Response) {
+  async login(
+    @Body() dto: LoginDto,
+    @Req() request: Request,
+    @Res({ passthrough: true }) response: Response,
+  ) {
     const { user, token } = await this.auth.login(dto);
-    response.cookie(SESSION_COOKIE, token, this.cookieOptions());
+    response.cookie(SESSION_COOKIE, token, this.cookieOptions(request));
     return { user };
   }
 
@@ -38,10 +46,11 @@ export class AuthController {
   @Post('logout')
   async logout(
     @CurrentUser() user: { userId: string; sessionId: string },
+    @Req() request: Request,
     @Res({ passthrough: true }) response: Response,
   ) {
     await this.auth.logout(user.userId, user.sessionId);
-    response.clearCookie(SESSION_COOKIE, { ...this.cookieOptions(), maxAge: undefined });
+    response.clearCookie(SESSION_COOKIE, { ...this.cookieOptions(request), maxAge: undefined });
     return { success: true };
   }
 
@@ -65,8 +74,15 @@ export class AuthController {
     return this.auth.resetPassword(dto);
   }
 
-  private cookieOptions() {
-    return { httpOnly: true, secure: this.config.get('COOKIE_SECURE') === 'true',
-      sameSite: 'strict' as const, path: '/api', maxAge: SESSION_SECONDS * 1000 };
+  /**
+   * SEC-02 hardening: the cookie is Secure whenever the request arrives over
+   * HTTPS, even if COOKIE_SECURE is still false on a legacy LAN deployment.
+   * On plain HTTP we keep it non-Secure deliberately — a Secure cookie would
+   * never be stored/sent by the browser and login would silently break.
+   */
+  private cookieOptions(request: Request) {
+    const secure = request.protocol === 'https' || this.config.get('COOKIE_SECURE') === 'true';
+    return { httpOnly: true, secure, sameSite: 'strict' as const,
+      path: '/api', maxAge: SESSION_SECONDS * 1000 };
   }
 }

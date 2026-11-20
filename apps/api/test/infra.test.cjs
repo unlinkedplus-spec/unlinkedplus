@@ -14,6 +14,25 @@ const base = fs.readFileSync(path.join(repoRoot, 'docker-compose.yml'), 'utf8');
 const prod = fs.readFileSync(path.join(repoRoot, 'deploy', 'docker-compose.prod.yml'), 'utf8');
 const envExample = fs.readFileSync(path.join(repoRoot, '.env.example'), 'utf8');
 
+test('SEC-01: legacy Express/Prisma code is archived, active stack is unambiguous', () => {
+  assert.ok(fs.existsSync(path.join(repoRoot, 'legacy', 'README.md')));
+  assert.ok(fs.existsSync(path.join(repoRoot, 'legacy', 'backend', 'src', 'index.ts')));
+  assert.ok(fs.existsSync(path.join(repoRoot, 'legacy', 'prisma', 'schema.prisma')));
+  assert.ok(!fs.existsSync(path.join(repoRoot, 'backend')), 'root backend/ must be archived');
+  // In the synced api_build layout, prisma/ is the active apps/api/prisma copy;
+  // in the source repo layout the legacy root prisma/ is gone. Either way the
+  // archived copy and the active schema must both exist.
+  assert.ok(fs.existsSync(path.join(repoRoot, 'legacy', 'prisma', 'schema.prisma')));
+  assert.ok(fs.existsSync(path.join(repoRoot, 'apps', 'api', 'prisma', 'schema.prisma')) ||
+    fs.existsSync(path.join(repoRoot, 'prisma', 'schema.prisma')), 'active prisma schema must exist');
+  assert.ok(fs.existsSync(path.join(repoRoot, 'apps', 'api', 'prisma', 'migrations')) ||
+    fs.existsSync(path.join(repoRoot, 'prisma', 'migrations')), 'active migrations must exist');
+  // Retained static demo assets are intentional and must stay for regression tests.
+  assert.ok(fs.existsSync(path.join(repoRoot, 'index.html')));
+  assert.ok(fs.existsSync(path.join(repoRoot, 'app.html')));
+  assert.ok(fs.existsSync(path.join(repoRoot, 'js', 'app.js')));
+});
+
 test('H6/H7/H10 regression: base compose matches the live low-memory stack', () => {
   for (const missing of ['backend/Dockerfile', 'frontend/Dockerfile', 'nginx.conf']) {
     assert.ok(!base.includes(missing), `base compose must not reference missing ${missing}`);

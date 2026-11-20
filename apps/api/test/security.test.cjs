@@ -137,12 +137,27 @@ test('JWT uses persisted sessions and rejects revoked or disabled identity', asy
 test('auth response exposes no JWT and sets strict HttpOnly cookie', async () => {
   let cookie;
   const controller = new AuthController({ login: async () => ({ user: { username: 'human' }, token: 'test-token' }) }, config);
-  const response = await controller.login({}, { cookie: (...args) => { cookie = args; } });
+  const response = await controller.login({}, { protocol: 'http' }, { cookie: (...args) => { cookie = args; } });
   assert.deepEqual(response, { user: { username: 'human' } });
   assert.equal(cookie[2].httpOnly, true);
   assert.equal(cookie[2].sameSite, 'strict');
   assert.equal(cookie[2].secure, true);
   assert.equal(cookie[2].path, '/api');
+});
+
+test('SEC-02: cookie becomes Secure over HTTPS even when COOKIE_SECURE=false', async () => {
+  let cookie;
+  const insecureConfig = { get: key => key === 'COOKIE_SECURE' ? 'false' : undefined };
+  const controller = new AuthController(
+    { login: async () => ({ user: { username: 'human' }, token: 'test-token' }) },
+    insecureConfig,
+  );
+  await controller.login({}, { protocol: 'https' }, { cookie: (...args) => { cookie = args; } });
+  assert.equal(cookie[2].secure, true, 'HTTPS request must set Secure flag');
+
+  let lanCookie;
+  await controller.login({}, { protocol: 'http' }, { cookie: (...args) => { lanCookie = args; } });
+  assert.equal(lanCookie[2].secure, false, 'plain HTTP LAN stays usable; TLS termination is required for production');
 });
 
 test('rate limit uses Redis counter, returns429 and fails closed on Redis outage', async () => {

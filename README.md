@@ -6,6 +6,31 @@ Unlinked+ is a mobile-first Indonesian social platform where users celebrate car
 
 ---
 
+## Active architecture (audit P1)
+
+> Catatan audit:README lama di bawah ini mendeskripsikan demo statis `file://`. Itu **bukan** arsitektur produksi aktif.
+
+- **API aktif:** `apps/api/` (NestJS), schema `apps/api/prisma/schema.prisma`, migrasi `apps/api/prisma/migrations/`.
+- **Web aktif:** `apps/web/` (Next.js), melayani `/` (Chibi publik / Same Boat setelah login), `/features/*`, `/app`, `/admin`.
+- **Infra:** `docker-compose.yml`, `docker/host-nginx.conf`.
+- **`legacy/`**: arsip kode Express lama yang tidak aktif (lihat `legacy/README.md`).
+- **`app.html` + `js/`**: demo statis yang tetap dipertahankan untuk regression test label jujur; bukan halaman utama.
+
+### TLS / cookie aman untuk produksi (SEC-02)
+
+Lingkungan LAN saat ini memakai HTTP polos (`COOKIE_SECURE=false`). Untuk produksi:
+
+1. Terminasi TLS di reverse proxy (Nginx/load balancer) dengan sertifikat valid.
+2. Set `FRONTEND_URL=https://<domain>` dan `COOKIE_SECURE=true` di `.env`.
+3. Redirect HTTP → HTTPS di Nginx; HSTS sudah aktif di `docker/host-nginx.conf`.
+4. Pastikan origin yang diizinkan (`FRONTEND_URL`) sama persis dengan origin browser.
+5. Cookie `unlinked_session` akan otomatis ber-flag `Secure` saat request melalui HTTPS
+   (lihat `auth.controller.ts` — `secure` mengikuti protokol request atau `COOKIE_SECURE`).
+
+Jangan mengaktifkan `COOKIE_SECURE=true` pada HTTP polos: cookie tidak akan dikirim browser dan login gagal.
+
+---
+
 ## How to Run
 
 No build step, no server required. The app runs entirely in the browser over `file://`.
