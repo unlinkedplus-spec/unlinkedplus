@@ -1,6 +1,7 @@
 'use strict';
 
 const bcrypt = require('bcryptjs');
+const { randomBytes } = require('crypto');
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 
@@ -12,20 +13,35 @@ const catalog = [
   { id: '47d05c48-ae4c-4ef2-8e30-000000000005', slug: 'kacamata', name: 'Kacamata', itemType: 'accessory', price: 10000, isPremium: true },
 ];
 
-async function seedAdmin() {
-  const username = process.env.ADMIN_USERNAME || 'admin';
-  const existing = await prisma.user.findUnique({ where: { username } });
+async function seedAdmin(client = prisma, env = process.env, log = console.log) {
+  const username = String(env.ADMIN_USERNAME || 'admin').trim().toLowerCase();
+  const existing = await client.user.findUnique({ where: { username } });
   if (existing) {
-    // Keep the existing password; only make sure the account can administer.
-    await prisma.user.update({
+    // Never grant admin rights to an account that was registered by a user.
+    // Only an account already carrying the admin role is considered legitimate.
+    if (existing.role !== 'admin') {
+      throw new Error(
+        `Refusing to promote existing account "${username}" to admin. ` +
+        `Choose a different ADMIN_USERNAME or promote it manually after identity verification.`,
+      );
+    }
+    // Keep the existing password — seeding must never reset a real admin password.
+    await client.user.update({
       where: { id: existing.id },
-      data: { role: 'admin', status: 'active' },
+      data: { status: 'active' },
     });
-    console.log(`Admin account "${username}" already exists — role ensured.`);
+    log(`Admin account "${username}" already exists — status ensured.`);
     return;
   }
-  const password = process.env.ADMIN_PASSWORD || 'UnlinkedAdmin2026!';
-  await prisma.user.create({
+
+  // There is deliberately no guessable fallback password. If the operator did
+  // not provide one, generate a high-entropy password and print it exactly once.
+  const generated = !env.ADMIN_PASSWORD;
+  const password = generated ? randomBytes(24).toString('hex') : String(env.ADMIN_PASSWORD);
+  if (password.length < 12 || /changeme|example|replace/i.test(password)) {
+    throw new Error('ADMIN_PASSWORD must be at least 12 characters and must not be a placeholder.');
+  }
+  await client.user.create({
     data: {
       username,
       passwordHash: bcrypt.hashSync(password, 12),
@@ -34,7 +50,12 @@ async function seedAdmin() {
       profile: { create: { avatarConfig: { character: 'panda', accessories: [] } } },
     },
   });
-  console.log(`Admin account "${username}" created. Change ADMIN_PASSWORD in .env for real deployments.`);
+  if (generated) {
+    log(`Admin account "${username}" created with a generated password: ${password}`);
+    log('Save this password now — it is not printed again. Set ADMIN_PASSWORD in .env to control it explicitly.');
+  } else {
+    log(`Admin account "${username}" created from ADMIN_PASSWORD.`);
+  }
 }
 
 async function main() {
@@ -75,9 +96,13 @@ async function main() {
   }
 }
 
-main()
-  .catch((error) => {
-    console.error('Seed failed:', error);
-    process.exitCode = 1;
-  })
-  .finally(() => prisma.$disconnect());
+module.exports = { seedAdmin, catalog };
+
+if (require.main === module) {
+  main()
+    .catch((error) => {
+      console.error('Seed failed:', error);
+      process.exitCode = 1;
+    })
+    .finally(() => prisma.$disconnect());
+}

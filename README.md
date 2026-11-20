@@ -160,7 +160,7 @@ Mail delivery is configurable through `apps/api/.env`:
 
 ### Admin access and reverse proxy
 
-`prisma/seed.cjs` creates an idempotent admin account on every `docker compose up`. Override it with `ADMIN_USERNAME` / `ADMIN_PASSWORD` in `.env`; the default is `admin` / `UnlinkedAdmin2026!`. **Change the password before exposing the app publicly.** The seed never overwrites an existing admin password.
+`prisma/seed.cjs` creates an idempotent admin account on every `docker compose up`. Set `ADMIN_USERNAME` / `ADMIN_PASSWORD` in `.env` before first boot. There is **no** default password: when `ADMIN_PASSWORD` is unset the seed generates a high-entropy password and prints it once to the console. The seed refuses to promote a pre-existing non-admin account (prevents privilege escalation) and never overwrites an existing password. Placeholder or short (<12 char) passwords are rejected.
 
 `docker/host-nginx.conf` is the host-level reverse proxy. It must route the Next.js paths to the frontend container:
 

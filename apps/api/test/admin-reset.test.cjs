@@ -18,27 +18,36 @@ function authContext({ user = { id: 'user-1', status: 'active' }, mails = [] } =
   const created = [];
   const updated = [];
   const revoked = [];
+  const claimed = [];
+  const used = [];
+  let claimCounts = [1, 1]; // conditional claim, then revoke-all
   const prisma = {
     user: {
       findUnique: async () => user,
       update: async (args) => { updated.push(args); return args; },
     },
     passwordResetToken: {
-      updateMany: async () => ({ count: 1 }),
+      updateMany: async (args) => {
+        claimed.push(args);
+        return { count: claimCounts.length ? claimCounts.shift() : 1 };
+      },
       create: async (args) => { created.push(args.data); return args.data; },
       findUnique: async () => ctx.record,
       update: async (args) => { used.push(args); return args; },
     },
-    $transaction: async (ops) => Promise.all(ops),
+    // Support both array-style (other services) and callback-style (atomic reset) transactions.
+    $transaction: async (fn) => typeof fn === 'function' ? fn(prisma) : Promise.all(fn),
   };
-  const used = [];
   const redis = { client: { smembers: async () => revoked, multi: () => ({
     del: () => ({ exec: async () => [] }),
   }) } };
   const config = { get: (key) => key === 'FRONTEND_URL' ? 'http://localhost:3000' : undefined };
   const mail = { sendPasswordReset: async (input) => { mails.push(input); } };
   const jwt = { signAsync: async () => 'token' };
-  const ctx = { prisma, redis, config, mail, mails, jwt, created, updated, used, revoked, record: null };
+  const ctx = {
+    prisma, redis, config, mail, mails, jwt, created, updated, used, revoked, claimed, record: null,
+    setClaimCounts: (counts) => { claimCounts = counts; },
+  };
   const service = new AuthService(prisma, jwt, redis, config, mail);
   return { service, ctx };
 }
@@ -81,10 +90,46 @@ test('reset password rejects invalid tokens and revokes sessions after a valid r
     user: { id: 'user-1', status: 'active' },
   };
   assert.deepEqual(await service.resetPassword({ token, password: 'a-new-password' }), { success: true });
-  assert.equal(ctx.used.length, 1);
+  // C3: the token is claimed with a conditional updateMany inside the transaction,
+  // and every other active token for the user is revoked in the same transaction.
+  assert.equal(ctx.claimed.length, 2);
+  assert.equal(ctx.claimed[0].where.id, 'reset-1');
+  assert.equal(ctx.claimed[0].where.usedAt, null);
+  assert.ok(ctx.claimed[0].where.expiresAt.gt instanceof Date);
+  assert.deepEqual(ctx.claimed[1].where, { userId: 'user-1', usedAt: null });
   assert.equal(ctx.updated.length, 1);
   assert.ok(await bcrypt.compare('a-new-password', ctx.updated[0].data.passwordHash));
   assert.equal(ctx.record.kind, 'email');
+});
+
+test('C3 regression: a concurrent second use of the same token is rejected', async () => {
+  const { service, ctx } = authContext();
+  const token = 'c'.repeat(64);
+  ctx.record = {
+    id: 'reset-race', userId: 'user-1', tokenHash: hashToken(token), kind: 'email',
+    expiresAt: new Date(Date.now() + 60000), usedAt: null,
+    user: { id: 'user-1', status: 'active' },
+  };
+  // Simulate another request having already flipped usedAt in the same instant.
+  ctx.setClaimCounts([0]);
+  await assert.rejects(service.resetPassword({ token, password: 'a-new-password' }), status(400));
+  assert.equal(ctx.updated.length, 0, 'password must not change when the claim is lost');
+  assert.equal(ctx.claimed.length, 1, 'revoke-all must not run when the claim is lost');
+});
+
+test('C3 regression: resetting via email token revokes the long-lived recovery code', async () => {
+  const { service, ctx } = authContext();
+  const token = 'd'.repeat(64);
+  ctx.record = {
+    id: 'reset-email', userId: 'user-1', tokenHash: hashToken(token), kind: 'email',
+    expiresAt: new Date(Date.now() + 60000), usedAt: null,
+    user: { id: 'user-1', status: 'active' },
+  };
+  await service.resetPassword({ token, password: 'a-new-password' });
+  // The second updateMany covers ALL of the user's remaining tokens, regardless
+  // of kind — a 10-year recovery code included — so it cannot be reused later.
+  assert.deepEqual(ctx.claimed[1].where, { userId: 'user-1', usedAt: null });
+  assert.equal(ctx.claimed[1].data.usedAt instanceof Date, true);
 });
 
 test('admin overview aggregates stats and refuses to disable the acting admin', async () => {

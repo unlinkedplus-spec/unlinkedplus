@@ -159,13 +159,26 @@ export class AuthService {
     }
 
     const passwordHash = await bcrypt.hash(dto.password, 12);
-    await this.prisma.$transaction([
-      this.prisma.passwordResetToken.update({
-        where: { id: record.id },
-        data: { usedAt: new Date() },
-      }),
-      this.prisma.user.update({ where: { id: record.userId }, data: { passwordHash } }),
-    ]);
+    const now = new Date();
+    // Atomically claim the token. The conditional updateMany is the lock: only
+    // one concurrent request can flip usedAt from null to a timestamp, so a
+    // second request sees count === 0 and is rejected instead of writing a
+    // second password. Every other active credential for this user (including
+    // the long-lived recovery code) is revoked in the same transaction.
+    await this.prisma.$transaction(async (tx) => {
+      const claimed = await tx.passwordResetToken.updateMany({
+        where: { id: record.id, usedAt: null, expiresAt: { gt: now } },
+        data: { usedAt: now },
+      });
+      if (claimed.count !== 1) {
+        throw new BadRequestException('Kode/tautan reset tidak valid atau kedaluwarsa');
+      }
+      await tx.passwordResetToken.updateMany({
+        where: { userId: record.userId, usedAt: null },
+        data: { usedAt: now },
+      });
+      await tx.user.update({ where: { id: record.userId }, data: { passwordHash } });
+    });
     await this.revokeSessions(record.userId);
     return { success: true };
   }
