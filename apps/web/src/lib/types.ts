@@ -42,6 +42,8 @@ export interface Post {
   isAnonymous?: boolean;
   user: PostAuthor | null;
   reactionCounts: ReactionCounts;
+  /** Spill Without Judgment: how the author wants readers to respond. */
+  spillMode?: SpillMode;
   _count?: { reactions: number; comments: number };
 }
 
@@ -235,6 +237,16 @@ export const POST_CATEGORIES = [
   'Bisnis Boncos',
   'Salah Jurusan',
 ] as const;
+
+// Spill Without Judgment — the author, not the audience, decides the tone.
+export const SPILL_MODES = ['listen', 'advice', 'laugh', 'share'] as const;
+export type SpillMode = typeof SPILL_MODES[number];
+export const SPILL_MODE_META: Record<SpillMode, { label: string; hint: string }> = {
+  listen: { label: 'Cuma mau didengar', hint: 'Balas dengan dukungan, bukan nasihat.' },
+  advice: { label: 'Butuh solusi', hint: 'Boleh beri saran kalau kamu mau.' },
+  laugh:  { label: 'Butuh teman tertawa', hint: 'Boleh canda, jangan menghakimi.' },
+  share:  { label: 'Berbagi pengalaman', hint: 'Cerita serupa dipersilakan.' },
+};
 
 export const ANTI_FLEX_PHRASES = [
   'alhamdulillah diterima', 'gaji dua digit', 'promosi jabatan',

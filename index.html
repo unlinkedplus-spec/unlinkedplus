@@ -3,418 +3,148 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>unlinked+ — No Flex. Just Human.</title>
-  <meta name="description" content="unlinked+ — platform media sosial yang memutus budaya pencitraan." />
-
-  <!-- Google Fonts -->
+  <title>unlinked+ — Tempatnya Orang-Orang Jujur soal Hidup</title>
+  <meta name="description" content="Spill cerita, temukan teman senasib, dan tumbuh bersama di unlinked+. Less Flex, More Human." />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet" />
-
-  <!-- Stylesheets -->
-  <link rel="stylesheet" href="styles/main.css" />
-  <link rel="stylesheet" href="styles/landing.css" />
-  <link rel="stylesheet" href="styles/features.css" />
-  <link rel="stylesheet" href="styles/app-mobile.css" />
-
-  <!-- JavaScript -->
-  <script src="js/storage.js"></script>
-  <script src="js/app.js"></script>
+  <link rel="stylesheet" href="styles/public-landing.css" />
 </head>
 <body>
+  <div class="page">
 
-  <!-- ======================================================
-       Dashboard Layout
-       ====================================================== -->
-  <div class="app-shell">
-    
     <!-- Topbar -->
     <header class="topbar">
-      <button class="mobile-menu-toggle" id="mobile-menu-toggle" aria-label="Buka menu" aria-expanded="false">
-        <span></span><span></span><span></span>
-      </button>
-      <a class="brand-lockup" href="#home" aria-label="unlinked+ Beranda">
-        <img class="brand-mascot-img" src="images/mascot-avatar.png" alt=""/>
+      <a class="brand" href="/" aria-label="unlinked+ beranda">
+        <img class="brand-avatar" src="images/mascot-avatar.png" alt="" />
         <span class="brand-word">unlinked<span>+</span></span>
       </a>
-      <div class="brand-divider"></div>
+      <span class="top-divider"></span>
       <span class="top-tagline">Less Flex, More Human.</span>
-      <label class="global-search">
-        <span>⌕</span>
-        <input placeholder="Cari cerita, topik, atau teman seperjuangan..."/>
+      <label class="search">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M16.5 16.5 21 21"/></svg>
+        <input placeholder="Cari cerita, topik, atau teman seperjuangan..." aria-label="Cari" />
       </label>
-      <div class="top-actions">
-        <button class="icon-button notification-button" aria-label="Notifikasi">♧<i>3</i></button>
-        <button class="icon-button" aria-label="Toko">♙</button>
-        <button class="join-button">Gabung Sekarang <span>→</span></button>
-        <button class="mobile-cart" id="mobile-cart" aria-label="Toko">
-          <span>🛍</span><i id="mobile-cart-count">0</i>
-        </button>
-        <button class="profile-bubble" aria-label="Profil">
-          <img src="images/mascot-avatar.png" alt="Profil"/>
-        </button>
-      </div>
+      <nav class="top-actions">
+        <a class="login" href="/app">Masuk</a>
+        <a class="btn btn-yellow" href="/app">Gabung Sekarang <span>→</span></a>
+      </nav>
     </header>
 
-    <div class="desktop-layout">
-      <!-- Left Sidebar -->
-      <aside class="left-sidebar" id="sidebar">
-        <div class="drawer-head">
-          <span class="brand-word">unlinked<span>+</span></span>
-          <button class="drawer-close" id="drawer-close" aria-label="Tutup menu">✕</button>
+    <!-- Hero -->
+    <section class="hero">
+      <div class="hero-clouds" aria-hidden="true">
+        <span class="cloud c1"></span><span class="cloud c2"></span>
+        <span class="cloud c3"></span><span class="cloud c4"></span>
+      </div>
+      <div class="hero-copy">
+        <p class="eyebrow"><i></i> Memutus yang Toksik, Menambah yang Esensial <i></i></p>
+        <h1>Tempatnya<br/>Orang-Orang Jujur<br/>soal <span>Hidup.</span></h1>
+        <p class="hero-sub">Spill cerita, temukan teman senasib,<br/>dan tumbuh bersama di <b>unlinked+</b>.</p>
+        <div class="hero-cta">
+          <a class="btn btn-yellow" href="/app">Gabung Sekarang <span>→</span></a>
+          <a class="btn btn-outline" href="/app?tab=spill"><span class="play">▶</span> Lihat Preview</a>
         </div>
-        <div class="nav-group">
-          <button class="nav-item active">
-            <span class="nav-icon">⌂</span>Beranda<i></i>
-          </button>
-          <button class="nav-item">
-            <span class="nav-icon">ϟ</span>Discover
-          </button>
-          <button class="nav-item">
-            <span class="nav-icon">＋</span>Spill
-          </button>
-          <button class="nav-item">
-            <span class="nav-icon">♧</span>Komunitas
-          </button>
-          <button class="nav-item">
-            <span class="nav-icon">♙</span>Profil
-          </button>
+      </div>
+      <div class="hero-art">
+        <svg class="hero-spiral" viewBox="0 0 80 80" aria-hidden="true">
+          <path d="M42 40 C42 30 54 28 57 36 C60 44 50 51 45 45 C41 40 47 34 52 38" />
+        </svg>
+        <img class="hero-character" src="images/post-illustration.png"
+             alt="Maskot unlinked+: pekerja lelah di depan laptop dengan spiral stres" />
+        <div class="city" aria-hidden="true">
+          <span></span><span></span><span></span><span></span><span></span><span></span><span></span>
         </div>
-        <div class="nav-separator"></div>
-        <div class="nav-caption">✦ FITUR SERU</div>
-        <div class="nav-group compact">
-          <button class="nav-item">
-            <span class="nav-icon">📊</span>Poll
-          </button>
-          <button class="nav-item">
-            <span class="nav-icon">🎭</span>Personality Test
-          </button>
-          <button class="nav-item">
-            <span class="nav-icon">😆</span>Meme Studio
-          </button>
-          <button class="nav-item">
-            <span class="nav-icon">🛍️</span>Store
-          </button>
-          <button class="nav-item">
-            <span class="nav-icon">🎯</span>Opportunity Board
-          </button>
-          <button class="nav-item">
-            <span class="nav-icon">🌱</span>Mental Reset
-          </button>
-          <button class="nav-item">
-            <span class="nav-icon">👑</span>unlinked+ Plus
-          </button>
-          <button class="nav-item">
-            <span class="nav-icon">📈</span>Dashboard Iklan
-          </button>
+        <p class="hero-quote">Hidup bukan<br/>soal terlihat sukses,<br/>tapi tetap waras.</p>
+      </div>
+    </section>
+
+    <!-- Why unlinked+ -->
+    <section class="why" aria-label="Kenapa unlinked+">
+      <div class="why-title">Kenapa<br/><b>unlinked+?</b></div>
+      <div class="why-item">
+        <svg viewBox="0 0 32 32" aria-hidden="true" class="ic"><path d="M5 7h22v15H15l-7 5v-5H5z"/><circle cx="12" cy="15" r="1"/><circle cx="16" cy="15" r="1"/><circle cx="20" cy="15" r="1"/></svg>
+        <div><b>Spill Without<br/>Judgment</b><span>Bercerita tanpa<br/>takut dihakimi</span></div>
+      </div>
+      <div class="why-item">
+        <svg viewBox="0 0 32 32" aria-hidden="true" class="ic"><circle cx="11" cy="11" r="4"/><circle cx="22" cy="12" r="3"/><path d="M4 26c0-5 3-8 7-8s7 3 7 8M20 20c4 0 7 2 8 6"/></svg>
+        <div><b>Same Boat</b><span>Temukan yang<br/>senasib</span></div>
+      </div>
+      <div class="why-item">
+        <svg viewBox="0 0 32 32" aria-hidden="true" class="ic"><path d="M9 4h14v6c0 5-3 8-7 10-4-2-7-5-7-10z"/><path d="M16 20v5M11 27h10M9 7H6v3c0 3 2 5 4 5M23 7h3v3c0 3-2 5-4 5"/></svg>
+        <div><b>Mental Armor</b><span>Apresiasi proses,<br/>bukan hasil</span></div>
+      </div>
+      <div class="why-item">
+        <svg viewBox="0 0 32 32" aria-hidden="true" class="ic"><path d="M13 4h6l-1 6 7 7-3 3-6-4-6 4-3-3 7-7z"/><path d="M13 10 9 6M19 10l4-4M16 16v7"/></svg>
+        <div><b>Comeback Journey</b><span>Bangkit pelan-pelan,<br/>bareng komunitas</span></div>
+      </div>
+      <div class="why-item">
+        <svg viewBox="0 0 32 32" aria-hidden="true" class="ic"><rect x="4" y="12" width="24" height="15" rx="2"/><path d="M4 17h24M16 12v15M10 12c0-5 12-5 12 0"/></svg>
+        <div><b>Avatar &amp; Store</b><span>Ekspresikan diri<br/>dengan gaya!</span></div>
+      </div>
+      <div class="why-spark" aria-hidden="true">✦</div>
+    </section>
+
+    <!-- More than social media -->
+    <section class="more" id="fitur">
+      <div class="more-intro">
+        <h2>Lebih dari<br/>Sekadar Sosial Media</h2>
+        <p>unlinked+ adalah ruang aman untuk berbagi, terhubung, dan bertumbuh.</p>
+        <a class="btn btn-yellow" href="/app">Jelajahi Fitur <span>→</span></a>
+        <div class="more-art" aria-hidden="true">
+          <img src="images/plus-mascot.png" alt="" class="m1" />
+          <img src="images/unlinked-mascot-hero.png" alt="" class="m2" />
+          <img src="images/mascot-avatar.png" alt="" class="m3" />
+          <img src="images/sidebar-mascot.png" alt="" class="m4" />
         </div>
-        <div class="nav-separator"></div>
-        <div class="nav-caption">✦ TENTANG UNLINKED+</div>
-        <div class="nav-group compact muted-nav">
-          <button class="nav-item">
-            <span class="nav-icon">ⓘ</span>Bantuan
-          </button>
-          <button class="nav-item">
-            <span class="nav-icon">♧</span>Kebijakan Privasi
-          </button>
-          <button class="nav-item">
-            <span class="nav-icon">♢</span>Syarat & Ketentuan
-          </button>
-          <button class="nav-item">
-            <span class="nav-icon">✉</span>Kontak Kami
-          </button>
+      </div>
+      <div class="feature-grid">
+        <a class="feature-card" href="/app">
+          <svg viewBox="0 0 28 28" class="ic" aria-hidden="true"><path d="M4 12 14 4l10 8v11H4z"/><path d="M10 23v-7h8v7"/></svg>
+          <div><b>Unlinked Rooms</b><span>Komunitas dengan topik spesifik</span></div>
+        </a>
+        <a class="feature-card" href="/app">
+          <svg viewBox="0 0 28 28" class="ic" aria-hidden="true"><circle cx="10" cy="10" r="4"/><circle cx="20" cy="11" r="3"/><path d="M3 24c0-5 3-8 7-8s7 3 7 8M19 17c4 0 6 2 6 6"/></svg>
+          <div><b>Support Circles</b><span>Kelompok dukungan kecil</span></div>
+        </a>
+        <a class="feature-card" href="/app">
+          <svg viewBox="0 0 28 28" class="ic" aria-hidden="true"><rect x="3" y="7" width="22" height="15" rx="2"/><path d="m3 9 11 8 11-8"/></svg>
+          <div><b>Dear Future Me</b><span>Surat untuk diri di masa depan</span></div>
+        </a>
+        <a class="feature-card" href="/app">
+          <svg viewBox="0 0 28 28" class="ic" aria-hidden="true"><rect x="4" y="5" width="20" height="20" rx="3"/><path d="M4 11h20M9 3v4M19 3v4M9 16h3M9 20h6"/></svg>
+          <div><b>Tiny Wins</b><span>Tantangan kecil setiap hari</span></div>
+        </a>
+        <a class="feature-card" href="/app">
+          <svg viewBox="0 0 28 28" class="ic" aria-hidden="true"><path d="M9 4h10v6c0 5-2 8-5 10-3-2-5-5-5-10z"/><path d="M14 20v4M9 25h10"/></svg>
+          <div><b>Hall of Almost</b><span>Galeri penghargaan untuk usaha</span></div>
+        </a>
+        <a class="feature-card" href="/app">
+          <svg viewBox="0 0 28 28" class="ic" aria-hidden="true"><path d="M14 24S4 18 4 11a5 5 0 0 1 10-2 5 5 0 0 1 10 2c0 7-10 13-10 13z"/></svg>
+          <div><b>Mental Reset</b><span>Reset pikiran, isi energi lagi</span></div>
+        </a>
+      </div>
+    </section>
+
+    <!-- Bottom CTA -->
+    <section class="join">
+      <div class="join-copy">
+        <img src="images/unlinked-mascot-hero.png" alt="" class="join-mascot" />
+        <div>
+          <h2>Bergabunglah dengan<br/>komunitas yang positif!</h2>
+          <p>Karena kamu tidak sendirian.</p>
+          <a class="btn btn-navy" href="/app">Gabung Sekarang <span>→</span></a>
         </div>
-        <div class="sidebar-promo">
-          <img src="images/sidebar-mascot.png" alt="Maskot unlinked+"/>
-          <div class="sidebar-promo-copy">
-            <b>Tetap waras di tengah dunia kerja yang toxic!</b>
-            <button>Ikuti Kami</button>
-          </div>
-          <div class="social-links">
-            <span>◉</span>
-            <span>𝕏</span>
-            <span>◎</span>
-            <span>▶</span>
-            <span>♪</span>
-          </div>
-        </div>
-      </aside>
+      </div>
+      <div class="stats">
+        <div><b>120K+</b><span>Pengguna Aktif</span></div>
+        <div><b>2.5M+</b><span>Spill Dibagikan</span></div>
+        <div><b>87%</b><span>Happy User</span></div>
+      </div>
+      <p class="join-tagline">Less Flex,<br/>More Human.</p>
+    </section>
 
-      <!-- Main Content -->
-      <section class="main-column" id="home">
-        <!-- Beranda (konten marketing) — disembunyikan saat fitur dibuka -->
-        <div id="view-home">
-        <!-- Hero Banner -->
-        <section class="hero-banner">
-          <div class="hero-copy">
-            <div class="hero-eyebrow"><i></i> KARIER BOLEH BERANTAKAN. KAMU TETAP BERHARGA.</div>
-            <h1>LinkedIn untuk<br/>orang yang<br/><span>lagi gagal.</span></h1>
-            <p>Capek lihat orang pamer pencapaian di sebelah?<br/>Di sini, nggak apa-apa kalau ceritamu belum berakhir indah.</p>
-            <div class="hero-cta">
-              <button>Gabung, jadi diri sendiri <b>→</b></button>
-              <a href="#feed">Baca cerita dulu</a>
-            </div>
-            <small>♧ Pakai nama samaran. Bukan nama jabatan.</small>
-          </div>
-          <div class="hero-art">
-            <img class="hero-character" src="images/hero-character-reference.png" alt="Budak korporat membawa kopi dan kardus"/>
-            <div class="hero-note">
-              <b>Hari berat?</b>
-              <span>Tarik dulu di sini.</span>
-            </div>
-            <div class="hero-sticker">
-              <span class="heart">♡</span>
-              <span>Gapapa kok,<br/>untuk cuma cerita.</span>
-            </div>
-          </div>
-        </section>
-
-        <!-- Topic Strip -->
-        <div class="topic-strip">
-          <b>🔥 Topik Populer:</b>
-          <button class="topic-tag">#Burnout</button>
-          <button class="topic-tag">#Resign</button>
-          <button class="topic-tag">#KerjaLagi</button>
-          <button class="topic-tag">#Healing</button>
-          <button class="topic-tag">#LifeBalance</button>
-          <button class="topic-tag">#CareerSwitch</button>
-          <button class="all-topics">Lihat semua →</button>
-        </div>
-
-        <!-- Content Grid -->
-        <div class="content-grid" id="feed">
-          <!-- Personal Rail -->
-          <aside class="personal-rail">
-            <div class="personal-menu">
-              <div class="personal-heading">✦ Ruang Kamu</div>
-              <button class="personal-nav-item active">
-                <span>⌂</span>Beranda<i></i>
-              </button>
-              <button class="personal-nav-item">
-                <span>✎</span>Spill
-              </button>
-              <button class="personal-nav-item">
-                <span>☻</span>Avatar
-              </button>
-              <button class="personal-nav-item">
-                <span>♙</span>Toko
-              </button>
-              <button class="personal-nav-item">
-                <span>♧</span>Profil
-              </button>
-            </div>
-            <div class="personal-note">
-              <b>Pelan-pelan<br/>juga sampai.</b>
-              <p>Tidak semua hal harus jadi pencapaian hari ini.</p>
-              <span>〰</span>
-            </div>
-          </aside>
-
-          <!-- Feed Column -->
-          <div class="feed-column">
-            <div class="feed-title">
-              <div>
-                <div class="eyebrow">RUANG CERITA KITA</div>
-                <h2>Hari ini, apa adanya.</h2>
-              </div>
-              <button class="refresh">Muat ulang ↻</button>
-            </div>
-
-            <!-- Composer -->
-            <form class="composer">
-              <img class="composer-avatar-img" src="images/feed-avatar.png" alt="Avatar kamu"/>
-              <div class="composer-main">
-                <textarea placeholder="Ada yang mau kamu ceritakan?\nTaruh bebanmu sebentar di sini..."></textarea>
-                <div class="composer-tools">
-                  <div class="composer-attachments">
-                    <button type="button">▧ <span>Foto</span></button>
-                    <button type="button">▣ <span>Video</span></button>
-                    <button type="button">▥ <span>Poll</span></button>
-                    <button type="button">☻ <span>Ekspresi</span></button>
-                  </div>
-                  <select class="category-select">
-                    <option>Ditolak HRD</option>
-                    <option>Salah Kirim Chat</option>
-                    <option>Dimarahi Bos</option>
-                    <option>Bisnis Boncos</option>
-                    <option>Salah Jurusan</option>
-                    <option>Lainnya</option>
-                  </select>
-                  <span class="char-count">0/1200</span>
-                  <button class="spill-button">Spill It! ＋</button>
-                </div>
-              </div>
-            </form>
-
-            <div class="feed-heading">
-              <b>Cerita terbaru</b>
-              <span>Tanpa perlombaan pencapaian.</span>
-            </div>
-
-            <!-- Post Card -->
-            <article class="post-card">
-              <div class="post-top">
-                <div class="post-avatar">
-                  <img src="images/mascot-avatar.png" alt=""/>
-                </div>
-                <div class="post-author">
-                  <b>BudakKantor <span class="crown">♛</span></b>
-                  <small>Lv. 2 · 2 jam lalu</small>
-                </div>
-                <button class="more-button" aria-label="Opsi postingan">•••</button>
-              </div>
-              <p class="post-text">Hari ini ditolak HRD lagi... padahal udah kirim CV ke 17 perusahaan</p>
-              <img class="post-illustration" src="images/post-illustration.png" alt="Ilustrasi pekerja kantoran"/>
-              <div class="reaction-list">
-                <button>
-                  <span>👋</span>
-                  <span>Puk-Puk</span> <b>(342)</b>
-                </button>
-                <button>
-                  <span>😂</span>
-                  <span>Ngakak</span> <b>(271)</b>
-                </button>
-                <button>
-                  <span>🙂</span>
-                  <span>Sama Banget</span> <b>(375)</b>
-                </button>
-              </div>
-              <div class="post-actions">
-                <button>♧ <span>128</span></button>
-                <button>⇄ <span>45</span></button>
-                <button>♧ <span>Simpan</span></button>
-                <button>↗ <span>Bagikan</span></button>
-              </div>
-            </article>
-
-            <!-- Sponsored Card -->
-            <div class="sponsored-card">
-              <div class="sponsored-label">SPONSORED</div>
-              <img class="sponsor-art" src="images/sponsor-illustration.png" alt="Ilustrasi kursus online"/>
-              <div class="sponsor-copy">
-                <b>Upgrade skill, jangan cuma upgrade emosi!</b>
-                <p>Kursus online praktis untuk karier lebih baik.</p>
-                <button>Pelajari Sekarang&nbsp; →</button>
-              </div>
-              <span class="ad-pill">Iklan</span>
-            </div>
-          </div>
-
-          <!-- Right Rail -->
-          <aside class="right-rail">
-            <div class="trend-card">
-              <div class="rail-heading">
-                <b>🔥 Tren Hari Ini</b>
-                <button>Lihat semua →</button>
-              </div>
-              <button class="trend-row">
-                <i>1</i>
-                <span>
-                  <b>#BurnoutDiKantor</b>
-                  <small>124.5K Spill</small>
-                </span>
-                <strong>↑ 12%</strong>
-              </button>
-              <button class="trend-row">
-                <i>2</i>
-                <span>
-                  <b>#ResignAtauTahan</b>
-                  <small>98.3K Spill</small>
-                </span>
-                <strong>↑ 8%</strong>
-              </button>
-              <button class="trend-row">
-                <i>3</i>
-                <span>
-                  <b>#LifeBalance</b>
-                  <small>76.1K Spill</small>
-                </span>
-                <strong>↑ 5%</strong>
-              </button>
-              <button class="trend-row">
-                <i>4</i>
-                <span>
-                  <b>#CareerSwitch</b>
-                  <small>54.7K Spill</small>
-                </span>
-                <strong>↑ 3%</strong>
-              </button>
-              <button class="trend-row">
-                <i>5</i>
-                <span>
-                  <b>#MentalHealth</b>
-                  <small>42.9K Spill</small>
-                </span>
-                <strong>↑ 1%</strong>
-              </button>
-            </div>
-
-            <div class="plus-card">
-              <div>
-                <b>unlinked+ <span>Plus</span></b>
-                <p>Bebas iklan, lebih banyak keseruan!</p>
-                <button>Langganan Sekarang →</button>
-              </div>
-              <img src="images/plus-mascot.png" alt="Maskot unlinked+ Plus"/>
-            </div>
-
-            <div class="stats-card">
-              <b>▥ Statistik Komunitas</b>
-              <div class="stats-row">
-                <div>
-                  <strong>2.5M</strong>
-                  <small>Pengguna</small>
-                </div>
-                <div>
-                  <strong>120K</strong>
-                  <small>Spill/Hari</small>
-                </div>
-                <div>
-                  <strong>87%</strong>
-                  <small>Happy User</small>
-                </div>
-              </div>
-              <small class="stats-note">Ilustrasi tampilan statistik komunitas.</small>
-            </div>
-          </aside>
-        </div>
-        </div><!-- /view-home -->
-
-        <!-- Wadah fitur: Discover, Komunitas, Poll, dll. -->
-        <div id="view-feature" class="feature-view" hidden></div>
-      </section>
-    </div>
-
-    <!-- Mobile Nav -->
-    <nav class="mobile-nav">
-      <button class="selected">
-        <span>⌂</span>
-        <small>Beranda</small>
-      </button>
-      <button>
-        <span>＋</span>
-        <small>Spill</small>
-      </button>
-      <button>
-        <span>☻</span>
-        <small>Avatar</small>
-      </button>
-      <button>
-        <span>🛍</span>
-        <small>Toko</small>
-      </button>
-      <button>
-        <span>♙</span>
-        <small>Profil</small>
-      </button>
-    </nav>
+    <footer class="footer">© 2025 unlinked+ — Memutus yang Toksik, Menambah yang Esensial.</footer>
   </div>
-
-  <div class="nav-overlay" id="nav-overlay" hidden></div>
-
-  <!-- Modul fitur (Discover, Poll, Store, dll). Dimuat setelah app.js
-       karena memakai window.getNavLabel dan window.focusComposer. -->
-  <script src="js/features.js"></script>
-
 </body>
 </html>

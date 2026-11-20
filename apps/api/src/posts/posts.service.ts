@@ -50,7 +50,13 @@ export class PostsService {
     const dto = validateInput(CreatePostDto, input);
     const result = await this.prisma.$transaction(async (tx) => {
       const post = await tx.post.create({
-        data: { userId, category: dto.category, content: dto.content }, select: { id: true },
+        data: {
+          userId,
+          category: dto.category,
+          content: dto.content,
+          spillMode: dto.spillMode ?? 'listen',
+        },
+        select: { id: true },
       });
       await changeXp(tx, userId, XP_REWARDS.postCreated);
       const created = await tx.post.findUniqueOrThrow({ where: { id: post.id }, select: POST_SELECT });

@@ -17,6 +17,7 @@ export const isReactionType = (type: string): type is ReactionType =>
 // another endpoint. Moderation keeps its own explicit select with ids.
 export const POST_SELECT = {
   id: true, category: true, content: true, status: true, createdAt: true, isAnonymous: true,
+  spillMode: true,
   user: { select: PUBLIC_AUTHOR_SELECT },
   _count: { select: { reactions: true, comments: { where: { status: 'active' } } } },
 } satisfies Prisma.PostSelect;

@@ -97,7 +97,7 @@ export const adminSetUserStatus = (id: string, status: 'active' | 'disabled') =>
 export const getPosts = (page = 1) =>
   req<PaginatedResponse<Post>>('GET', `/posts?page=${page}`);
 
-export const createPost = (data: { category: string; content: string }) =>
+export const createPost = (data: { category: string; content: string; spillMode?: string }) =>
   req<Post>('POST', '/posts', data);
 
 export const getPost = (id: string) => req<Post>('GET', `/posts/${id}`);

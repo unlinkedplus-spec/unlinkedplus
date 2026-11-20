@@ -2,8 +2,8 @@
 
 import { useState } from 'react';
 import { createPost } from '../lib/api';
-import { ANTI_FLEX_PHRASES, POST_CATEGORIES, containsFlex } from '../lib/types';
-import type { Post } from '../lib/types';
+import { ANTI_FLEX_PHRASES, POST_CATEGORIES, SPILL_MODES, SPILL_MODE_META, containsFlex } from '../lib/types';
+import type { Post, SpillMode } from '../lib/types';
 
 interface Props {
   onCreated: (post: Post) => void;
@@ -21,6 +21,7 @@ const CATEGORY_COLORS: Record<string, string> = {
 
 export default function CreatePost({ onCreated, onAuthRequired, loggedIn }: Props) {
   const [category, setCategory] = useState<typeof POST_CATEGORIES[number]>(POST_CATEGORIES[0]);
+  const [spillMode, setSpillMode] = useState<SpillMode>('listen');
   const [content, setContent] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
@@ -35,8 +36,9 @@ export default function CreatePost({ onCreated, onAuthRequired, loggedIn }: Prop
     setError('');
     setSubmitting(true);
     try {
-      const post = await createPost({ category, content: content.trim() });
+      const post = await createPost({ category, content: content.trim(), spillMode });
       setContent('');
+      setSpillMode('listen');
       onCreated(post);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Gagal posting');
@@ -69,6 +71,36 @@ export default function CreatePost({ onCreated, onAuthRequired, loggedIn }: Prop
               </button>
             ))}
           </div>
+        </div>
+
+        {/* Spill Without Judgment — author chooses how readers should respond */}
+        <div className="mb-4">
+          <label className="text-xs font-bold text-gray-500 uppercase tracking-wide block mb-2">
+            Spill ini mau dibaca bagaimana?
+          </label>
+          <div className="grid grid-cols-2 gap-2">
+            {SPILL_MODES.map((mode) => (
+              <button
+                key={mode}
+                type="button"
+                onClick={() => setSpillMode(mode)}
+                aria-pressed={spillMode === mode}
+                className={`rounded-xl border px-3 py-2 text-left transition ${
+                  spillMode === mode
+                    ? 'bg-primary/20 border-primary text-navy'
+                    : 'bg-gray-50 border-gray-200 text-gray-500 hover:border-primary'
+                }`}
+              >
+                <span className="block text-xs font-bold">{SPILL_MODE_META[mode].label}</span>
+                <span className="block text-[10px] mt-0.5 leading-snug opacity-80">
+                  {SPILL_MODE_META[mode].hint}
+                </span>
+              </button>
+            ))}
+          </div>
+          <p className="text-[11px] text-gray-400 mt-2">
+            Pemilik Spill yang menentukan caranya dibaca. Hormati pilihannya.
+          </p>
         </div>
 
         {/* Textarea */}

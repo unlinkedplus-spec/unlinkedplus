@@ -4,7 +4,8 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { getPosts } from '../lib/api';
 import { buildAvatarSVG } from '../lib/avatar-svg';
 import type { Post } from '../lib/types';
-import { getLevelName } from '../lib/types';
+import { SPILL_MODE_META, getLevelName } from '../lib/types';
+import type { SpillMode } from '../lib/types';
 import { relativeTime } from '../lib/time';
 import EmptyState from './EmptyState';
 import LoadingState from './LoadingState';
@@ -87,6 +88,7 @@ export default function FailFeed({ loggedIn, onAuthRequired, newPost }: Props) {
     const level = post.user?.profile?.mentalLevel ?? 1;
     const levelColor = LEVEL_COLORS[level] ?? LEVEL_COLORS[1];
     const catColor = CATEGORY_COLORS[post.category] ?? 'bg-gray-100 text-gray-600';
+    const mode = SPILL_MODE_META[post.spillMode as SpillMode] ?? SPILL_MODE_META.listen;
 
     return (
       <article key={post.id} className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100">
@@ -101,16 +103,20 @@ export default function FailFeed({ loggedIn, onAuthRequired, newPost }: Props) {
                 Lv.{level} {getLevelName(level)}
               </span>
             </div>
-            <div className="flex items-center gap-2 mt-0.5">
+            <div className="flex items-center gap-2 mt-0.5 flex-wrap">
               <span className={`text-xs px-2 py-0.5 rounded-full font-semibold ${catColor}`}>
                 {post.category}
+              </span>
+              <span className="text-xs px-2 py-0.5 rounded-full font-semibold bg-primary/20 text-navy">
+                {mode.label}
               </span>
               <span className="text-xs text-gray-400">{relativeTime(post.createdAt)}</span>
             </div>
           </div>
         </div>
 
-        <p className="text-sm text-navy/90 leading-relaxed mb-3">{post.content}</p>
+        <p className="text-sm text-navy/90 leading-relaxed mb-2">{post.content}</p>
+        <p className="mb-3 text-[11px] text-gray-400">🤝 {mode.hint}</p>
 
         <ReactionBar
           postId={post.id}
