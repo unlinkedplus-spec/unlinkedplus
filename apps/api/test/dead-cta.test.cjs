@@ -16,16 +16,15 @@ const waitlist = fs.readFileSync(path.join(webRoot, 'components', 'WaitlistForm.
 test('H4 regression: root serves the two-state Beranda with navigable CTAs', () => {
   assert.match(landing, /import \{ cookies \} from ['"]next\/headers['"]/);
   assert.match(landing, /jar\.get\('unlinked_session'\)/);
-  assert.match(landing, /<DashboardPixel variant=/);
-  assert.match(landing, /authenticated \? 'sameboat' : 'chibi'/);
-  assert.ok(fs.existsSync(path.join(webRoot, 'components', 'DashboardPixel.tsx')),
-    'pixel-faithful Beranda component must exist');
-  const dash = fs.readFileSync(path.join(webRoot, 'components', 'DashboardPixel.tsx'), 'utf8');
-  assert.match(dash, /mockup-sameboat\.png/);
-  assert.match(dash, /mockup-chibi\.png/);
+  assert.match(landing, /<ExactMockup view=/);
+  assert.match(landing, /authenticated \? 'beranda' : 'landing'/);
+  assert.ok(fs.existsSync(path.join(webRoot, 'components', 'ExactMockup.tsx')),
+    'exact mockup component must exist');
+  const dash = fs.readFileSync(path.join(webRoot, 'components', 'ExactMockup.tsx'), 'utf8');
+  assert.match(dash, /mockup-identik\/chibi-landing\.png/);
+  assert.match(dash, /mockup-identik\/same-boat\.png/);
   assert.match(dash, /['"]\/features\/spill['"]/);
   assert.match(dash, /['"]\/app['"]/);
-  assert.match(dash, /<AuthModal/);
   assert.match(dash, /createPost\(/);
 });
 

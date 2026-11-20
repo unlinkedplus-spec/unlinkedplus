@@ -19,7 +19,7 @@ const dto = read(apiRoot, 'src', 'users', 'dto', 'ad-preferences.dto.ts');
 const service = read(apiRoot, 'src', 'users', 'users.service.ts');
 const controller = read(apiRoot, 'src', 'users', 'users.controller.ts');
 const api = read(webRoot, 'lib', 'api.ts');
-const pixel = read(webRoot, 'components', 'DashboardPixel.tsx');
+const pixel = read(webRoot, 'components', 'ExactMockup.tsx');
 const mobile = read(webRoot, 'components', 'DashboardMobile.tsx');
 const profile = read(webRoot, 'components', 'ProfileTab.tsx');
 

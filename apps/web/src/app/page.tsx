@@ -1,12 +1,12 @@
 import { cookies } from 'next/headers';
-import DashboardPixel from '../components/DashboardPixel';
+import ExactMockup from '../components/ExactMockup';
 
 /**
- * Public root = Chibi Community mockup; after login the same origin serves the
- * Same Boat Beranda. The session cookie decides which state is rendered.
+ * Public root = exact Chibi Community mockup from the approved ZIP.
+ * After login the same origin serves the exact Same Boat Beranda mockup.
  */
 export default async function Home() {
   const jar = await cookies();
   const authenticated = Boolean(jar.get('unlinked_session'));
-  return <DashboardPixel variant={authenticated ? 'sameboat' : 'chibi'} authenticated={authenticated} />;
+  return <ExactMockup view={authenticated ? 'beranda' : 'landing'} authenticated={authenticated} />;
 }
