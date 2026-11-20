@@ -8,34 +8,38 @@ import { getLevelName } from '../lib/types';
 import { relativeTime } from '../lib/time';
 import EmptyState from './EmptyState';
 import LoadingState from './LoadingState';
+import NavIcon from './NavIcon';
 import ReactionBar from './ReactionBar';
 import CertificateModal from './CertificateModal';
 import AuthModal from './AuthModal';
 import SponsoredPost from './SponsoredPost';
 
 const CATEGORY_COLORS: Record<string, string> = {
-  'Ditolak HRD':      'bg-red-100 text-red-700',
-  'Salah Kirim Chat': 'bg-orange-100 text-orange-700',
-  'Dimarahi Bos':     'bg-purple-100 text-purple-700',
-  'Bisnis Boncos':    'bg-cyan-100 text-cyan-700',
+  'Ditolak HRD':      'bg-rose-100 text-rose-700',
+  'Salah Kirim Chat': 'bg-sunshine/35 text-navy',
+  'Dimarahi Bos':     'bg-lavender/35 text-navy',
+  'Bisnis Boncos':    'bg-sky-100 text-sky-700',
   'Salah Jurusan':    'bg-emerald-100 text-emerald-700',
 };
 
 const LEVEL_COLORS: Record<number, string> = {
-  1: 'bg-gray-100 text-gray-600',
-  2: 'bg-blue-100 text-blue-700',
-  3: 'bg-purple-100 text-purple-700',
-  4: 'bg-orange-100 text-orange-700',
-  5: 'bg-yellow-100 text-yellow-700',
+  1: 'bg-cream text-navy/60',
+  2: 'bg-lavender/30 text-navy',
+  3: 'bg-lavender/50 text-navy',
+  4: 'bg-sunshine/40 text-navy',
+  5: 'bg-sunshine text-navy',
 };
 
 interface Props {
   loggedIn: boolean;
   onAuthRequired: () => void;
   newPost?: Post | null;
+  /** Active topic filter coming from the Trending rail. */
+  hashtag?: string | null;
+  onClearHashtag?: () => void;
 }
 
-export default function FailFeed({ loggedIn, onAuthRequired, newPost }: Props) {
+export default function FailFeed({ loggedIn, onAuthRequired, newPost, hashtag, onClearHashtag }: Props) {
   const [posts, setPosts] = useState<Post[]>([]);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
@@ -82,35 +86,41 @@ export default function FailFeed({ loggedIn, onAuthRequired, newPost }: Props) {
     setCertPost(post);
   }
 
+  const keyword = hashtag?.trim().toLowerCase() ?? '';
+  const visiblePosts = keyword
+    ? posts.filter((post) =>
+        post.category.toLowerCase().includes(keyword) || post.content.toLowerCase().includes(keyword))
+    : posts;
+
   function renderPost(post: Post) {
     const avatarConfig = post.user?.profile?.avatarConfig ?? null;
     const level = post.user?.profile?.mentalLevel ?? 1;
     const levelColor = LEVEL_COLORS[level] ?? LEVEL_COLORS[1];
-    const catColor = CATEGORY_COLORS[post.category] ?? 'bg-gray-100 text-gray-600';
+    const catColor = CATEGORY_COLORS[post.category] ?? 'bg-cream text-navy/70';
 
     return (
-      <article key={post.id} className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100">
-        <div className="flex items-start gap-3 mb-3">
-          <svg viewBox="0 0 300 300" width="48" height="48" className="shrink-0 rounded-xl bg-primary/10">
-            <g dangerouslySetInnerHTML={{ __html: buildAvatarSVG(avatarConfig as Parameters<typeof buildAvatarSVG>[0]) }} />
-          </svg>
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-2 flex-wrap">
-              <span className="font-bold text-navy text-sm">{post.user?.username ?? 'Anonim'}</span>
-              <span className={`text-xs px-2 py-0.5 rounded-full font-semibold ${levelColor}`}>
+      <article key={post.id} className="surface-card animate-popin p-5 transition-transform duration-200 hover:-translate-y-0.5">
+        <div className="mb-4 flex items-start gap-3">
+          <div className="h-12 w-12 shrink-0 overflow-hidden rounded-2xl border-2 border-lavender/70 bg-sunshine/20 shadow-sm">
+            <svg viewBox="0 0 300 300" width="48" height="48" aria-hidden="true">
+              <g dangerouslySetInnerHTML={{ __html: buildAvatarSVG(avatarConfig as Parameters<typeof buildAvatarSVG>[0]) }} />
+            </svg>
+          </div>
+          <div className="min-w-0 flex-1">
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="text-sm font-black text-navy">{post.user?.username ?? 'Anonim'}</span>
+              <span className={`pill-soft ${levelColor}`}>
                 Lv.{level} {getLevelName(level)}
               </span>
             </div>
-            <div className="flex items-center gap-2 mt-0.5">
-              <span className={`text-xs px-2 py-0.5 rounded-full font-semibold ${catColor}`}>
-                {post.category}
-              </span>
-              <span className="text-xs text-gray-400">{relativeTime(post.createdAt)}</span>
+            <div className="mt-1 flex flex-wrap items-center gap-2">
+              <span className={`pill-soft ${catColor}`}>{post.category}</span>
+              <span className="text-[11px] text-navy/40">{relativeTime(post.createdAt)}</span>
             </div>
           </div>
         </div>
 
-        <p className="text-sm text-navy/90 leading-relaxed mb-3">{post.content}</p>
+        <p className="mb-1 whitespace-pre-wrap text-sm leading-relaxed text-navy/90">{post.content}</p>
 
         <ReactionBar
           postId={post.id}
@@ -120,10 +130,11 @@ export default function FailFeed({ loggedIn, onAuthRequired, newPost }: Props) {
 
         {loggedIn && (
           <button
+            type="button"
             onClick={() => handleCertClick(post)}
-            className="mt-3 text-xs text-gray-400 hover:text-accent transition font-medium"
+            className="focus-ring mt-3 inline-flex items-center gap-1.5 text-[11px] font-bold text-navy/50 transition hover:text-navy"
           >
-            🏆 Buat Sertifikat
+            <NavIcon name="sparkles" size={13} /> Buat Sertifikat
           </button>
         )}
       </article>
@@ -131,37 +142,61 @@ export default function FailFeed({ loggedIn, onAuthRequired, newPost }: Props) {
   }
 
   return (
-    <div className="max-w-lg mx-auto pb-28 px-4 pt-4">
-      <h2 className="font-display font-black text-xl text-navy mb-4">🏠 Feed Gagal</h2>
+    <div className="mx-auto max-w-lg px-4 pb-28 pt-4">
+      <div className="mb-4 flex items-end justify-between">
+        <div>
+          <h2 className="font-display text-xl font-black text-navy">Spill Feed</h2>
+          <p className="text-[11px] text-navy/50">Cerita jujur, tanpa panggung pencapaian.</p>
+        </div>
+        <span className="pill-soft bg-lavender/25 text-navy">
+          <NavIcon name="sparkles" size={12} /> {posts.length} cerita
+        </span>
+      </div>
 
-      {posts.length === 0 && !loading && (
-        <div className="text-center py-12 text-gray-400">
-          <div className="text-4xl mb-3">😶‍🌫️</div>
+      {hashtag && (
+        <div className="mb-4 flex items-center justify-between rounded-2xl border border-lavender/50 bg-lavender/15 px-4 py-2.5">
+          <span className="text-xs font-bold text-navy">Menampilkan topik: {hashtag}</span>
+          {onClearHashtag && (
+            <button type="button" onClick={onClearHashtag} className="focus-ring text-[11px] font-bold text-navy/60 hover:text-navy">
+              Hapus
+            </button>
+          )}
+        </div>
+      )}
+
+      {visiblePosts.length === 0 && !loading && !hashtag && (
+        <div className="py-12 text-center text-navy/40">
+          <div className="mb-3 text-4xl">😶‍🌫️</div>
           <p>Belum ada cerita. Jadi yang pertama spill!</p>
         </div>
       )}
 
       <div className="flex flex-col gap-4">
-        {posts.length > 1 && (
+        {visiblePosts.length > 1 && (
           <>
             <SponsoredPost />
-            {posts.slice(0, 1).map((post) => renderPost(post))}
+            {visiblePosts.slice(0, 1).map((post) => renderPost(post))}
             <SponsoredPost />
-            {posts.slice(1).map((post) => renderPost(post))}
+            {visiblePosts.slice(1).map((post) => renderPost(post))}
           </>
         )}
-        {posts.length === 1 && (
+        {visiblePosts.length === 1 && (
           <>
             <SponsoredPost />
-            {posts.map((post) => renderPost(post))}
+            {visiblePosts.map((post) => renderPost(post))}
           </>
         )}
-        {posts.length === 0 && null}
+        {visiblePosts.length === 0 && hashtag && (
+          <div className="surface-card p-6 text-center">
+            <p className="text-sm font-bold text-navy">Belum ada spill untuk topik ini.</p>
+            <p className="mt-1 text-xs text-navy/50">Coba topik lain, atau lihat semua cerita.</p>
+          </div>
+        )}
       </div>
 
       {loading && <LoadingState message="Memuat spill..." />}
 
-      {!loading && posts.length === 0 && (
+      {!loading && posts.length === 0 && !hashtag && (
         <EmptyState
           title="Belum ada spill"
           description="Jadilah yang pertama bercerita kegagalan di sini"

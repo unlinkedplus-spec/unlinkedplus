@@ -1,6 +1,8 @@
 @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap');
 :root{
   --yellow: #f5c542;
+  --sunshine: #f5c542;
+  --lavender: #b9a6ff;
   --orange: #f57c00;
   --navy: #172b4d;
   --ink: #19233a;
@@ -8,7 +10,7 @@
   --paper: #fafafa;
   --line: #e7e9ef;
   --soft: #fff5d6;
-  --cream: #fff8e7;
+  --cream: #fff7e6;
   --shadow: 0 3px 12px rgba(23,43,77,.055)
 }
 
@@ -22,7 +24,7 @@ html{
 
 body{
   margin: 0;
-  background: #fbfbfc;
+  background: #fffbf2;
   color: var(--ink);
   font-family: 'DM Sans', sans-serif
 }
@@ -329,9 +331,12 @@ body{
 /* Hero Banner */
 .hero-banner{
   height: 374px;
-  border: 1px solid #f4df9e;
-  border-radius: 23px;
-  background: linear-gradient(105deg,#fff8e7 0%,#fffde9 100%);
+  border: 1px solid rgba(185,166,255,.45);
+  border-radius: 28px;
+  /* navy base with lavender + sunshine glow: playful, not corporate */
+  background: radial-gradient(circle at 82% 18%,rgba(185,166,255,.38),transparent 38%),
+              radial-gradient(circle at 18% 105%,rgba(245,197,66,.22),transparent 42%),
+              linear-gradient(110deg,#172b4d 0%,#1e3560 100%);
   display: grid;
   grid-template-columns: 1fr auto;
   gap: 20px;
@@ -349,9 +354,10 @@ body{
 }
 
 .hero-eyebrow{
-  font: 700 11px 'DM Sans';
-  color: #5a6479;
-  letter-spacing: .8px;
+  font: 800 10px 'DM Sans';
+  color: var(--sunshine);
+  letter-spacing: 1.1px;
+  text-transform: uppercase;
   margin-bottom: 18px;
   display: flex;
   align-items: center;
@@ -366,18 +372,19 @@ body{
 
 .hero-copy h1{
   font: 700 56px/1.1 'Space Grotesk';
-  color: var(--navy);
+  color: #fff7e6;
   margin: 0 0 16px;
   letter-spacing: -2.5px
 }
 
 .hero-copy h1 span{
-  color: var(--orange)
+  color: var(--sunshine);
+  text-shadow: 0 6px 0 rgba(185,166,255,.35)
 }
 
 .hero-copy p{
   font: 500 14px/1.6 'DM Sans';
-  color: #4a5568;
+  color: rgba(255,247,230,.82);
   margin: 0 0 20px;
   max-width: 480px
 }
@@ -405,13 +412,15 @@ body{
 
 .hero-cta a{
   font: 700 13px 'DM Sans';
-  color: var(--navy);
-  text-decoration: none
+  color: #fff7e6;
+  text-decoration: underline;
+  text-decoration-color: var(--lavender);
+  text-underline-offset: 4px
 }
 
 .hero-copy>small{
-  font: 500 10px 'DM Sans';
-  color: #7a8496;
+  font: 600 10px 'DM Sans';
+  color: rgba(255,247,230,.65);
   margin-top: 12px
 }
 
@@ -429,6 +438,27 @@ body{
   height: 320px;
   object-fit: contain;
   object-position: center bottom
+}
+
+/* Small mascot chip keeps the panda as the emotional brand anchor. */
+.hero-mascot{
+  position: absolute;
+  left: 6px;
+  bottom: 36px;
+  width: 92px;
+  height: 92px;
+  object-fit: contain;
+  border-radius: 26px;
+  background: rgba(255,247,230,.92);
+  border: 2px solid var(--lavender);
+  padding: 6px;
+  box-shadow: 0 10px 24px rgba(23,43,77,.28);
+  animation: mascot-float 5s ease-in-out infinite
+}
+
+@keyframes mascot-float{
+  0%,100%{transform:translateY(0)}
+  50%{transform:translateY(-8px)}
 }
 
 .hero-note{
@@ -459,8 +489,8 @@ body{
   position: absolute;
   bottom: 42px;
   right: 22px;
-  background: linear-gradient(135deg,#fff5d6,#ffe9a0);
-  border: 2px solid var(--yellow);
+  background: linear-gradient(135deg,#fff7e6,#dcd0ff);
+  border: 2px solid var(--lavender);
   border-radius: 20px;
   padding: 10px 14px;
   box-shadow: 0 4px 14px rgba(245,197,66,.25);

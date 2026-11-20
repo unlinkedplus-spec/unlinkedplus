@@ -1,14 +1,16 @@
 'use client';
 
+import NavIcon, { type NavIconName } from './NavIcon';
+
 export type TabId = 'feed' | 'confession' | 'spill' | 'avatar' | 'shop' | 'profile';
 
-const TABS: { id: TabId; icon: string; label: string }[] = [
-  { id: 'feed',       icon: '🏠', label: 'Beranda'  },
-  { id: 'confession', icon: '🎭', label: 'Confess' },
-  { id: 'spill',     icon: '✍️', label: 'Spill'    },
-  { id: 'avatar',     icon: '🧑‍💼', label: 'Avatar'  },
-  { id: 'shop',       icon: '🛒', label: 'Toko'    },
-  { id: 'profile',    icon: '👤', label: 'Profil'  },
+const TABS: { id: TabId; icon: NavIconName; label: string }[] = [
+  { id: 'feed',       icon: 'home',    label: 'Beranda'  },
+  { id: 'confession', icon: 'mask',    label: 'Confess'  },
+  { id: 'spill',      icon: 'pen',     label: 'Spill'    },
+  { id: 'avatar',     icon: 'avatar',  label: 'Avatar'   },
+  { id: 'shop',       icon: 'store',   label: 'Toko'     },
+  { id: 'profile',    icon: 'profile', label: 'Profil'   },
 ];
 
 interface Props {
@@ -18,22 +20,28 @@ interface Props {
 
 export default function BottomNav({ active, onChange }: Props) {
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-gray-200 safe-pb">
-      <div className="max-w-lg mx-auto flex">
-        {TABS.map((tab) => (
-          <button
-            key={tab.id}
-            onClick={() => onChange(tab.id)}
-            className={`flex-1 flex flex-col items-center py-2 gap-0.5 transition ${
-              active === tab.id
-                ? 'text-primary border-t-2 border-primary font-bold'
-                : 'text-gray-400 border-t-2 border-transparent'
-            }`}
-          >
-            <span className="text-xl leading-none">{tab.icon}</span>
-            <span className="text-[10px]">{tab.label}</span>
-          </button>
-        ))}
+    <nav aria-label="Navigasi utama" className="safe-pb fixed bottom-0 left-0 right-0 z-50 border-t border-navy/10 bg-white/95 backdrop-blur">
+      <div className="mx-auto flex max-w-lg">
+        {TABS.map((tab) => {
+          const isActive = active === tab.id;
+          return (
+            <button
+              key={tab.id}
+              type="button"
+              aria-current={isActive ? 'page' : undefined}
+              onClick={() => onChange(tab.id)}
+              className={`focus-ring relative flex flex-1 flex-col items-center gap-1 py-2.5 transition-colors ${
+                isActive ? 'text-navy' : 'text-navy/40'
+              }`}
+            >
+              {isActive && <span className="absolute -top-px h-1 w-9 rounded-full bg-sunshine" />}
+              <span className={`transition-transform duration-200 ${isActive ? '-translate-y-0.5' : ''}`}>
+                <NavIcon name={tab.icon} size={20} />
+              </span>
+              <span className={`text-[10px] ${isActive ? 'font-black' : 'font-semibold'}`}>{tab.label}</span>
+            </button>
+          );
+        })}
       </div>
     </nav>
   );
