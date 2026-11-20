@@ -6,9 +6,12 @@ import { buildAvatarSVG } from '../lib/avatar-svg';
 import type { Post } from '../lib/types';
 import { getLevelName } from '../lib/types';
 import { relativeTime } from '../lib/time';
+import EmptyState from './EmptyState';
+import LoadingState from './LoadingState';
 import ReactionBar from './ReactionBar';
 import CertificateModal from './CertificateModal';
 import AuthModal from './AuthModal';
+import SponsoredPost from './SponsoredPost';
 
 const CATEGORY_COLORS: Record<string, string> = {
   'Ditolak HRD':      'bg-red-100 text-red-700',
@@ -91,7 +94,22 @@ export default function FailFeed({ loggedIn, onAuthRequired, newPost }: Props) {
       )}
 
       <div className="flex flex-col gap-4">
-        {posts.map((post) => {
+        {posts.length > 1 && (
+          <>
+            <SponsoredPost />
+            {posts.slice(0, 1).map((post) => renderPost(post))}
+            <SponsoredPost />
+            {posts.slice(1).map((post) => renderPost(post))}
+          </>
+        )}
+        {posts.length === 1 && (
+          <>
+            <SponsoredPost />
+            {posts.map((post) => renderPost(post))}
+          </>
+        )}
+        {posts.length === 0 && null}
+      </div>
           const avatarConfig = post.user?.profile?.avatarConfig ?? null;
           const level = post.user?.profile?.mentalLevel ?? 1;
           const levelColor = LEVEL_COLORS[level] ?? LEVEL_COLORS[1];
@@ -144,8 +162,14 @@ export default function FailFeed({ loggedIn, onAuthRequired, newPost }: Props) {
         })}
       </div>
 
-      {loading && (
-        <div className="text-center py-6 text-gray-400 text-sm">Memuat...</div>
+      {loading && <LoadingState message="Memuat spill..." />}
+
+      {!loading && posts.length === 0 && (
+        <EmptyState
+          title="Belum ada spill"
+          description="Jadilah yang pertama bercerita kegagalan di sini"
+          action={loggedIn ? { label: 'Buat Spill', onClick: onAuthRequired } : undefined}
+        />
       )}
 
       <div ref={sentinelRef} className="h-4" />

@@ -59,6 +59,9 @@ services:
   backend:
     <<: *api
     restart: unless-stopped
+    # Hanya loopback: host nginx lokal yang menjadi entrypoint publik.
+    ports:
+      - "127.0.0.1:3001:3001"
     depends_on:
       migrate:
         condition: service_completed_successfully
@@ -86,6 +89,9 @@ services:
     build: ./apps/web
     restart: unless-stopped
     init: true
+    # Hanya loopback, dipakai host nginx untuk /admin.
+    ports:
+      - "127.0.0.1:3000:3000"
     environment:
       NODE_OPTIONS: --max-old-space-size=192
     depends_on:

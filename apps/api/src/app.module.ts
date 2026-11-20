@@ -1,6 +1,9 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
-import { APP_GUARD } from '@nestjs/core';
+import { APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
+import { CacheModule } from './common/cache/cache.module';
+import { HttpMetricsInterceptor } from './common/metrics/http-metrics.interceptor';
+import { MetricsModule } from './common/metrics/metrics.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { RedisModule } from './redis/redis.module';
 import { AuthModule } from './auth/auth.module';
@@ -13,6 +16,8 @@ import { ReportsModule } from './reports/reports.module';
 import { AvatarsModule } from './avatars/avatars.module';
 import { StoreModule } from './store/store.module';
 import { CertificatesModule } from './certificates/certificates.module';
+import { PollsModule } from './polls/polls.module';
+import { ConfessionsModule } from './confessions/confessions.module';
 import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
 import { RateLimitGuard } from './common/guards/rate-limit.guard';
 import { validateEnvironment } from './common/environment';
@@ -20,12 +25,15 @@ import { validateEnvironment } from './common/environment';
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true, validate: validateEnvironment }),
+    CacheModule, MetricsModule,
     PrismaModule, RedisModule, HealthModule, AuthModule, UsersModule, PostsModule,
     ReactionsModule, CommentsModule, ReportsModule, AvatarsModule, StoreModule, CertificatesModule,
+    PollsModule, ConfessionsModule,
   ],
   providers: [
     { provide: APP_GUARD, useClass: RateLimitGuard },
     { provide: APP_GUARD, useClass: JwtAuthGuard },
+    { provide: APP_INTERCEPTOR, useClass: HttpMetricsInterceptor },
   ],
 })
 export class AppModule {}

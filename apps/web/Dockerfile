@@ -6,7 +6,7 @@ RUN npm ci --no-audit --no-fund
 FROM node:22-bookworm-slim AS builder
 WORKDIR /app
 ENV NEXT_TELEMETRY_DISABLED=1
-ENV NODE_OPTIONS=--max-old-space-size=768
+ENV NODE_OPTIONS=--max-old-space-size=1024
 ARG NEXT_PUBLIC_API_URL
 ENV NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}
 COPY --from=deps /app/node_modules ./node_modules

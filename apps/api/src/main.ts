@@ -16,7 +16,12 @@ async function bootstrap() {
   app.use(cookieParser());
   app.use((request: Request, response: Response, next: NextFunction) => {
     response.setHeader('Cache-Control', 'no-store');
-    if (!['GET', 'HEAD', 'OPTIONS'].includes(request.method) && request.get('origin') !== process.env.FRONTEND_URL) {
+    const origin = request.get('origin');
+    if (
+      origin &&
+      !['GET', 'HEAD', 'OPTIONS'].includes(request.method) &&
+      origin !== process.env.FRONTEND_URL
+    ) {
       response.status(403).json({ message: 'Origin permintaan tidak diizinkan' });
       return;
     }

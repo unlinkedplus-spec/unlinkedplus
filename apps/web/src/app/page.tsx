@@ -1,133 +1,175 @@
 import WaitlistForm from '../components/WaitlistForm';
+import { buildAvatarSVG } from '../lib/avatar-svg';
 
 export default function LandingPage() {
   return (
     <main className="min-h-screen bg-background text-navy">
-      {/* Nav */}
-      <nav className="flex items-center justify-between px-6 py-4 max-w-5xl mx-auto">
-        <span className="font-display font-black text-2xl text-navy">
-          unlinked<span className="text-primary">+</span>
-        </span>
-        <WaitlistForm mode="nav" />
+      {/* Navbar */}
+      <nav className="flex items-center justify-between px-6 py-4 max-w-7xl mx-auto">
+        <div>
+          <span className="font-display font-black text-2xl text-navy">
+            unlinked<span className="text-primary">+</span>
+          </span>
+          <p className="text-xs text-gray-500 mt-0.5">Less Flex. More Human.</p>
+        </div>
+        <div className="flex items-center gap-3">
+          <button className="text-sm font-medium text-navy hover:text-navy/80 transition">
+            Masuk
+          </button>
+          <button className="bg-navy text-white text-sm font-bold px-5 py-2 rounded-full hover:bg-navy/90 transition">
+            Gabung sekarang →
+          </button>
+        </div>
       </nav>
 
-      {/* Hero */}
-      <section className="bg-gradient-to-br from-primary via-yellow-300 to-accent py-20 px-6 text-center">
-        <div className="max-w-2xl mx-auto">
-          <h1 className="font-display font-black text-4xl md:text-6xl text-navy leading-tight mb-4">
-            Gagal itu manusiawi.<br />
-            <span className="text-white">Pamernya yang ngga.</span>
+      {/* Hero Section */}
+      <section className="bg-primary/20 rounded-3xl mx-6 mt-6 mb-8 p-8 md:p-12 max-w-7xl mx-auto flex flex-col md:flex-row items-center gap-8">
+        <div className="flex-1">
+          <p className="text-xs font-bold text-navy/70 uppercase tracking-widest mb-3">
+            KARIER BOLEH BERANTAKAN. KAMU TETAP BERHARGA.
+          </p>
+          <h1 className="font-display font-black text-3xl md:text-5xl text-navy leading-tight mb-4">
+            LinkedIn untuk orang yang lagi gagal.
           </h1>
-          <p className="text-navy/80 text-lg md:text-xl mb-8 font-medium">
-            Spill cerita gagalmu. Dapet reaksi empati. Naik level mental.
-            <br />Tanpa flex. Tanpa topeng.
+          <p className="text-navy/80 text-sm md:text-base mb-6 max-w-lg">
+            Capek lihat orang pamer pencapaian di sebelah? Di sini, nggak apa-apa kalau ceritamu belum berakhir indah.
           </p>
-
-          {/* Character strip */}
-          <div className="flex justify-center gap-2 mb-8">
-            {(['panda','intern','php-victim','freelancer'] as const).map((id) => (
-              <div key={id} className="w-16 h-16 bg-white/30 rounded-2xl flex items-center justify-center overflow-hidden">
-                <svg viewBox="0 0 300 300" width="64" height="64" aria-hidden="true">
-                  <CharacterPreview id={id} />
-                </svg>
-              </div>
-            ))}
+          <div className="flex flex-wrap gap-3 mb-4">
+            <button className="bg-navy text-white font-bold px-6 py-3 rounded-full text-sm hover:bg-navy/90 transition">
+              Gabung, jadi diri sendiri →
+            </button>
+            <button className="bg-white text-navy font-bold px-6 py-3 rounded-full text-sm border border-navy/20 hover:bg-gray-50 transition">
+              Baca cerita dulu
+            </button>
           </div>
-
-          <WaitlistForm mode="hero" />
+          <p className="text-xs text-navy/60">
+            Pakai nama samaran. Bukan nama jabatan.
+          </p>
+        </div>
+        <div className="w-48 h-48 md:w-64 md:h-64 shrink-0 relative">
+          <svg viewBox="0 0 300 300" className="w-full h-full" aria-hidden="true">
+            <g dangerouslySetInnerHTML={{ __html: buildAvatarSVG({ character: 'panda', accessories: [] }) }} />
+          </svg>
+          <div className="absolute -top-4 -right-4 bg-white rounded-2xl px-4 py-2 shadow-lg text-xs font-medium text-navy">
+            Hari berat? Taruh dulu di sini. 💙
+          </div>
+          <div className="absolute -bottom-4 -left-4 bg-white rounded-2xl px-4 py-2 shadow-lg text-xs font-medium text-navy">
+            Nggak harus sukses untuk punya cerita. ❤️
+          </div>
         </div>
       </section>
 
-      {/* Certificate preview */}
-      <section className="py-16 px-6 bg-white">
-        <div className="max-w-3xl mx-auto text-center">
-          <h2 className="font-display font-black text-3xl text-navy mb-4">
-            Sertifikat Gagal Resmi™
-          </h2>
-          <p className="text-gray-600 mb-8">
-            Setiap spill bisa jadi sertifikat yang bisa kamu download dan kirim ke HRD.
-          </p>
-          <div className="inline-block bg-primary rounded-2xl px-10 py-8 text-navy border-4 border-navy shadow-xl">
-            <div className="text-xs font-bold uppercase tracking-widest mb-2 opacity-60">Sertifikat Ketahanan Mental</div>
-            <div className="font-display font-black text-2xl mb-1">unlinked+</div>
-            <div className="text-sm mb-4 opacity-80">menyatakan bahwa</div>
-            <div className="font-bold text-xl mb-4">BudakKantor_XXXX</div>
-            <div className="text-sm italic opacity-70 max-w-xs">
-              &ldquo;Ngirim CV 100x, dapet ghosting 100x, tetap semangat 100x.&rdquo;
+      {/* Divider */}
+      <div className="max-w-7xl mx-auto px-6 mb-8 flex items-center gap-4 text-sm font-medium text-navy/60">
+        <span>Memutus yang Toksik</span>
+        <span className="text-primary text-lg">+</span>
+        <span>Menambah yang Esensial</span>
+      </div>
+
+      {/* 3-Column Layout */}
+      <div className="max-w-7xl mx-auto px-6 pb-12 grid grid-cols-1 lg:grid-cols-12 gap-6">
+        {/* Left Sidebar - RUANG KAMU */}
+        <aside className="lg:col-span-3 bg-white rounded-2xl p-6 border border-gray-100">
+          <h3 className="font-display font-bold text-sm text-navy mb-4">RUANG KAMU</h3>
+          <nav className="space-y-2">
+            {[
+              { id: 'beranda', icon: '🏠', label: 'Beranda', active: true },
+              { id: 'spill', icon: '✍️', label: 'Spill', active: false },
+              { id: 'avatar', icon: '🧑‍💼', label: 'Avatar', active: false },
+              { id: 'toko', icon: '🛒', label: 'Toko', active: false },
+              { id: 'profil', icon: '👤', label: 'Profil', active: false },
+            ].map((item) => (
+              <button
+                key={item.id}
+                className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition w-full text-left ${
+                  item.active
+                    ? 'bg-primary/10 text-navy'
+                    : 'text-gray-600 hover:bg-gray-100'
+                }`}
+              >
+                <span className="text-lg">{item.icon}</span>
+                <span>{item.label}</span>
+                {item.active && <span className="ml-auto w-2 h-2 rounded-full bg-primary" />}
+              </button>
+            ))}
+          </nav>
+          <div className="mt-8 pt-6 border-t border-gray-100">
+            <p className="text-xs text-gray-400 font-medium">Pelan-pelan juga sampai.</p>
+            <p className="text-[10px] text-gray-300 mt-1">
+              Tidak semua hal harus jadi pencapaian hari ini.
+            </p>
+          </div>
+        </aside>
+
+        {/* Main Content - RUANG CERITA KITA */}
+        <main className="lg:col-span-6">
+          <div className="bg-white rounded-2xl p-6 border border-gray-100">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="font-display font-black text-xl text-navy">Hari ini, apa adanya.</h2>
+              <button className="text-xs text-navy border border-navy/20 px-3 py-1.5 rounded-lg hover:bg-navy/5 transition">
+                ↻ Muat ulang
+              </button>
             </div>
-            <div className="mt-4 text-xs opacity-50">Level 3 · Kebal Revisi</div>
-          </div>
-        </div>
-      </section>
 
-      {/* Features */}
-      <section className="py-16 px-6 bg-background">
-        <div className="max-w-4xl mx-auto">
-          <h2 className="font-display font-black text-3xl text-navy text-center mb-12">
-            Kenapa unlinked+?
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {FEATURES.map((f) => (
-              <div key={f.title} className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm">
-                <div className="text-4xl mb-4">{f.icon}</div>
-                <h3 className="font-display font-bold text-lg text-navy mb-2">{f.title}</h3>
-                <p className="text-gray-600 text-sm">{f.desc}</p>
+            {/* Input area */}
+            <div className="bg-background rounded-xl p-4 mb-6 border border-gray-200">
+              <div className="flex items-start gap-3">
+                <span className="text-xl">✏️</span>
+                <div className="flex-1">
+                  <p className="text-sm text-navy/70">
+                    Ada yang mau kamu ceritakan? Taruh bebanmu sebentar di sini.
+                  </p>
+                </div>
               </div>
-            ))}
-          </div>
-        </div>
-      </section>
+            </div>
 
-      {/* Manifesto */}
-      <section className="py-16 px-6 bg-navy text-white text-center">
-        <div className="max-w-2xl mx-auto">
-          <h2 className="font-display font-black text-3xl mb-6">Manifesto Kami</h2>
-          <p className="text-white/80 leading-relaxed">
-            LinkedIn penuh orang yang &ldquo;humbled and honored&rdquo;. unlinked+ adalah tempatnya
-            orang yang jujur. Gagal ngelamar? Spill. Dimarahi bos? Cerita. Bisnis boncos? Share.
-            Karena jatuh bersama lebih ringan dari pura-pura terbang sendirian.
-          </p>
-          <p className="mt-6 font-display font-black text-primary text-xl">
-            No Flex. Just Human.
-          </p>
-        </div>
-      </section>
+            {/* Empty state */}
+            <div className="text-center py-12">
+              <div className="text-4xl mb-4">💔</div>
+              <h3 className="font-display font-bold text-lg text-navy mb-2">Belum ada spill di sini.</h3>
+              <p className="text-sm text-gray-500 mb-6 max-w-xs mx-auto">
+                Tidak harus punya cerita hebat. Hari yang berat juga layak didengar.
+              </p>
+              <button className="bg-primary text-navy font-bold px-6 py-2.5 rounded-full text-sm hover:bg-primary/90 transition flex items-center gap-2 mx-auto">
+                <span>✏️</span>
+                <span>Tulis cerita pertama</span>
+              </button>
+            </div>
+          </div>
+        </main>
+
+        {/* Right Sidebar - PENGINGAT KECIL */}
+        <aside className="lg:col-span-3">
+          <div className="bg-primary/10 rounded-2xl p-5 mb-6">
+            <h3 className="font-display font-bold text-sm text-navy mb-3">PENGINGAT KECIL</h3>
+            <p className="text-xs text-navy/80 mb-4">
+              Kamu bukan CV-mu. Kamu manusia utuh, bahkan ketika karier sedang berantakan.
+            </p>
+            <div className="text-[10px] text-navy/60 font-medium">
+              — unlinked+
+            </div>
+          </div>
+
+          <div className="bg-white rounded-2xl p-5 border border-gray-100">
+            <h4 className="font-display font-bold text-sm text-navy mb-3">Di sini, kita...</h4>
+            <ul className="text-xs text-gray-600 space-y-2">
+              <li className="flex items-start gap-2">
+                <span className="text-primary">•</span>
+                <span>Saling dukung. Bukan saling adu nasib.</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="text-primary">•</span>
+                <span>Jujur & apa adanya. Tanpa panggung pencapaian.</span>
+              </li>
+            </ul>
+          </div>
+        </aside>
+      </div>
 
       {/* Footer */}
       <footer className="py-8 px-6 text-center text-gray-400 text-sm">
         <p>© 2025 unlinked+ — Dibuat dengan ❤️ dan banyak rejected offer letters.</p>
       </footer>
     </main>
-  );
-}
-
-const FEATURES = [
-  {
-    icon: '🛡️',
-    title: 'Anti-Flex Sensor',
-    desc: 'Sensor otomatis blokir konten pamer. Disini cuma boleh cerita gagal, bukan prestasi.',
-  },
-  {
-    icon: '🧠',
-    title: 'Mental XP System',
-    desc: 'Dapet reaksi empati dari komunitas = naik level mental. Dari Rapuh sampai Suhu Spill.',
-  },
-  {
-    icon: '🎭',
-    title: 'Avatar Anonim',
-    desc: 'Pilih karakter & aksesori. Spill tanpa takut dikenali atasan atau mantan.',
-  },
-];
-
-// Tiny inline SVG previews for hero strip
-function CharacterPreview({ id }: { id: string }) {
-  const heads: Record<string, string> = {
-    panda: '<circle cx="150" cy="115" r="65" fill="#FDDCB0"/><ellipse cx="127" cy="120" rx="17" ry="9" fill="#1A1A1A" opacity="0.32"/><ellipse cx="173" cy="120" rx="17" ry="9" fill="#1A1A1A" opacity="0.32"/>',
-    intern: '<circle cx="150" cy="115" r="65" fill="#FFE0B2"/><rect x="100" y="58" width="100" height="40" rx="20" fill="#4A3728"/>',
-    'php-victim': '<circle cx="150" cy="115" r="65" fill="#FDDCB0"/><path d="M87,105 Q95,55 150,52 Q200,55 212,100" fill="none" stroke="#5C4033" stroke-width="4"/>',
-    freelancer: '<circle cx="150" cy="115" r="65" fill="#FFE0B2"/><path d="M85,115 Q82,65 110,52 Q150,45 190,52 Q218,65 215,110" fill="#2D2D2D"/>',
-  };
-  return (
-    <g dangerouslySetInnerHTML={{ __html: heads[id] ?? heads.panda }} />
   );
 }

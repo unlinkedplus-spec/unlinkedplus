@@ -21,6 +21,30 @@ async function main() {
     }),
   ));
   console.log('Avatar catalog seeded. No users, posts, or purchases were created.');
+
+  const pollCount = await prisma.poll.count();
+  if (pollCount === 0) {
+    const polls = [
+      {
+        question: 'Kalau gajian telat, kamu biasanya?',
+        options: ['Tetap kerja, gajian kan tetap masuk', 'Pura-pura sibuk biar enggak disuruh lembur', 'Langsung komplain ke atasan', 'Udah males, ikut-ikutan aja'],
+      },
+      {
+        question: 'Antara WFH atau datang ke kantor, pilihanmu?',
+        options: ['WFH: bebas atur waktu', 'Kantor: biar ada batas kerja', 'Hybrid saja yang penting jelas', 'Tergantung mood dan proyek'],
+      },
+    ];
+    for (const poll of polls) {
+      await prisma.poll.create({
+        data: {
+          question: poll.question,
+          endsAt: new Date(Date.now() + 7 * 24 * 3600 * 1000),
+          options: { create: poll.options.map((label, position) => ({ label, position })) },
+        },
+      });
+    }
+    console.log(`${polls.length} starter polls seeded.`);
+  }
 }
 
 main()

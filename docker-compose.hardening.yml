@@ -1,0 +1,44 @@
+# Overlay hardening — dipakai BERSAMA docker-compose.yml, bukan menggantikannya.
+#
+#   API_REPLICAS=3 WORKER_REPLICAS=2 \
+#     docker compose -f docker-compose.yml -f docker-compose.hardening.yml up -d
+#
+# Tanpa file ini, `docker compose up -d` berjalan seperti biasa
+# (1 backend, 1 worker) — perilaku default tidak berubah.
+#
+# Catatan: mem_limit sudah diatur di docker-compose.yml, jadi di sini TIDAK
+# diulang (menghindari konflik antara mem_limit dan deploy.resources.limits).
+
+services:
+  backend:
+    restart: unless-stopped
+    # Waktu menyelesaikan request in-flight + menutup pool Prisma/Redis
+    # sebelum Docker mengirim SIGKILL.
+    stop_grace_period: 30s
+    deploy:
+      replicas: ${API_REPLICAS:-1}
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  worker:
+    restart: unless-stopped
+    # Worker harus menuntaskan job render sertifikat yang sedang berjalan.
+    stop_grace_period: 60s
+    deploy:
+      replicas: ${WORKER_REPLICAS:-1}
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  nginx:
+    restart: unless-stopped
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"

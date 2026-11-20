@@ -8,8 +8,10 @@ import type {
   AvatarItem,
   AuthResponse,
   Certificate,
+  Confession,
   InventoryItem,
   PaginatedResponse,
+  Poll,
   Post,
   Transaction,
   User,
@@ -112,6 +114,24 @@ export const confirmPurchase = (transactionId: string) =>
 
 export const getTransactions = () =>
   req<Transaction[]>('GET', '/store/transactions');
+
+// Polls
+export const getActivePoll = () => req<Poll | null>('GET', '/polls/active');
+
+export const getPollResults = (id: string) => req<Poll>('GET', `/polls/${id}/results`);
+
+export const getMyPollVote = (id: string) =>
+  req<{ optionId: string | null }>('GET', `/polls/${id}/mine`);
+
+export const votePoll = (id: string, optionId: string) =>
+  req<Poll>('POST', `/polls/${id}/vote`, { optionId });
+
+// Confessions
+export const getConfessions = (page = 1) =>
+  req<PaginatedResponse<Confession>>('GET', `/confessions?page=${page}`);
+
+export const createConfession = (data: { content: string; isAnonymous?: boolean; scheduledAt?: string }) =>
+  req<Confession>('POST', '/confessions', data);
 
 // Certificates
 export const createCertificate = (postId: string) =>

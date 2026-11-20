@@ -22,6 +22,7 @@ model User {
   transactions   Transaction[]
   reports        Report[]        @relation("reporter")
   inventoryItems UserInventory[]
+  pollVotes      PollVote[]
 
   @@map("users")
 }
@@ -45,6 +46,9 @@ model Post {
   content      String
   createdAt    DateTime      @default(now()) @map("created_at")
   status       String        @default("active") @db.VarChar(20)
+  isConfession Boolean       @default(false) @map("is_confession")
+  isAnonymous  Boolean       @default(false) @map("is_anonymous")
+  scheduledAt  DateTime?     @map("scheduled_at")
   user         User?         @relation(fields: [userId], references: [id], onDelete: SetNull)
   reactions    Reaction[]
   comments     Comment[]
@@ -52,6 +56,7 @@ model Post {
 
   @@index([status, createdAt, id])
   @@index([userId, status])
+  @@index([isConfession, status, scheduledAt])
   @@map("posts")
 }
 
@@ -64,6 +69,7 @@ model Reaction {
   user         User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([postId, userId, reactionType])
+  @@index([postId, reactionType])
   @@map("reactions")
 }
 
@@ -114,6 +120,7 @@ model Certificate {
   post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
 
   @@index([postId])
+  @@index([status])
   @@map("certificates")
 }
 
@@ -127,6 +134,9 @@ model Transaction {
   user          User?       @relation(fields: [userId], references: [id], onDelete: SetNull)
   item          AvatarItem? @relation(fields: [itemId], references: [id], onDelete: SetNull)
 
+  @@index([userId, paymentStatus])
+  @@index([userId, itemId, paymentStatus])
+  @@index([createdAt])
   @@map("transactions")
 }
 
@@ -142,6 +152,48 @@ model Report {
 
   @@index([status, createdAt])
   @@map("reports")
+}
+
+model Poll {
+  id        String      @id @default(uuid())
+  question  String      @db.VarChar(200)
+  status    String      @default("active") @db.VarChar(20)
+  startsAt  DateTime    @default(now()) @map("starts_at")
+  endsAt    DateTime    @map("ends_at")
+  createdAt DateTime    @default(now()) @map("created_at")
+  options   PollOption[]
+  votes     PollVote[]
+
+  @@index([status, endsAt])
+  @@map("polls")
+}
+
+model PollOption {
+  id       String     @id @default(uuid())
+  pollId   String     @map("poll_id")
+  label    String     @db.VarChar(120)
+  position Int
+  poll     Poll       @relation(fields: [pollId], references: [id], onDelete: Cascade)
+  votes    PollVote[]
+
+  @@unique([pollId, position])
+  @@map("poll_options")
+}
+
+model PollVote {
+  id        String      @id @default(uuid())
+  pollId    String      @map("poll_id")
+  optionId  String      @map("option_id")
+  userId    String      @map("user_id")
+  createdAt DateTime    @default(now()) @map("created_at")
+  updatedAt DateTime    @updatedAt @map("updated_at")
+  poll      Poll        @relation(fields: [pollId], references: [id], onDelete: Cascade)
+  option    PollOption  @relation(fields: [optionId], references: [id], onDelete: Cascade)
+  user      User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([pollId, userId])
+  @@index([optionId])
+  @@map("poll_votes")
 }
 
 // CMS / Control Center models
@@ -169,5 +221,6 @@ model Media {
   path         String
   createdAt    DateTime @default(now()) @map("created_at")
 
+  @@index([mimeType, createdAt])
   @@map("media")
 }

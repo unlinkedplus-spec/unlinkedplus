@@ -19,6 +19,7 @@ export interface User {
   id: string;
   username: string;
   createdAt: string;
+  role?: string;
   profile: Profile | null;
 }
 
@@ -130,6 +131,42 @@ export function getXpProgress(xp: number): { current: number; next: number; pct:
     }
   }
   return { current: 0, next: 50, pct: 0 };
+}
+
+export interface PollOptionResult {
+  id: string;
+  label: string;
+  position: number;
+  votes: number;
+  percentage: number;
+}
+
+export interface Poll {
+  id: string;
+  question: string;
+  status: string;
+  startsAt: string;
+  endsAt: string;
+  isOpen: boolean;
+  totalVotes: number;
+  myVoteId: string | null;
+  options: PollOptionResult[];
+}
+
+export interface Confession {
+  id: string;
+  content: string;
+  createdAt: string;
+  isAnonymous: boolean;
+  user: {
+    username: string;
+    profile?: {
+      avatarConfig?: unknown;
+      mentalLevel?: number;
+    };
+  } | null;
+  reactionCount: number;
+  commentCount: number;
 }
 
 export const POST_CATEGORIES = [

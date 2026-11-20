@@ -1,13 +1,14 @@
 'use client';
 
-export type TabId = 'feed' | 'create' | 'avatar' | 'shop' | 'profile';
+export type TabId = 'feed' | 'confession' | 'spill' | 'avatar' | 'shop' | 'profile';
 
 const TABS: { id: TabId; icon: string; label: string }[] = [
-  { id: 'feed',    icon: '🏠', label: 'Beranda' },
-  { id: 'create',  icon: '✍️', label: 'Spill'   },
-  { id: 'avatar',  icon: '🧑‍💼', label: 'Avatar'  },
-  { id: 'shop',    icon: '🛒', label: 'Toko'    },
-  { id: 'profile', icon: '👤', label: 'Profil'  },
+  { id: 'feed',       icon: '🏠', label: 'Beranda'  },
+  { id: 'confession', icon: '🎭', label: 'Confess' },
+  { id: 'spill',     icon: '✍️', label: 'Spill'    },
+  { id: 'avatar',     icon: '🧑‍💼', label: 'Avatar'  },
+  { id: 'shop',       icon: '🛒', label: 'Toko'    },
+  { id: 'profile',    icon: '👤', label: 'Profil'  },
 ];
 
 interface Props {

@@ -1,53 +1,8 @@
 /* ============================================================
    unlinked+ — main.css
-   Global design tokens, reset, utility classes, keyframes.
-   Consumed by landing.css and app.css.
+   Global reset and basic styles.
    ============================================================ */
 
-/* ----------------------------------------------------------
-   Google Fonts import fallback (also loaded via <link> in HTML)
-   ---------------------------------------------------------- */
-@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800;900&family=Inter:wght@400;500;600&display=swap');
-
-/* ----------------------------------------------------------
-   Design Tokens
-   ---------------------------------------------------------- */
-:root {
-  /* Colors */
-  --color-yellow:      #F5C542;
-  --color-orange:      #F57C00;
-  --color-navy:        #172B4D;
-  --color-navy-light:  #2D4080;
-  --color-white:       #FAFAFA;
-  --color-gray-100:    #F0F0F0;
-  --color-gray-400:    #9CA3AF;
-  --color-danger:      #EF4444;
-  --color-success:     #22C55E;
-
-  /* Typography */
-  --font-display: 'Nunito', sans-serif;
-  --font-body:    'Inter', sans-serif;
-
-  /* Spacing scale (multiples of 4px) */
-  --space-1: 4px;
-  --space-2: 8px;
-  --space-3: 12px;
-  --space-4: 16px;
-  --space-5: 20px;
-  --space-6: 24px;
-  --space-7: 28px;
-  --space-8: 32px;
-
-  /* Border radius */
-  --radius-sm:   6px;
-  --radius-md:   12px;
-  --radius-lg:   20px;
-  --radius-pill: 9999px;
-}
-
-/* ----------------------------------------------------------
-   Global Reset
-   ---------------------------------------------------------- */
 *,
 *::before,
 *::after {
@@ -61,9 +16,9 @@ html {
 }
 
 body {
-  font-family: var(--font-body);
-  background: var(--color-white);
-  color: var(--color-navy);
+  font-family: 'DM Sans', sans-serif;
+  background: #fbfbfc;
+  color: #19233a;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -75,7 +30,7 @@ svg {
 }
 
 button {
-  font-family: var(--font-body);
+  font-family: 'DM Sans', sans-serif;
   cursor: pointer;
 }
 
@@ -84,173 +39,8 @@ a {
   text-decoration: none;
 }
 
-/* ----------------------------------------------------------
-   Button Utilities
-   ---------------------------------------------------------- */
-.btn-primary {
-  display: inline-block;
-  background: var(--color-yellow);
-  color: var(--color-navy);
-  padding: 12px 24px;
-  border-radius: var(--radius-pill);
-  font-weight: 700;
-  font-size: 1rem;
-  border: none;
-  cursor: pointer;
-  transition: transform 0.15s ease, box-shadow 0.15s ease, opacity 0.15s ease;
-  text-align: center;
-  line-height: 1.2;
-}
-
-.btn-primary:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(245, 197, 24, 0.45);
-}
-
-.btn-primary:active {
-  transform: translateY(0);
-  box-shadow: none;
-}
-
-.btn-primary:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-  transform: none;
-  box-shadow: none;
-}
-
-.btn-secondary {
-  display: inline-block;
-  background: var(--color-navy);
-  color: var(--color-white);
-  padding: 12px 24px;
-  border-radius: var(--radius-pill);
-  font-weight: 700;
-  font-size: 1rem;
-  border: none;
-  cursor: pointer;
-  transition: transform 0.15s ease, box-shadow 0.15s ease, opacity 0.15s ease;
-  text-align: center;
-  line-height: 1.2;
-}
-
-.btn-secondary:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(26, 39, 68, 0.35);
-}
-
-.btn-secondary:active {
-  transform: translateY(0);
-  box-shadow: none;
-}
-
-.btn-secondary:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-  transform: none;
-  box-shadow: none;
-}
-
-.btn-ghost {
-  display: inline-block;
-  background: transparent;
-  color: var(--color-navy);
-  padding: 12px 24px;
-  border-radius: var(--radius-pill);
-  font-weight: 700;
-  font-size: 1rem;
-  border: 2px solid var(--color-navy);
-  cursor: pointer;
-  transition: transform 0.15s ease, background 0.15s ease;
-  text-align: center;
-  line-height: 1.2;
-}
-
-.btn-ghost:hover {
-  background: var(--color-navy);
-  color: var(--color-white);
-  transform: translateY(-2px);
-}
-
-.btn-full {
-  width: 100%;
-}
-
-.btn-sm {
-  padding: 8px 16px;
-  font-size: 0.85rem;
-}
-
-/* ----------------------------------------------------------
-   Badge Utility
-   ---------------------------------------------------------- */
-.badge {
-  display: inline-block;
-  padding: 2px 10px;
-  border-radius: var(--radius-pill);
-  font-size: 0.75rem;
-  font-weight: 700;
-  line-height: 1.4;
-}
-
-/* ----------------------------------------------------------
-   Modal Utilities
-   ---------------------------------------------------------- */
-.modal-overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.6);
-  z-index: 100;
-}
-
-.modal-overlay[hidden] {
-  display: none;
-}
-
-.modal-card {
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  background: var(--color-white);
-  border-radius: var(--radius-lg);
-  padding: 24px;
-  z-index: 101;
-  max-width: 90vw;
-  width: 420px;
-  max-height: 90vh;
-  overflow-y: auto;
-}
-
-.modal-card[hidden] {
-  display: none;
-}
-
-/* ----------------------------------------------------------
-   Keyframe Animations
-   ---------------------------------------------------------- */
-@keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(24px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@keyframes pulse-soft {
-  0%, 100% {
-    transform: scale(1);
-  }
-  50% {
-    transform: scale(1.04);
-  }
-}
-
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
+input,
+textarea,
+select {
+  font-family: 'DM Sans', sans-serif;
 }
