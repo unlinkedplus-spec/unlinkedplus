@@ -63,11 +63,8 @@ export default function AppPage() {
 
   function handleAuthSuccess() {
     setAuthModal(false);
-    if (resetToken) {
-      setResetToken('');
-      router.replace('/app');
-    }
-    void checkAuth();
+    setResetToken('');
+    router.push('/');
   }
 
   function handleLogout() {
