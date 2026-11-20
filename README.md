@@ -1,8 +1,8 @@
-# SambatIn 💔
+# Unlinked+ 💔
 
 **"LinkedIn untuk Orang yang Lagi Gagal."**
 
-SambatIn is a mobile-first Indonesian social platform where users celebrate career failures, workplace grievances, and HRD rejections anonymously — using cute cartoon avatars instead of real photos. It is the Anti-LinkedIn: sarkastik, empatik, and built for *budak korporat* and fresh graduates who are tired of seeing people flex on the other platform.
+Unlinked+ is a mobile-first Indonesian social platform where users celebrate career failures, workplace grievances, and HRD rejections anonymously — using cute cartoon avatars instead of real photos. It is the Anti-LinkedIn: sarkastik, empatik, and built for *budak korporat* and fresh graduates who are tired of seeing people flex on the other platform.
 
 ---
 
@@ -62,20 +62,20 @@ Posting and receiving reactions earns **XP** (Mental Baja Points). XP drives you
 | 2 | Tahan Banting | 50 – 149 |
 | 3 | Kebal Revisi | 150 – 299 |
 | 4 | Kebal PHP HRD | 300 – 499 |
-| 5 | Suhu Sambat | 500+ |
+| 5 | Suhu Unlinked+ | 500+ |
 
 ### 4. Generator "Sertifikat Kegagalan" Siap Share
 Every post has a **Buat Sertifikat** button. Clicking it opens a modal with an official-looking failure certificate parody:
 
 > *SERTIFIKAT RESMI KEGAGALAN — Dengan bangga mengumumkan bahwa [Username] telah sukses [Kategori Kegagalan]*
 
-The certificate includes your avatar, an "APPROVED BY HRD NERAKA" stamp, and a SambatIn watermark. Download it as a PNG via `html2canvas` and share to X, TikTok, or IG Story.
+The certificate includes your avatar, an "APPROVED BY HRD NERAKA" stamp, and a Unlinked+ watermark. Download it as a PNG via `html2canvas` and share to X, TikTok, or IG Story.
 
 ### 5. Toko Avatar & Lencana (Simulasi Monetisasi QRIS)
-The **Toko Sambat** tab offers exclusive items:
+The **Toko Unlinked+** tab offers exclusive items:
 - 🕶️ Kacamata Melorot (Rp10.000)
-- 🏆 Lencana Sultan Sambat (Rp15.000)
-- 🧙 Lencana Suhu Sambat (Rp12.000)
+- 🏆 Lencana Sultan Unlinked+ (Rp15.000)
+- 🧙 Lencana Suhu Unlinked+ (Rp12.000)
 - 🎭 Pack Ekspresi Lengkap (Rp15.000)
 
 Clicking **Beli** opens an instant QRIS payment simulation modal. Confirming fires a confetti animation, unlocks the item, and makes it available in the Avatar Builder immediately.
