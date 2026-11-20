@@ -12,6 +12,7 @@ import type { Post } from '../lib/types';
 import { relativeTime } from '../lib/time';
 import { buildAvatarSVG } from '../lib/avatar-svg';
 import AuthModal from './AuthModal';
+import DashboardMobile from './DashboardMobile';
 
 export type DashboardVariant = 'chibi' | 'sameboat';
 
@@ -26,15 +27,21 @@ const H = 1024;
 
 export default function DashboardPixel({ variant, authenticated, preview = false }: Props) {
   const [scale, setScale] = useState(1);
+  const [mobile, setMobile] = useState(false);
   const [posts, setPosts] = useState<Post[]>([]);
   const [content, setContent] = useState('');
   const [posting, setPosting] = useState(false);
   const [error, setError] = useState('');
   const [authOpen, setAuthOpen] = useState(false);
+  const [emojiOpen, setEmojiOpen] = useState(false);
+  const [toolNote, setToolNote] = useState('');
   const [mine, setMine] = useState<Record<string, { pukpuk: boolean; ngakak: boolean; sama: boolean }>>({});
 
   useEffect(() => {
-    const fit = () => setScale(Math.min(1, window.innerWidth / W));
+    const fit = () => {
+      setMobile(window.innerWidth < 900 || new URLSearchParams(window.location.search).has('mobile'));
+      setScale(Math.min(1, window.innerWidth / W));
+    };
     fit();
     window.addEventListener('resize', fit);
     return () => window.removeEventListener('resize', fit);
@@ -88,6 +95,8 @@ export default function DashboardPixel({ variant, authenticated, preview = false
   const bg = isChibi ? '/images/dash/mockup-chibi.png' : '/images/dash/mockup-sameboat.png';
   const post = posts[0];
 
+  if (mobile) return <DashboardMobile variant={variant} authenticated={authenticated} />;
+
   return (
     <div className="px-root">
       <style jsx global>{`
@@ -97,12 +106,20 @@ export default function DashboardPixel({ variant, authenticated, preview = false
           background-image:url('${bg}');background-size:${W}px ${H}px;background-repeat:no-repeat}
         .px-hit{position:absolute;display:block;cursor:pointer;background:transparent;border:0;padding:0}
         .px-cover{position:absolute;background:#fff;border-radius:16px;border:1px solid #EDEFF6;box-sizing:border-box}
-        .px-input{position:absolute;left:545px;top:476px;width:600px;height:74px;border:0;outline:0;resize:none;
-          background:#fff;color:#172B4D;font:500 13px/1.5 Inter,sans-serif;padding:2px 0}
+        /* Cover the mockup's composer box at its exact coordinates (no double edge). */
+        .px-input{position:absolute;left:550px;top:469px;width:610px;height:58px;border:1px solid #EEF0F7;border-radius:14px;
+          outline:0;resize:none;background:#fff;color:#172B4D;font:500 13px/1.45 Inter,sans-serif;padding:8px 12px;box-sizing:border-box}
         .px-input::placeholder{color:#9AA3B8}
-        .px-spill{position:absolute;left:1032px;top:538px;width:132px;height:38px;border-radius:999px;border:0;
-          background:#F5C542;color:#172B4D;font:800 12.5px Inter,sans-serif;cursor:pointer}
-        .px-spill:disabled{opacity:.6;cursor:default}
+        .px-tool{position:absolute;display:flex;align-items:center;justify-content:center;background:transparent;border:0;cursor:pointer;
+          font:700 11px Inter,sans-serif;color:#172B4D}
+        .px-emoji{position:absolute;left:545px;top:545px;background:#fff;border:1px solid #E6E9F4;border-radius:12px;padding:8px;
+          display:flex;gap:6px;z-index:5;box-shadow:0 8px 20px rgba(23,43,77,.12)}
+        .px-emoji button{background:transparent;border:0;font-size:18px;cursor:pointer}
+        .px-note{position:absolute;left:545px;top:585px;font-size:11px;color:#C2410C;z-index:5;background:#fff;border-radius:8px;padding:4px 8px}
+        /* Transparent hit area exactly over the mockup's real Spill It! button. */
+        .px-spill{position:absolute;left:1040px;top:525px;width:118px;height:48px;border-radius:999px;border:0;
+          background:transparent;color:transparent;font-size:0;cursor:pointer}
+        .px-spill:disabled{cursor:default}
         /* Coordinates below are relative to the post card (459,600). */
         .px-post-av{position:absolute;left:16px;top:9px;width:50px;height:50px;border-radius:50%;overflow:hidden;background:#F1EEFF}
         .px-post-av svg{width:50px;height:50px;display:block}
@@ -135,17 +152,17 @@ export default function DashboardPixel({ variant, authenticated, preview = false
           {isChibi ? (
             <>
               <Link className="px-hit" style={{ left: 283, top: 344, width: 228, height: 46 }} href="/features/spill" aria-label="Buat Spill Sekarang" />
-              <Link className="px-hit" style={{ left: 520, top: 344, width: 198, height: 46 }} href="/app?tab=feed" aria-label="Jelajahi Komunitas" />
+              <Link className="px-hit" style={{ left: 520, top: 344, width: 198, height: 46 }} href="/" aria-label="Jelajahi Komunitas" />
             </>
           ) : (
-            <Link className="px-hit" style={{ left: 283, top: 310, width: 230, height: 46 }} href="/app?tab=feed" aria-label="Lihat Rekomendasi" />
+            <Link className="px-hit" style={{ left: 283, top: 310, width: 230, height: 46 }} href="/" aria-label="Lihat Rekomendasi" />
           )}
 
           {/* Sidebar navigation */}
           <Link className="px-hit" style={{ left: 24, top: 96, width: 208, height: 46 }} href="/" aria-label="Beranda" />
-          <Link className="px-hit" style={{ left: 24, top: 144, width: 208, height: 46 }} href="/app?tab=feed" aria-label="Discover" />
+          <Link className="px-hit" style={{ left: 24, top: 144, width: 208, height: 46 }} href="/" aria-label="Discover" />
           <Link className="px-hit" style={{ left: 24, top: 194, width: 208, height: 46 }} href="/features/spill" aria-label="Spill" />
-          <Link className="px-hit" style={{ left: 24, top: 244, width: 208, height: 46 }} href="/app?tab=feed" aria-label="Komunitas" />
+          <Link className="px-hit" style={{ left: 24, top: 244, width: 208, height: 46 }} href="/" aria-label="Komunitas" />
           <Link className="px-hit" style={{ left: 24, top: 294, width: 208, height: 46 }} href="/features/profil" aria-label="Profil" />
           {/* Fitur Seru — every item is a real page */}
           {[
@@ -156,14 +173,32 @@ export default function DashboardPixel({ variant, authenticated, preview = false
               href={`/features/${slug}`} aria-label={String(slug)} />
           ))}
           {/* Ruang Kamu */}
-          <Link className="px-hit" style={{ left: 256, top: 510, width: 190, height: 44 }} href="/app?tab=feed" aria-label="Ruang Beranda" />
+          <Link className="px-hit" style={{ left: 256, top: 510, width: 190, height: 44 }} href="/" aria-label="Ruang Beranda" />
           <Link className="px-hit" style={{ left: 256, top: 558, width: 190, height: 40 }} href="/features/spill" aria-label="Ruang Spill" />
           <Link className="px-hit" style={{ left: 256, top: 600, width: 190, height: 40 }} href="/features/avatar" aria-label="Ruang Avatar" />
           <Link className="px-hit" style={{ left: 256, top: 640, width: 190, height: 40 }} href="/features/toko" aria-label="Ruang Toko" />
           <Link className="px-hit" style={{ left: 256, top: 682, width: 190, height: 40 }} href="/features/profil" aria-label="Ruang Profil" />
 
+          {/* Composer tool buttons sit exactly over the mockup's icons */}
+          <Link className="px-tool" style={{ left: 548, top: 582, width: 80, height: 34 }}
+            href="/features/meme-studio" aria-label="Foto: buat kartu visual" />
+          <button className="px-tool" style={{ left: 636, top: 582, width: 86, height: 34 }}
+            onClick={() => setToolNote('Lampiran video belum tersedia di versi ini.')} aria-label="Video" />
+          <Link className="px-tool" style={{ left: 725, top: 582, width: 70, height: 34 }}
+            href="/features/poll" aria-label="Poll" />
+          <button className="px-tool" style={{ left: 800, top: 582, width: 100, height: 34 }}
+            onClick={() => setEmojiOpen(!emojiOpen)} aria-label="Ekspresi" />
+          {emojiOpen && (
+            <div className="px-emoji">
+              {['😮‍💨', '😭', '😂', '💪', '🫶', '☕', '🌱', '🙃'].map((e) => (
+                <button key={e} onClick={() => { setContent(content + e); setEmojiOpen(false); }}>{e}</button>
+              ))}
+            </div>
+          )}
+          {toolNote && <span className="px-note">{toolNote}</span>}
+
           {/* Composer overlay */}
-          <textarea className="px-input" value={content} onChange={(e) => setContent(e.target.value)}
+          <textarea className="px-input" value={content} onChange={(e) => { setContent(e.target.value); setToolNote(''); }}
             placeholder={isChibi
               ? 'Ada yang mau kamu ceritakan?\nTulis cerita, curhat, atau sekadar berbagi...'
               : 'Ada yang mau kamu ceritakan?\nTurut bertambah, sebentar di sini...'}

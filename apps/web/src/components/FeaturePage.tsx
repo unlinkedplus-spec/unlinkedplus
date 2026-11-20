@@ -75,13 +75,17 @@ const H = 1024;
 
 export default function FeaturePage({ slug, authenticated }: { slug: FeatureSlug; authenticated: boolean }) {
   const [scale, setScale] = useState(1);
+  const [mobile, setMobile] = useState(false);
   const [authOpen, setAuthOpen] = useState(false);
   const [created, setCreated] = useState<Post | null>(null);
   const [savedAvatar, setSavedAvatar] = useState(false);
   const meta = META[slug];
 
   useEffect(() => {
-    const fit = () => setScale(Math.min(1, window.innerWidth / W));
+    const fit = () => {
+      setMobile(window.innerWidth < 900 || new URLSearchParams(window.location.search).has('mobile'));
+      setScale(Math.min(1, window.innerWidth / W));
+    };
     fit();
     window.addEventListener('resize', fit);
     return () => window.removeEventListener('resize', fit);
@@ -159,6 +163,53 @@ export default function FeaturePage({ slug, authenticated }: { slug: FeatureSlug
     return null;
   }, [slug, authenticated]);
 
+  const panel = (
+    <>
+      <Link className="fp-back" href="/">← Kembali ke Beranda</Link>
+      <p className="fp-kicker">{meta.kicker}</p>
+      <h1 className="fp-title">{meta.title}</h1>
+      <p className="fp-desc">{meta.desc}</p>
+      {body}
+      {slug === 'personality-test' && <PersonalityTest />}
+      {slug === 'meme-studio' && <MemeStudio />}
+      {slug === 'mental-reset' && <MentalReset />}
+    </>
+  );
+
+  if (mobile) {
+    return (
+      <div className="fm-root">
+        <style jsx global>{`
+          .fm-root{background:#F7F8FE;min-height:100vh;color:#172B4D;font-family:Inter,sans-serif;padding-bottom:76px}
+          .fm-top{position:sticky;top:0;z-index:30;background:#fff;border-bottom:1px solid #EEF0F7;display:flex;align-items:center;gap:8px;padding:10px 14px}
+          .fm-top img{width:36px;height:36px;object-fit:contain}
+          .fm-word{font:900 20px Nunito,sans-serif;letter-spacing:-.6px}.fm-word b{color:#F5C542}
+          .fm-tag{font-size:9px;color:#8A94AD;font-weight:600;margin-left:2px}
+          .fm-panel{padding:16px}.fm-panel .fp-title{font-size:24px}
+          .fm-panel .fp-card,.fm-panel .fp-result,.fm-panel .fp-preview{max-width:none}
+          .fm-bottom{position:fixed;bottom:0;left:0;right:0;z-index:40;background:#fff;border-top:1px solid #EEF0F7;display:flex;padding:6px 4px 10px}
+          .fm-bottom a{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;text-decoration:none;font-size:9px;font-weight:700;color:#8A94AD}
+          .fm-bottom a.on{color:#172B4D}.fm-bottom a.on::before{content:'';height:3px;width:22px;background:#F5C542;border-radius:9px;margin-bottom:2px}
+          .fm-bottom span{font-size:17px;line-height:1}
+        `}</style>
+        <header className="fm-top">
+          <img src="/images/mascot-avatar.png" alt="" />
+          <span className="fm-word">unlinked<b>+</b></span>
+          <span className="fm-tag">{meta.title}</span>
+        </header>
+        <main className="fm-panel">{panel}</main>
+        <nav className="fm-bottom">
+          <Link href="/"><span>⌂</span>Beranda</Link>
+          <Link href="/features/spill"><span>⚡</span>Spill</Link>
+          <Link href="/features/avatar"><span>☻</span>Avatar</Link>
+          <Link href="/features/toko"><span>▣</span>Toko</Link>
+          <Link href="/features/profil"><span>♙</span>Profil</Link>
+        </nav>
+        {authOpen && <AuthModal onSuccess={() => { setAuthOpen(false); window.location.reload(); }} onClose={() => setAuthOpen(false)} defaultTab="login" />}
+      </div>
+    );
+  }
+
   return (
     <div className="fp-root">
       <style jsx global>{`
@@ -189,6 +240,18 @@ export default function FeaturePage({ slug, authenticated }: { slug: FeatureSlug
         .fp-caption{font:900 20px Nunito,sans-serif;text-align:center;color:#172B4D}
         .fp-btn{background:#F5C542;border:0;border-radius:999px;padding:11px 20px;font:800 12px Inter,sans-serif;color:#172B4D;cursor:pointer}
         .fp-nav{position:absolute;color:transparent;font-size:0}
+        .fm-root{background:#F7F8FE;min-height:100vh;color:#172B4D;font-family:Inter,sans-serif;padding-bottom:76px}
+        .fm-top{position:sticky;top:0;z-index:30;background:#fff;border-bottom:1px solid #EEF0F7;display:flex;align-items:center;gap:8px;padding:10px 14px}
+        .fm-top img{width:36px;height:36px;object-fit:contain}
+        .fm-word{font:900 20px Nunito,sans-serif;letter-spacing:-.6px}.fm-word b{color:#F5C542}
+        .fm-tag{font-size:9px;color:#8A94AD;font-weight:600;margin-left:2px}
+        .fm-panel{padding:16px}
+        .fm-panel .fp-title{font-size:24px}
+        .fm-panel .fp-card,.fm-panel .fp-result,.fm-panel .fp-preview{max-width:none}
+        .fm-bottom{position:fixed;bottom:0;left:0;right:0;z-index:40;background:#fff;border-top:1px solid #EEF0F7;display:flex;padding:6px 4px 10px}
+        .fm-bottom a{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;text-decoration:none;font-size:9px;font-weight:700;color:#8A94AD}
+        .fm-bottom a.on{color:#172B4D}.fm-bottom a.on::before{content:'';height:3px;width:22px;background:#F5C542;border-radius:9px;margin-bottom:2px}
+        .fm-bottom span{font-size:17px;line-height:1}
       `}</style>
       <div className="fp-stage">
         <div className="fp-canvas">
@@ -206,16 +269,7 @@ export default function FeaturePage({ slug, authenticated }: { slug: FeatureSlug
             <Link key={s as string} className="fp-hit fp-nav" style={{ left: 24, top: top as number, width: 208, height: 44 }}
               href={`/features/${s}`} aria-label={String(s)} />
           ))}
-          <div className="fp-panel">
-            <Link className="fp-back" href="/">← Kembali ke Beranda</Link>
-            <p className="fp-kicker">{meta.kicker}</p>
-            <h1 className="fp-title">{meta.title}</h1>
-            <p className="fp-desc">{meta.desc}</p>
-            {body}
-            {slug === 'personality-test' && <PersonalityTest />}
-            {slug === 'meme-studio' && <MemeStudio />}
-            {slug === 'mental-reset' && <MentalReset />}
-          </div>
+          <div className="fp-panel">{panel}</div>
         </div>
       </div>
       {authOpen && (

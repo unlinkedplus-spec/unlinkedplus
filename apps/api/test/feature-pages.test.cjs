@@ -55,6 +55,39 @@ test('Fitur Seru: local-only features are honest and functional', () => {
   assert.ok(feature.includes('Belum ada lowongan terverifikasi'), 'opportunity board must not show fake listings');
 });
 
+test('UI/UX: desktop keeps pixel fidelity while mobile uses a readable layout', () => {
+  assert.ok(fs.existsSync(path.join(webSrc, 'components', 'DashboardMobile.tsx')));
+  const mobile = read('components', 'DashboardMobile.tsx');
+  assert.match(dash, /import DashboardMobile from '\.\/DashboardMobile'/);
+  assert.match(dash, /window\.innerWidth < 900/);
+  assert.match(dash, /if \(mobile\) return <DashboardMobile/);
+  assert.match(mobile, /dm-bottom/);
+  assert.match(mobile, /position:fixed;bottom:0/);
+  assert.match(mobile, /dm-hero/);
+  assert.match(mobile, /dm-spill/);
+  assert.match(mobile, /createPost\(/);
+  assert.match(mobile, /toggleReaction\(/);
+  assert.match(feature, /chrome-top\.png/);
+});
+
+test('UI/UX: feature pages also switch to a mobile layout', () => {
+  assert.match(feature, /const \[mobile, setMobile\] = useState\(false\)/);
+  assert.match(feature, /window\.innerWidth < 900/);
+  assert.match(feature, /if \(mobile\)/);
+  assert.match(feature, /fm-bottom/);
+  assert.match(feature, /position:fixed;bottom:0/);
+});
+
+test('UI/UX: composer overlays are real and do not duplicate the mockup button', () => {
+  assert.match(dash, /background:transparent;color:transparent;font-size:0/);
+  assert.match(dash, /left:1040px;top:525px;width:118px;height:48px/);
+  assert.match(dash, /href="\/features\/meme-studio"/);
+  assert.match(dash, /href="\/features\/poll"/);
+  assert.match(dash, /setEmojiOpen\(!emojiOpen\)/);
+  assert.match(dash, /Lampiran video belum tersedia/);
+  assert.doesNotMatch(dash, /\.px-spill\{[^}]*background:#F5C542/);
+});
+
 test('Fitur Seru: pages keep the mockup chrome', () => {
   assert.match(feature, /chrome-top\.png/);
   assert.match(feature, /chrome-side\.png/);
