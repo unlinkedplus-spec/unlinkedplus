@@ -23,7 +23,7 @@ test('H4 regression: root serves the two-state Beranda with navigable CTAs', () 
   const dash = fs.readFileSync(path.join(webRoot, 'components', 'DashboardPixel.tsx'), 'utf8');
   assert.match(dash, /mockup-sameboat\.png/);
   assert.match(dash, /mockup-chibi\.png/);
-  assert.match(dash, /['"]\/app\?tab=spill['"]/);
+  assert.match(dash, /['"]\/features\/spill['"]/);
   assert.match(dash, /['"]\/app['"]/);
   assert.match(dash, /<AuthModal/);
   assert.match(dash, /createPost\(/);

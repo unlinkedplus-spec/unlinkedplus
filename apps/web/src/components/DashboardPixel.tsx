@@ -125,8 +125,8 @@ export default function DashboardPixel({ variant, authenticated, preview = false
           {/* Real navigation over the mockup's controls */}
           <Link className="px-hit" style={{ left: 24, top: 8, width: 240, height: 56 }} href="/" aria-label="Beranda" />
           <Link className="px-hit" style={{ left: 1300, top: 12, width: 152, height: 44 }}
-            href={authenticated ? '/app?tab=profile' : '/app'} aria-label="Gabung Sekarang / Profil" />
-          <Link className="px-hit" style={{ left: 1460, top: 6, width: 58, height: 58 }} href="/app?tab=profile" aria-label="Avatar" />
+            href={authenticated ? '/features/profil' : '/app'} aria-label="Gabung Sekarang / Profil" />
+          <Link className="px-hit" style={{ left: 1460, top: 6, width: 58, height: 58 }} href="/features/profil" aria-label="Avatar" />
           <input className="px-input" style={{ left: 570, top: 20, width: 390, height: 30, padding: 0, fontSize: 12 }}
             placeholder="Cari cerita, topik, atau teman seperjuangan..." aria-label="Cari" readOnly />
           <Link className="px-hit" style={{ left: 1244, top: 16, width: 42, height: 42 }} href="/app?tab=shop" aria-label="Toko" />
@@ -134,7 +134,7 @@ export default function DashboardPixel({ variant, authenticated, preview = false
           {/* Hero CTA positions differ per mockup */}
           {isChibi ? (
             <>
-              <Link className="px-hit" style={{ left: 283, top: 344, width: 228, height: 46 }} href="/app?tab=spill" aria-label="Buat Spill Sekarang" />
+              <Link className="px-hit" style={{ left: 283, top: 344, width: 228, height: 46 }} href="/features/spill" aria-label="Buat Spill Sekarang" />
               <Link className="px-hit" style={{ left: 520, top: 344, width: 198, height: 46 }} href="/app?tab=feed" aria-label="Jelajahi Komunitas" />
             </>
           ) : (
@@ -144,15 +144,23 @@ export default function DashboardPixel({ variant, authenticated, preview = false
           {/* Sidebar navigation */}
           <Link className="px-hit" style={{ left: 24, top: 96, width: 208, height: 46 }} href="/" aria-label="Beranda" />
           <Link className="px-hit" style={{ left: 24, top: 144, width: 208, height: 46 }} href="/app?tab=feed" aria-label="Discover" />
-          <Link className="px-hit" style={{ left: 24, top: 194, width: 208, height: 46 }} href="/app?tab=spill" aria-label="Spill" />
+          <Link className="px-hit" style={{ left: 24, top: 194, width: 208, height: 46 }} href="/features/spill" aria-label="Spill" />
           <Link className="px-hit" style={{ left: 24, top: 244, width: 208, height: 46 }} href="/app?tab=feed" aria-label="Komunitas" />
-          <Link className="px-hit" style={{ left: 24, top: 294, width: 208, height: 46 }} href="/app?tab=profile" aria-label="Profil" />
+          <Link className="px-hit" style={{ left: 24, top: 294, width: 208, height: 46 }} href="/features/profil" aria-label="Profil" />
+          {/* Fitur Seru — every item is a real page */}
+          {[
+            ['poll', 374], ['personality-test', 424], ['meme-studio', 474],
+            ['store', 524], ['opportunity-board', 574], ['mental-reset', 624],
+          ].map(([slug, top]) => (
+            <Link key={slug as string} className="px-hit" style={{ left: 24, top: top as number, width: 208, height: 44 }}
+              href={`/features/${slug}`} aria-label={String(slug)} />
+          ))}
           {/* Ruang Kamu */}
           <Link className="px-hit" style={{ left: 256, top: 510, width: 190, height: 44 }} href="/app?tab=feed" aria-label="Ruang Beranda" />
-          <Link className="px-hit" style={{ left: 256, top: 558, width: 190, height: 40 }} href="/app?tab=spill" aria-label="Ruang Spill" />
-          <Link className="px-hit" style={{ left: 256, top: 600, width: 190, height: 40 }} href="/app?tab=avatar" aria-label="Ruang Avatar" />
-          <Link className="px-hit" style={{ left: 256, top: 640, width: 190, height: 40 }} href="/app?tab=shop" aria-label="Ruang Toko" />
-          <Link className="px-hit" style={{ left: 256, top: 682, width: 190, height: 40 }} href="/app?tab=profile" aria-label="Ruang Profil" />
+          <Link className="px-hit" style={{ left: 256, top: 558, width: 190, height: 40 }} href="/features/spill" aria-label="Ruang Spill" />
+          <Link className="px-hit" style={{ left: 256, top: 600, width: 190, height: 40 }} href="/features/avatar" aria-label="Ruang Avatar" />
+          <Link className="px-hit" style={{ left: 256, top: 640, width: 190, height: 40 }} href="/features/toko" aria-label="Ruang Toko" />
+          <Link className="px-hit" style={{ left: 256, top: 682, width: 190, height: 40 }} href="/features/profil" aria-label="Ruang Profil" />
 
           {/* Composer overlay */}
           <textarea className="px-input" value={content} onChange={(e) => setContent(e.target.value)}
