@@ -4,6 +4,8 @@
  * baseURL is NEXT_PUBLIC_API_URL (e.g. http://192.168.1.20/api) or /api in dev via Next.js rewrite.
  */
 import type {
+  AdImpression,
+  AdPreferences,
   AdminOverview,
   AdminPost,
   AdminReport,
@@ -137,6 +139,12 @@ export const getMyPosts = (page = 1) =>
   req<PaginatedResponse<Post>>('GET', `/users/me/posts?page=${page}`);
 
 export const getMyStats = () => req<UserStats>('GET', '/users/me/stats');
+
+// Ad preferences (SEC-04) — user controlled, never content-targeted.
+export const getAdPreferences = () => req<AdPreferences>('GET', '/users/me/ad-preferences');
+export const updateAdPreferences = (data: AdPreferences) =>
+  req<AdPreferences>('PATCH', '/users/me/ad-preferences', data);
+export const recordAdImpression = () => req<AdImpression>('POST', '/users/me/ad-impressions');
 
 // Avatar items
 export const getAvatarItems = () => req<AvatarItem[]>('GET', '/avatar/items');

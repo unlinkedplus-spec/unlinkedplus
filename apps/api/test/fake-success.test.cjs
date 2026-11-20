@@ -114,3 +114,18 @@ test('H3 regression: static demo copy does not claim fake publication or real pa
   assert.ok(html.includes('Simulasikan Pembayaran'));
   assert.ok(!html.includes('Konfirmasi Bayar'));
 });
+
+test('SEC-06: admin metrics separate simulated transactions from real income', () => {
+  const apiSrc = path.join(__dirname, '..', 'src');
+  const service = fs.readFileSync(path.join(apiSrc, 'admin', 'admin-dashboard.service.ts'), 'utf8');
+  assert.match(service, /simulatedTransactions/);
+  assert.match(service, /simulatedRevenue/);
+  assert.match(service, /paymentStatus: 'simulated'/);
+  assert.match(service, /paymentStatus: 'paid'/);
+  const webPage = path.join(__dirname, '..', '..', 'web', 'src', 'app', 'admin', 'dashboard', 'page.tsx');
+  if (fs.existsSync(webPage)) {
+    const ui = fs.readFileSync(webPage, 'utf8');
+    assert.match(ui, /Transaksi simulasi/);
+    assert.match(ui, /bukan pendapatan nyata/);
+  }
+});

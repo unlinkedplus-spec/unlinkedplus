@@ -6,11 +6,13 @@ import {
   Get,
   Param,
   Patch,
+  Post,
   Query,
 } from '@nestjs/common';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
 import { Public } from '../common/decorators/public.decorator';
 import { UpdateProfileDto } from './dto/update-profile.dto';
+import { AdPreferencesDto } from './dto/ad-preferences.dto';
 import { UsersService } from './users.service';
 
 interface AuthenticatedUser {
@@ -46,6 +48,24 @@ export class UsersController {
   @Get('me/stats')
   myStats(@CurrentUser() user: AuthenticatedUser) {
     return this.usersService.getStats(user.userId);
+  }
+
+  @Get('me/ad-preferences')
+  adPreferences(@CurrentUser() user: AuthenticatedUser) {
+    return this.usersService.getAdPreferences(user.userId);
+  }
+
+  @Patch('me/ad-preferences')
+  updateAdPreferences(
+    @CurrentUser() user: AuthenticatedUser,
+    @Body() dto: AdPreferencesDto,
+  ) {
+    return this.usersService.setAdPreferences(user.userId, dto);
+  }
+
+  @Post('me/ad-impressions')
+  recordAdImpression(@CurrentUser() user: AuthenticatedUser) {
+    return this.usersService.recordAdImpression(user.userId);
   }
 
   @Public()

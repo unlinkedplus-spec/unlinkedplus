@@ -141,7 +141,11 @@ export interface AdminStats {
   reports: number;
   pendingReports: number;
   paidTransactions: number;
+  simulatedTransactions: number;
+  /** Real money received via an official gateway. Always 0 while simulation-only. */
   revenue: number;
+  /** Demo-only volume. Never presented as real income. */
+  simulatedRevenue: number;
   activePolls: number;
   pendingCertificates: number;
 }
@@ -159,6 +163,19 @@ export interface AdminOverview {
 export interface UserStats {
   totalPosts: number;
   totalReactionsReceived: number;
+}
+
+/** SEC-04: user-owned ad settings, never inferred from Spill content. */
+export interface AdPreferences {
+  adsEnabled: boolean;
+  maxPerSession: number;
+}
+
+export interface AdImpression {
+  allowed: boolean;
+  count: number;
+  limit: number;
+  reason: 'ok' | 'capped' | 'disabled';
 }
 
 export const LEVEL_NAMES: Record<number, string> = {

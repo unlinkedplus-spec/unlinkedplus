@@ -3,7 +3,7 @@
 /** Mobile layout: same visual language as the mockup, readable at phone widths. */
 import Link from 'next/link';
 import { useCallback, useEffect, useState } from 'react';
-import { createPost, getPosts, toggleReaction } from '../lib/api';
+import { createPost, getPosts, recordAdImpression, toggleReaction } from '../lib/api';
 import type { Post } from '../lib/types';
 import { relativeTime } from '../lib/time';
 import { buildAvatarSVG } from '../lib/avatar-svg';
@@ -27,11 +27,17 @@ export default function DashboardMobile({ variant, authenticated }: { variant: V
   const [emojiOpen, setEmojiOpen] = useState(false);
   const [toolNote, setToolNote] = useState('');
   const [mine, setMine] = useState<Record<string, { pukpuk: boolean; ngakak: boolean; sama: boolean }>>({});
+  const [showAd, setShowAd] = useState(!authenticated);
 
   const load = useCallback(async () => {
     try { const res = await getPosts(1); setPosts(res.data.slice(0, 3)); } catch { setPosts([]); }
   }, []);
   useEffect(() => { void load(); }, [load]);
+
+  useEffect(() => {
+    if (!authenticated) return;
+    void recordAdImpression().then((r) => setShowAd(r.allowed)).catch(() => setShowAd(true));
+  }, [authenticated]);
 
   const submit = async () => {
     if (!authenticated) { setAuthOpen(true); return; }
@@ -201,12 +207,19 @@ export default function DashboardMobile({ variant, authenticated }: { variant: V
           );
         })}
 
-        <div className="dm-sponsor">
-          <span className="label">SPONSORED</span>
-          <b>Upgrade skill, jangan cuma upgrade emosi!</b>
-          <p>Kursus online praktis untuk karier lebih baik.</p>
-          <button>Pelajari Sekarang →</button>
-        </div>
+        {showAd && (
+          <div className="dm-sponsor">
+            <span className="label">SPONSORED</span>
+            <b>Upgrade skill, jangan cuma upgrade emosi!</b>
+            <p>Kursus online praktis untuk karier lebih baik.</p>
+            <button>Pelajari Sekarang →</button>
+          </div>
+        )}
+        {!showAd && (
+          <p className="dm-err" style={{ marginTop: 12 }}>
+            Iklan disembunyikan sesuai preferensi/batas harian kamu. Tidak ada iklan berbasis isi Spill.
+          </p>
+        )}
 
         <div className="dm-card">
           <h3>🔥 Tren Hari Ini</h3>

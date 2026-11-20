@@ -1,10 +1,10 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
-import { authLogout, authMe, getMyPosts, getMyStats } from '../lib/api';
+import { authLogout, authMe, getAdPreferences, getMyPosts, getMyStats, updateAdPreferences } from '../lib/api';
 import { buildAvatarSVG } from '../lib/avatar-svg';
 import { getLevelName, getXpProgress, LEVEL_THRESHOLDS } from '../lib/types';
-import type { Post, User, UserStats } from '../lib/types';
+import type { AdPreferences, Post, User, UserStats } from '../lib/types';
 import { relativeTime } from '../lib/time';
 
 interface Props {
@@ -24,19 +24,31 @@ export default function ProfileTab({ onLogout }: Props) {
   const [stats, setStats] = useState<UserStats | null>(null);
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
+  const [ads, setAds] = useState<AdPreferences>({ adsEnabled: true, maxPerSession: 5 });
+  const [adSaving, setAdSaving] = useState(false);
 
   const load = useCallback(async () => {
     try {
-      const [me, s, myPosts] = await Promise.all([authMe(), getMyStats(), getMyPosts(1)]);
+      const [me, s, myPosts, adPrefs] = await Promise.all([
+        authMe(), getMyStats(), getMyPosts(1), getAdPreferences(),
+      ]);
       setUser(me);
       setStats(s);
       setPosts(myPosts.data);
+      setAds(adPrefs);
     } finally {
       setLoading(false);
     }
   }, []);
 
   useEffect(() => { void load(); }, [load]);
+
+  async function saveAds(next: AdPreferences) {
+    setAds(next);
+    setAdSaving(true);
+    try { await updateAdPreferences(next); } catch { void load(); }
+    finally { setAdSaving(false); }
+  }
 
   async function handleLogout() {
     try { await authLogout(); } catch {}
@@ -121,6 +133,34 @@ export default function ProfileTab({ onLogout }: Props) {
           </div>
         </div>
       )}
+
+      {/* SEC-04: user-controlled ad preferences */}
+      <section className="bg-white rounded-2xl p-5 border border-gray-100 mt-4">
+        <h3 className="font-display font-bold text-sm text-navy mb-2">Preferensi iklan</h3>
+        <p className="text-xs text-gray-500 mb-4">
+          Iklan tidak pernah dipilih berdasarkan isi Spill, dugaan kondisi mental, atau identitas anonim kamu.
+        </p>
+        <label className="flex items-center justify-between text-sm mb-3">
+          <span>Tampilkan iklan</span>
+          <input
+            type="checkbox"
+            checked={ads.adsEnabled}
+            disabled={adSaving}
+            onChange={(e) => void saveAds({ ...ads, adsEnabled: e.target.checked })}
+          />
+        </label>
+        <label className="flex items-center justify-between text-sm gap-3">
+          <span>Batas iklan per hari</span>
+          <select
+            value={ads.maxPerSession}
+            disabled={adSaving || !ads.adsEnabled}
+            onChange={(e) => void saveAds({ ...ads, maxPerSession: Number(e.target.value) })}
+            className="border border-gray-200 rounded-lg px-3 py-1.5 text-sm"
+          >
+            {[1, 3, 5, 10, 20].map((n) => <option key={n} value={n}>{n} iklan</option>)}
+          </select>
+        </label>
+      </section>
 
       {/* Logout */}
       <button

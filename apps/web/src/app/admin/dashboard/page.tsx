@@ -32,6 +32,7 @@ const STAT_LABELS: { key: keyof AdminStats; label: string }[] = [
   { key: 'activePosts', label: 'Postingan aktif' },
   { key: 'comments', label: 'Komentar' },
   { key: 'pendingReports', label: 'Laporan pending' },
+  { key: 'simulatedTransactions', label: 'Transaksi simulasi' },
   { key: 'activePolls', label: 'Poll aktif' },
   { key: 'pendingCertificates', label: 'Sertifikat pending' },
 ];
@@ -213,6 +214,9 @@ export default function AdminDashboardPage() {
 
         <button onClick={() => void load()} className="text-xs font-bold text-primary hover:underline mb-4">Muat ulang data</button>
 
+        <p className="text-xs text-gray-400 mb-3">
+          Transaksi simulasi bukan pendapatan nyata. Belum ada payment gateway resmi yang terhubung.
+        </p>
         <section className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
           {STAT_LABELS.map(({ key, label }) => (
             <div key={key} className="bg-white rounded-2xl border border-gray-100 p-4">

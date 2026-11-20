@@ -34,6 +34,8 @@ model Profile {
   mentalLevel  Int     @default(1) @map("mental_level")
   mentalXp     Int     @default(0) @map("mental_xp")
   bio          String?
+  // SEC-04: user-controlled ad preferences. Never derived from Spill content.
+  adPreferences Json? @map("ad_preferences")
   isAnonymous  Boolean @default(true) @map("is_anonymous")
   user         User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 

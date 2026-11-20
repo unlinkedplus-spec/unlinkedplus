@@ -7,6 +7,7 @@ import {
 } from '@nestjs/common';
 import { createHash, randomUUID } from 'crypto';
 import { Request, Response } from 'express';
+import { ConfigService } from '@nestjs/config';
 import { MetricsService } from '../metrics/metrics.service';
 import { RedisService } from '../../redis/redis.service';
 
@@ -53,7 +54,14 @@ export class RateLimitGuard implements CanActivate {
   constructor(
     private readonly redis: RedisService,
     private readonly metrics: MetricsService,
+    private readonly config?: ConfigService,
   ) {}
+
+  /** SEC-05: operators can tune limits via THROTTLE_TTL / THROTTLE_LIMIT. */
+  private setting(name: string, fallback: number, min: number, max: number) {
+    const raw = Number(this.config?.get<string>(name));
+    return Number.isFinite(raw) && raw >= min && raw <= max ? raw : fallback;
+  }
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const http = context.switchToHttp();
@@ -72,7 +80,9 @@ export class RateLimitGuard implements CanActivate {
     ].includes(request.path);
     const mutation = !['GET', 'HEAD', 'OPTIONS'].includes(request.method);
     const bucket = auth ? 'auth' : mutation ? 'write' : 'read';
-    const limit = auth ? 10 : mutation ? 30 : 180;
+    const base = this.setting('THROTTLE_LIMIT', 100, 10, 1000);
+    const limit = auth ? Math.max(5, Math.ceil(base / 10))
+      : mutation ? Math.max(10, Math.ceil(base / 3)) : base;
 
     const ipHash = createHash('sha256').update(request.ip || 'unknown').digest('hex');
     const key = `limit:${bucket}:${ipHash}`;
@@ -83,7 +93,7 @@ export class RateLimitGuard implements CanActivate {
         SLIDING_WINDOW_LUA,
         1,
         key,
-        '60000',
+        String(this.setting('THROTTLE_TTL', 60000, 1000, 3_600_000)),
         String(limit),
         member,
       )) as [number, number, number];

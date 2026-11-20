@@ -174,6 +174,54 @@ test('rate limit uses Redis counter, returns429 and fails closed on Redis outage
   await assert.rejects(unavailable.canActivate(context), status(503));
 });
 
+test('SEC-05: rate limit reads THROTTLE_TTL/LIMIT from config with safe defaults', async () => {
+  const guard = new RateLimitGuard(
+    { client: { eval: async (_script, _keys, _key, ttl, limit) => [1, Number(limit) - 1, 0] } },
+    { countRateLimit() {} },
+    { get: key => key === 'THROTTLE_LIMIT' ? '200' : key === 'THROTTLE_TTL' ? '120000' : undefined },
+  );
+  let seen;
+  guard.redis.client.eval = async (_s, _n, _key, ttl, limit) => { seen = { ttl, limit }; return [1, 9, 0]; };
+  const ctx = { switchToHttp: () => ({ getRequest: () => ({ path: '/posts', method: 'GET', ip: '1.2.3.4' }), getResponse: () => ({ setHeader() {} }) }) };
+  assert.equal(await guard.canActivate(ctx), true);
+  assert.equal(seen.ttl, '120000');
+  assert.equal(seen.limit, '200');
+
+  const fallback = new RateLimitGuard(
+    { client: { eval: async (_s, _n, _key, ttl, limit) => { seen = { ttl, limit }; return [1, 9, 0]; } } },
+    { countRateLimit() {} },
+  );
+  await fallback.canActivate(ctx);
+  assert.equal(seen.ttl, '60000');
+  assert.equal(seen.limit, '100');
+});
+
+test('SEC-03: CSP uses a per-request nonce instead of unsafe-inline', () => {
+  const fs = require('node:fs');
+  const path = require('node:path');
+  const webRoot = [
+    path.join(__dirname, '..', '..', '..', 'apps', 'web', 'src', 'middleware.ts'),
+    path.join(__dirname, '..', '..', 'web_build', 'src', 'middleware.ts'),
+  ].find((p) => fs.existsSync(p));
+  if (!webRoot) throw new Error('web middleware not found');
+  const middleware = fs.readFileSync(webRoot, 'utf8');
+  assert.match(middleware, /randomUUID\(\)/);
+  assert.match(middleware, /'nonce-\$\{nonce\}'/);
+  assert.match(middleware, /'strict-dynamic'/);
+  assert.match(middleware, /headers\.set\('x-nonce', nonce\)/);
+  assert.ok(!middleware.includes("script-src 'self' 'unsafe-inline'"));
+
+  const nginxPath = [
+    path.join(__dirname, '..', '..', '..', 'docker', 'host-nginx.conf'),
+    path.join(__dirname, '..', 'docker', 'host-nginx.conf'),
+  ].find((p) => fs.existsSync(p));
+  if (!nginxPath) throw new Error('nginx config not found');
+  const nginx = fs.readFileSync(nginxPath, 'utf8');
+  assert.ok(!nginx.includes("script-src 'self' 'unsafe-inline'"),
+    'nginx must not emit a competing static CSP');
+  assert.match(nginx, /SEC-03: CSP with a per-request nonce/);
+});
+
 test('environment rejects placeholder JWT and insecure HTTPS cookie settings', () => {
   const base = { DATABASE_URL: 'postgresql://x:x@localhost/x', REDIS_URL: 'redis://localhost', JWT_SECRET: 'a'.repeat(64), FRONTEND_URL: 'https://example.invalid', STORAGE_PATH: '/data', COOKIE_SECURE: 'true' };
   assert.equal(validateEnvironment(base), base);

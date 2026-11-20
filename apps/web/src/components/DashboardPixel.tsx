@@ -7,7 +7,7 @@
  */
 import Link from 'next/link';
 import { useCallback, useEffect, useState } from 'react';
-import { createPost, getPosts, toggleReaction } from '../lib/api';
+import { createPost, getPosts, recordAdImpression, toggleReaction } from '../lib/api';
 import type { Post } from '../lib/types';
 import { relativeTime } from '../lib/time';
 import { buildAvatarSVG } from '../lib/avatar-svg';
@@ -35,6 +35,7 @@ export default function DashboardPixel({ variant, authenticated, preview = false
   const [authOpen, setAuthOpen] = useState(false);
   const [emojiOpen, setEmojiOpen] = useState(false);
   const [toolNote, setToolNote] = useState('');
+  const [showAd, setShowAd] = useState(!authenticated);
   const [mine, setMine] = useState<Record<string, { pukpuk: boolean; ngakak: boolean; sama: boolean }>>({});
 
   useEffect(() => {
@@ -56,6 +57,11 @@ export default function DashboardPixel({ variant, authenticated, preview = false
     }
   }, []);
   useEffect(() => { void load(); }, [load]);
+
+  useEffect(() => {
+    if (!authenticated) return;
+    void recordAdImpression().then((r) => setShowAd(r.allowed)).catch(() => setShowAd(true));
+  }, [authenticated]);
 
   const submit = async () => {
     if (!authenticated) { setAuthOpen(true); return; }
@@ -226,6 +232,15 @@ export default function DashboardPixel({ variant, authenticated, preview = false
                 ))}
               </div>
               <div className="px-foot"><span>💬 128</span><span>🔖 45</span><span>↗ Simpan</span><span>↗ Bagikan</span></div>
+            </div>
+          )}
+
+          {/* SEC-04: suppress the mockup's baked-in ad when the user opts out or hits the cap. */}
+          {!showAd && (
+            <div className="px-cover" style={{ left: 460, top: 805, width: 715, height: 135 }}>
+              <span style={{ position: 'absolute', left: 20, top: 52, fontSize: 12, color: '#8A94AD' }}>
+                Iklan disembunyikan sesuai preferensi/batas harian kamu. Tidak ada iklan berbasis isi Spill.
+              </span>
             </div>
           )}
         </div>

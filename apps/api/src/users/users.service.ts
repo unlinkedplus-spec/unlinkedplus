@@ -8,11 +8,18 @@ import {
 import { Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { UpdateProfileDto } from './dto/update-profile.dto';
+import { AdPreferencesDto } from './dto/ad-preferences.dto';
+import { RedisService } from '../redis/redis.service';
 import { PUBLIC_USER_SELECT } from './user.select';
+
+const DEFAULT_AD_PREFERENCES = { adsEnabled: true, maxPerSession: 5 };
 
 @Injectable()
 export class UsersService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly redis?: RedisService,
+  ) {}
 
   async findByUsername(username: string) {
     const user = await this.prisma.user.findUnique({
@@ -130,6 +137,49 @@ export class UsersService {
       commentsReceived: comments,
       mentalXp: profile?.mentalXp ?? 0,
       mentalLevel: profile?.mentalLevel ?? 1,
+    };
+  }
+
+  /** SEC-04: preferences come only from the user, never from Spill content. */
+  async getAdPreferences(userId: string) {
+    const profile = await this.prisma.profile.findUnique({
+      where: { userId }, select: { adPreferences: true },
+    });
+    const raw = profile?.adPreferences;
+    if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return { ...DEFAULT_AD_PREFERENCES };
+    const value = raw as Record<string, unknown>;
+    const max = Number(value.maxPerSession);
+    return {
+      adsEnabled: typeof value.adsEnabled === 'boolean' ? value.adsEnabled : DEFAULT_AD_PREFERENCES.adsEnabled,
+      maxPerSession: Number.isInteger(max) && max >= 1 && max <= 20
+        ? max : DEFAULT_AD_PREFERENCES.maxPerSession,
+    };
+  }
+
+  async setAdPreferences(userId: string, dto: AdPreferencesDto) {
+    const value = { adsEnabled: dto.adsEnabled, maxPerSession: dto.maxPerSession };
+    await this.prisma.profile.upsert({
+      where: { userId },
+      create: { userId, adPreferences: value },
+      update: { adPreferences: value },
+    });
+    return value;
+  }
+
+  /** SEC-04: daily frequency cap, independent of any Spill content. */
+  async recordAdImpression(userId: string) {
+    const prefs = await this.getAdPreferences(userId);
+    if (!prefs.adsEnabled || !this.redis) {
+      return { allowed: false, count: 0, limit: prefs.maxPerSession, reason: 'disabled' };
+    }
+    const key = `adimpr:${userId}`;
+    const count = await this.redis.client.incr(key);
+    if (count === 1) await this.redis.client.expire(key, 86_400);
+    return {
+      allowed: count <= prefs.maxPerSession,
+      count,
+      limit: prefs.maxPerSession,
+      reason: count <= prefs.maxPerSession ? 'ok' : 'capped',
     };
   }
 }
