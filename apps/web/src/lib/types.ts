@@ -161,6 +161,12 @@ export interface AdminOverview {
 }
 
 export interface UserStats {
+  posts: number;
+  reactionsReceived: number;
+  commentsReceived: number;
+  mentalXp: number;
+  mentalLevel: number;
+  /** Backwards-compatible aliases. */
   totalPosts: number;
   totalReactionsReceived: number;
 }

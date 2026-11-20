@@ -4,6 +4,7 @@
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { createPost, getPosts, recordAdImpression, toggleReaction } from '../lib/api';
+import AuthModal from './AuthModal';
 
 type View = 'landing' | 'beranda';
 const W = 1536;
@@ -13,6 +14,7 @@ export default function ExactMockup({ view, authenticated }: { view: View; authe
   const [scale, setScale] = useState(1);
   const [content, setContent] = useState('');
   const [showAd, setShowAd] = useState(!authenticated);
+  const [authTab, setAuthTab] = useState<'login' | 'register' | null>(null);
 
   useEffect(() => {
     const fit = () => setScale(Math.min(1, window.innerWidth / W));
@@ -61,18 +63,36 @@ export default function ExactMockup({ view, authenticated }: { view: View; authe
 
           {isLanding ? (
             <>
-              <Link className="ex-hit" style={{ left: 1240, top: 24, width: 70, height: 44 }} href="/app" aria-label="Masuk" />
-              <Link className="ex-hit" style={{ left: 1310, top: 20, width: 180, height: 48 }} href="/app" aria-label="Gabung Sekarang" />
-              <Link className="ex-hit" style={{ left: 130, top: 388, width: 245, height: 52 }} href="/app" aria-label="Gabung Sekarang hero" />
-              <Link className="ex-hit" style={{ left: 388, top: 388, width: 200, height: 52 }} href="/features/spill" aria-label="Lihat Preview" />
-              <Link className="ex-hit" style={{ left: 60, top: 760, width: 180, height: 44 }} href="/app?tab=feed" aria-label="Jelajahi Fitur" />
-              <Link className="ex-hit" style={{ left: 440, top: 956, width: 175, height: 40 }} href="/app" aria-label="Gabung Sekarang bawah" />
+              <button className="ex-hit" style={{ left: 1240, top: 24, width: 70, height: 44 }}
+                onClick={() => setAuthTab('login')} aria-label="Masuk">Masuk</button>
+              <button className="ex-hit" style={{ left: 1310, top: 20, width: 180, height: 48 }}
+                onClick={() => setAuthTab('register')} aria-label="Gabung Sekarang">Gabung Sekarang</button>
+              <button className="ex-hit" style={{ left: 130, top: 388, width: 245, height: 52 }}
+                onClick={() => setAuthTab('register')} aria-label="Gabung Sekarang hero">Gabung Sekarang</button>
+              <Link className="ex-hit" style={{ left: 388, top: 388, width: 200, height: 52 }}
+                href="/exact?view=beranda" aria-label="Lihat Preview">Lihat Preview</Link>
+              <Link className="ex-hit" style={{ left: 60, top: 760, width: 180, height: 44 }}
+                href="/app?tab=feed" aria-label="Jelajahi Fitur">Jelajahi Fitur</Link>
+              <button className="ex-hit" style={{ left: 440, top: 956, width: 175, height: 40 }}
+                onClick={() => setAuthTab('register')} aria-label="Gabung Sekarang bawah">Gabung Sekarang</button>
+
+              {/* "Kenapa unlinked+?" strip — every item is a real feature */}
               {[
-                [800, 595, 215, 90, '/features/poll'], [1020, 595, 215, 90, '/features/poll'],
-                [1240, 595, 240, 90, '/features/meme-studio'], [800, 695, 215, 90, '/features/personality-test'],
-                [1020, 695, 215, 90, '/features/mental-reset'], [1240, 695, 240, 90, '/features/mental-reset'],
+                [270, 455, 150, 90, '/features/spill'], [430, 455, 150, 90, '/features/same-boat'],
+                [610, 455, 150, 90, '/features/mental-armor'], [780, 455, 170, 90, '/features/comeback-journey'],
+                [960, 455, 160, 90, '/features/dear-future-me'], [1140, 455, 200, 90, '/features/toko'],
               ].map(([l, t, w, h, href], i) => (
-                <Link key={i} className="ex-hit" style={{ left: l as number, top: t as number, width: w as number, height: h as number }}
+                <Link key={`why-${i}`} className="ex-hit" style={{ left: l as number, top: t as number, width: w as number, height: h as number }}
+                  href={href as string} aria-label={`kenapa-${i}`} />
+              ))}
+
+              {/* "Lebih dari Sekadar Sosial Media" cards */}
+              {[
+                [800, 595, 215, 90, '/features/unlinked-rooms'], [1020, 595, 215, 90, '/features/support-circles'],
+                [1240, 595, 240, 90, '/features/dear-future-me'], [800, 695, 215, 90, '/features/tiny-wins'],
+                [1020, 695, 215, 90, '/features/hall-of-almost'], [1240, 695, 240, 90, '/features/mental-reset'],
+              ].map(([l, t, w, h, href], i) => (
+                <Link key={`card-${i}`} className="ex-hit" style={{ left: l as number, top: t as number, width: w as number, height: h as number }}
                   href={href as string} aria-label={`fitur-${i}`} />
               ))}
             </>
@@ -123,6 +143,13 @@ export default function ExactMockup({ view, authenticated }: { view: View; authe
           )}
         </div>
       </div>
+      {authTab && (
+        <AuthModal
+          defaultTab={authTab}
+          onSuccess={() => { setAuthTab(null); window.location.href = '/'; }}
+          onClose={() => setAuthTab(null)}
+        />
+      )}
     </div>
   );
 }

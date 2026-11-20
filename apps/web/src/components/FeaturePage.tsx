@@ -15,7 +15,9 @@ import type { Post } from '../lib/types';
 export type FeatureSlug =
   | 'poll' | 'personality-test' | 'meme-studio'
   | 'store' | 'toko' | 'opportunity-board' | 'mental-reset'
-  | 'spill' | 'avatar' | 'profil';
+  | 'spill' | 'avatar' | 'profil'
+  | 'unlinked-rooms' | 'support-circles' | 'dear-future-me'
+  | 'tiny-wins' | 'hall-of-almost';
 
 const META: Record<FeatureSlug, { title: string; kicker: string; desc: string }> = {
   poll: { title: 'Poll', kicker: 'REALITY CHECK', desc: 'Polling komunitas tentang hal-hal yang sering kita alami, bukan sekadar angka.' },
@@ -28,6 +30,11 @@ const META: Record<FeatureSlug, { title: string; kicker: string; desc: string }>
   spill: { title: 'Spill', kicker: 'RUANG CERITA KITA', desc: 'Tulis cerita dengan mode yang kamu pilih sendiri. Pemilik Spill yang menentukan caranya dibaca.' },
   avatar: { title: 'Avatar', kicker: 'EKSPRESIKAN DIRI', desc: 'Rakit avatar kecil yang mewakili perasaanmu hari ini—bukan pencapaianmu.' },
   profil: { title: 'Profil', kicker: 'RUANG KAMU', desc: 'Profil, level, dan cerita kamu. Keluar dari sini kapan saja.' },
+  'unlinked-rooms': { title: 'Unlinked Rooms', kicker: 'KOMUNITAS', desc: 'Ruang kecil berdasarkan pengalaman dan minat—bukan kompetisi followers.' },
+  'support-circles': { title: 'Support Circles', kicker: 'DUKUNGAN', desc: 'Lingkaran dukungan kecil untuk saling mendengar, bukan menghakimi.' },
+  'dear-future-me': { title: 'Dear Future Me', kicker: 'SURAT UNTUK DIRI', desc: 'Tulis pesan untuk dirimu sendiri dan tentukan kapan boleh dibuka kembali.' },
+  'tiny-wins': { title: 'Tiny Wins', kicker: 'LANGKAH KECIL', desc: 'Tantangan kecil yang bisa diselesaikan dalam sehari. Tidak perlu heroik.' },
+  'hall-of-almost': { title: 'Hall of Almost', kicker: 'GALERI USAHA', desc: 'Galeri penghargaan untuk usaha yang belum berhasil. Bukan panggung pencapaian.' },
 };
 
 const QUIZ: Array<{
@@ -205,7 +212,7 @@ export default function FeaturePage({ slug, authenticated }: { slug: FeatureSlug
           <Link href="/features/toko"><span>▣</span>Toko</Link>
           <Link href="/features/profil"><span>♙</span>Profil</Link>
         </nav>
-        {authOpen && <AuthModal onSuccess={() => { setAuthOpen(false); window.location.reload(); }} onClose={() => setAuthOpen(false)} defaultTab="login" />}
+        {authOpen && <AuthModal onSuccess={() => { setAuthOpen(false); window.location.href = '/'; }} onClose={() => setAuthOpen(false)} defaultTab="login" />}
       </div>
     );
   }
@@ -273,7 +280,7 @@ export default function FeaturePage({ slug, authenticated }: { slug: FeatureSlug
         </div>
       </div>
       {authOpen && (
-        <AuthModal onSuccess={() => { setAuthOpen(false); window.location.reload(); }} onClose={() => setAuthOpen(false)} defaultTab="login" />
+        <AuthModal onSuccess={() => { setAuthOpen(false); window.location.href = '/'; }} onClose={() => setAuthOpen(false)} defaultTab="login" />
       )}
     </div>
   );

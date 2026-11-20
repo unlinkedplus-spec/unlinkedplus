@@ -82,7 +82,9 @@ export class AuthController {
    */
   private cookieOptions(request: Request) {
     const secure = request.protocol === 'https' || this.config.get('COOKIE_SECURE') === 'true';
+    // Path '/' is required so the session cookie is also sent to '/', where
+    // the two-state root decides between public landing and logged-in Beranda.
     return { httpOnly: true, secure, sameSite: 'strict' as const,
-      path: '/api', maxAge: SESSION_SECONDS * 1000 };
+      path: '/', maxAge: SESSION_SECONDS * 1000 };
   }
 }

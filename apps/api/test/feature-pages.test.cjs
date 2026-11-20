@@ -88,6 +88,42 @@ test('UI/UX: composer overlays are real and do not duplicate the mockup button',
   assert.doesNotMatch(dash, /\.px-spill\{[^}]*background:#F5C542/);
 });
 
+test('Landing feature cards route to their matching functional pages', () => {
+  const dash = fs.readFileSync(path.join(webSrc, 'components', 'ExactMockup.tsx'), 'utf8');
+  const route = read('app', 'features', '[slug]', 'page.tsx');
+  for (const slug of ['unlinked-rooms', 'support-circles', 'dear-future-me', 'tiny-wins', 'hall-of-almost']) {
+    assert.ok(dash.includes(`/features/${slug}`), `card must link ${slug}`);
+    assert.ok(route.includes(`'${slug}'`), `route must allow ${slug}`);
+  }
+  const landing = fs.readFileSync(path.join(webSrc, 'components', 'LandingFeaturePage.tsx'), 'utf8');
+  assert.match(landing, /function GroupList/);
+  assert.match(landing, /function FutureMe/);
+  assert.match(landing, /function TinyWins/);
+  assert.match(landing, /function Hall/);
+  assert.match(landing, /function Breathing/);
+  assert.match(landing, /unlinkedplus_/);
+  assert.match(landing, /localStorage/);
+  assert.ok(landing.includes('bukan penanganan medis'));
+});
+
+test('Four official pillars are first-class functional pages', () => {
+  const route = read('app', 'features', '[slug]', 'page.tsx');
+  const dash = fs.readFileSync(path.join(webSrc, 'components', 'ExactMockup.tsx'), 'utf8');
+  for (const slug of ['spill', 'same-boat', 'mental-armor', 'comeback-journey']) {
+    assert.ok(route.includes(`'${slug}'`), `route must allow ${slug}`);
+    assert.ok(dash.includes(`/features/${slug}`), `landing strip must link ${slug}`);
+  }
+  const landing = fs.readFileSync(path.join(webSrc, 'components', 'LandingFeaturePage.tsx'), 'utf8');
+  assert.match(landing, /function SameBoat/);
+  assert.match(landing, /function MentalArmor/);
+  assert.match(landing, /function ComebackJourney/);
+  assert.match(landing, /getPosts\(/);
+  assert.match(landing, /getMyStats\(/);
+  assert.match(landing, /unlinkedplus_comeback/);
+  assert.ok(landing.includes('bukan skor kesehatan mental'));
+  assert.ok(landing.includes('Tidak ada peringkat publik'));
+});
+
 test('Fitur Seru: pages keep the mockup chrome', () => {
   assert.match(feature, /chrome-top\.png/);
   assert.match(feature, /chrome-side\.png/);

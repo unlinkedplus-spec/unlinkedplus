@@ -30,3 +30,15 @@ test('Exact mockup: visual is exact, interactions are real overlays', () => {
   assert.match(component, /aria-label="Tulis spill"/);
   assert.match(component, /transform:scale\(\$\{scale\}\)/);
 });
+
+test('Exact landing: every CTA and menu opens auth or a real feature', () => {
+  assert.match(component, /import AuthModal from '\.\/AuthModal'/);
+  assert.match(component, /setAuthTab\('login'\)/);
+  assert.match(component, /setAuthTab\('register'\)/);
+  assert.match(component, /window\.location\.href = '\/'/);
+  assert.match(component, /aria-label="Lihat Preview"/);
+  assert.match(component, /kenapa-\$\{i\}/);
+  assert.match(component, /fitur-\$\{i\}/);
+  assert.ok(!component.includes('href="/app" aria-label="Masuk"'), 'landing Masuk must not jump to /app');
+  assert.ok(!component.includes('href="/app" aria-label="Gabung Sekarang"'), 'landing CTA must not jump to /app');
+});

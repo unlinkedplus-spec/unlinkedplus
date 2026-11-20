@@ -142,7 +142,7 @@ test('auth response exposes no JWT and sets strict HttpOnly cookie', async () =>
   assert.equal(cookie[2].httpOnly, true);
   assert.equal(cookie[2].sameSite, 'strict');
   assert.equal(cookie[2].secure, true);
-  assert.equal(cookie[2].path, '/api');
+  assert.equal(cookie[2].path, '/', 'cookie must be sent to the two-state root');
 });
 
 test('SEC-02: cookie becomes Secure over HTTPS even when COOKIE_SECURE=false', async () => {

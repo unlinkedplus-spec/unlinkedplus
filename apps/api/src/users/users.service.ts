@@ -137,6 +137,9 @@ export class UsersService {
       commentsReceived: comments,
       mentalXp: profile?.mentalXp ?? 0,
       mentalLevel: profile?.mentalLevel ?? 1,
+      // Backwards-compatible aliases used by the profile UI.
+      totalPosts: posts,
+      totalReactionsReceived: reactionsReceived,
     };
   }
 
