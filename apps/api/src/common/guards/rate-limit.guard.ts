@@ -63,7 +63,13 @@ export class RateLimitGuard implements CanActivate {
     // Endpoint operasional tidak boleh terkena limit (Prometheus, load balancer).
     if (request.path === '/health' || request.path === '/metrics') return true;
 
-    const auth = request.path === '/auth/login' || request.path === '/auth/register';
+    const auth = [
+      '/auth/login',
+      '/auth/register',
+      '/auth/forgot-password',
+      '/auth/reset-password',
+      '/auth/email',
+    ].includes(request.path);
     const mutation = !['GET', 'HEAD', 'OPTIONS'].includes(request.method);
     const bucket = auth ? 'auth' : mutation ? 'write' : 'read';
     const limit = auth ? 10 : mutation ? 30 : 180;

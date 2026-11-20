@@ -99,6 +99,7 @@ d:\Anti-LinkedIn\
     ├── feed.js             # Fail Feed, post creation, AI Sensor
     ├── certificate.js      # Certificate modal, html2canvas download
     ├── shop.js             # Shop catalog, QRIS modal, confetti
+    ├── storage.js          # Migrates legacy sambatin_* keys to unlinkedplus_*
     └── app.js              # Tab navigation, XP display, profile tab
 ```
 
@@ -113,6 +114,8 @@ External CDN dependencies (loaded from `<script>` tags — no install needed):
 
 All keys are prefixed `unlinkedplus_` to avoid collisions.
 
+**Backward compatibility:** builds from before the rename stored data under `sambatin_*`. `js/storage.js` runs before every other script, copies any legacy value into the matching `unlinkedplus_*` key (only when the new key is empty), and removes the old key. Existing users keep their posts, avatar, XP, purchases and reactions after upgrading.
+
 | Key | Type | Description |
 |-----|------|-------------|
 | `unlinkedplus_quota` | number | Remaining waitlist spots (starts at 142) |
@@ -124,6 +127,36 @@ All keys are prefixed `unlinkedplus_` to avoid collisions.
 | `unlinkedplus_xp` | number | Cumulative XP (Mental Baja Points) |
 | `unlinkedplus_username` | string | Display username shown in posts and profile |
 | `unlinkedplus_active_tab` | string | Last active bottom-nav tab, restored on reload |
+
+---
+
+## Full-stack app (`apps/api` + `apps/web`)
+
+The routed Next.js application talks to the NestJS API. These endpoints were added for moderation and account recovery:
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `GET` | `/admin/overview` | Aggregated stats, recent users/posts/reports and 7-day activity |
+| `GET` | `/admin/users` | Paginated user list (includes `role` and `status`) |
+| `GET` | `/admin/posts` | Paginated post list |
+| `PATCH` | `/admin/users/:id/status` | Activate or disable an account (cannot disable yourself) |
+| `POST` | `/auth/email` | Attach an email to the signed-in account for recovery |
+| `POST` | `/auth/forgot-password` | Send a single-use, 15-minute reset link (same response for unknown emails) |
+| `POST` | `/auth/reset-password` | Redeem a reset token or the one-time recovery code, then revoke all sessions |
+
+All `/admin/*` routes require a JWT session with `role === 'admin'`.
+
+The UI lives at:
+- `/admin/dashboard` — the new overview dashboard (stats, activity, users, reports)
+- `/admin` — the existing moderation desk
+- `/app` — sign-in modal with **Lupa kata sandi?** and reset flows; reset links open `/app?reset=<token>`
+
+`POST /auth/register` returns a one-time `recoveryCode`. Save it — it can be used in place of an emailed link and cannot be retrieved later. Reset tokens are stored only as SHA-256 hashes in `password_reset_tokens`.
+
+Mail delivery is configurable through `apps/api/.env`:
+- `MAIL_DRIVER=disabled` (default) — no email sent; use the recovery code
+- `MAIL_DRIVER=console` — log the reset link to the API console (local development)
+- `MAIL_DRIVER=webhook` — POST the message to `MAIL_WEBHOOK_URL`
 
 ---
 

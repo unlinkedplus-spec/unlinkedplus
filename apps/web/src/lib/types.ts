@@ -93,6 +93,61 @@ export interface PaginatedResponse<T> {
 
 export interface AuthResponse {
   user: User;
+  /** One-time recovery code. Store it somewhere safe; it cannot be retrieved later. */
+  recoveryCode?: string;
+}
+
+export interface RecoveryResponse {
+  success: boolean;
+  emailSent?: boolean;
+}
+
+export interface AdminUser extends User {
+  role: string;
+  status: string;
+}
+
+export interface AdminPost {
+  id: string;
+  content: string;
+  category: string;
+  status: string;
+  createdAt: string;
+  userId: string | null;
+  user: { id: string; username: string } | null;
+}
+
+export interface AdminReport {
+  id: string;
+  targetType: string;
+  targetId: string;
+  reason: string | null;
+  status: string;
+  createdAt: string;
+}
+
+export interface AdminStats {
+  users: number;
+  activeUsers: number;
+  posts: number;
+  activePosts: number;
+  comments: number;
+  reports: number;
+  pendingReports: number;
+  paidTransactions: number;
+  revenue: number;
+  activePolls: number;
+  pendingCertificates: number;
+}
+
+export interface AdminOverview {
+  stats: AdminStats;
+  recent: {
+    users: AdminUser[];
+    posts: AdminPost[];
+    reports: AdminReport[];
+  };
+  activity: { date: string; posts: number }[];
 }
 
 export interface UserStats {

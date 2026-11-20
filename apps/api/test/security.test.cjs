@@ -24,8 +24,10 @@ test('registration accepts pseudonyms and rejects identity/role injection', asyn
   for (const input of [
     { password: 'short' }, { password: 'x'.repeat(73) }, { password: '漢'.repeat(25) },
     { password: 'a-long-password', role: 'admin' },
-    { password: 'a-long-password', email: 'never-collected@example.invalid' },
+    { password: 'a-long-password', email: 'not-an-email' },
   ]) await assert.rejects(validate(input, RegisterDto), status(400));
+  const withEmail = await validate({ username: 'manusia_77', password: 'a-long-password', email: '  Human@Example.com ' }, RegisterDto);
+  assert.equal(withEmail.email, 'human@example.com');
 });
 
 test('avatar accepts only preset fields and rejects null, duplicate and untrusted SVG', async () => {
@@ -145,11 +147,15 @@ test('auth response exposes no JWT and sets strict HttpOnly cookie', async () =>
 
 test('rate limit uses Redis counter, returns429 and fails closed on Redis outage', async () => {
   let count = 0;
-  const guard = new RateLimitGuard({ client: { eval: async () => ++count } });
+  const metrics = { countRateLimit() {} };
+  const guard = new RateLimitGuard({ client: { eval: async () => {
+    count += 1;
+    return count <= 10 ? [1, 10 - count, 60000] : [0, 0, 1000];
+  } } }, metrics);
   const context = { switchToHttp: () => ({ getRequest: () => ({ path: '/auth/login', method: 'POST', ip: '127.0.0.1' }), getResponse: () => ({ setHeader() {} }) }) };
   for (let n = 0; n < 10; n++) assert.equal(await guard.canActivate(context), true);
   await assert.rejects(guard.canActivate(context), status(429));
-  const unavailable = new RateLimitGuard({ client: { eval: async () => { throw new Error('offline'); } } });
+  const unavailable = new RateLimitGuard({ client: { eval: async () => { throw new Error('offline'); } } }, metrics);
   await assert.rejects(unavailable.canActivate(context), status(503));
 });
 

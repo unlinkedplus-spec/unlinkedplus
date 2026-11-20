@@ -82,6 +82,54 @@ export default function FailFeed({ loggedIn, onAuthRequired, newPost }: Props) {
     setCertPost(post);
   }
 
+  function renderPost(post: Post) {
+    const avatarConfig = post.user?.profile?.avatarConfig ?? null;
+    const level = post.user?.profile?.mentalLevel ?? 1;
+    const levelColor = LEVEL_COLORS[level] ?? LEVEL_COLORS[1];
+    const catColor = CATEGORY_COLORS[post.category] ?? 'bg-gray-100 text-gray-600';
+
+    return (
+      <article key={post.id} className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100">
+        <div className="flex items-start gap-3 mb-3">
+          <svg viewBox="0 0 300 300" width="48" height="48" className="shrink-0 rounded-xl bg-primary/10">
+            <g dangerouslySetInnerHTML={{ __html: buildAvatarSVG(avatarConfig as Parameters<typeof buildAvatarSVG>[0]) }} />
+          </svg>
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2 flex-wrap">
+              <span className="font-bold text-navy text-sm">{post.user?.username ?? 'Anonim'}</span>
+              <span className={`text-xs px-2 py-0.5 rounded-full font-semibold ${levelColor}`}>
+                Lv.{level} {getLevelName(level)}
+              </span>
+            </div>
+            <div className="flex items-center gap-2 mt-0.5">
+              <span className={`text-xs px-2 py-0.5 rounded-full font-semibold ${catColor}`}>
+                {post.category}
+              </span>
+              <span className="text-xs text-gray-400">{relativeTime(post.createdAt)}</span>
+            </div>
+          </div>
+        </div>
+
+        <p className="text-sm text-navy/90 leading-relaxed mb-3">{post.content}</p>
+
+        <ReactionBar
+          postId={post.id}
+          initialCounts={post.reactionCounts ?? { pukpuk: 0, ngakak: 0, sama: 0 }}
+          loggedIn={loggedIn}
+        />
+
+        {post.userId && (
+          <button
+            onClick={() => handleCertClick(post)}
+            className="mt-3 text-xs text-gray-400 hover:text-accent transition font-medium"
+          >
+            🏆 Buat Sertifikat
+          </button>
+        )}
+      </article>
+    );
+  }
+
   return (
     <div className="max-w-lg mx-auto pb-28 px-4 pt-4">
       <h2 className="font-display font-black text-xl text-navy mb-4">🏠 Feed Gagal</h2>
@@ -109,57 +157,6 @@ export default function FailFeed({ loggedIn, onAuthRequired, newPost }: Props) {
           </>
         )}
         {posts.length === 0 && null}
-      </div>
-          const avatarConfig = post.user?.profile?.avatarConfig ?? null;
-          const level = post.user?.profile?.mentalLevel ?? 1;
-          const levelColor = LEVEL_COLORS[level] ?? LEVEL_COLORS[1];
-          const catColor = CATEGORY_COLORS[post.category] ?? 'bg-gray-100 text-gray-600';
-
-          return (
-            <article key={post.id} className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100">
-              {/* Header */}
-              <div className="flex items-start gap-3 mb-3">
-                <svg viewBox="0 0 300 300" width="48" height="48" className="shrink-0 rounded-xl bg-primary/10">
-                  <g dangerouslySetInnerHTML={{ __html: buildAvatarSVG(avatarConfig as Parameters<typeof buildAvatarSVG>[0]) }} />
-                </svg>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <span className="font-bold text-navy text-sm">{post.user?.username ?? 'Anonim'}</span>
-                    <span className={`text-xs px-2 py-0.5 rounded-full font-semibold ${levelColor}`}>
-                      Lv.{level} {getLevelName(level)}
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-2 mt-0.5">
-                    <span className={`text-xs px-2 py-0.5 rounded-full font-semibold ${catColor}`}>
-                      {post.category}
-                    </span>
-                    <span className="text-xs text-gray-400">{relativeTime(post.createdAt)}</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Content */}
-              <p className="text-sm text-navy/90 leading-relaxed mb-3">{post.content}</p>
-
-              {/* Reactions */}
-              <ReactionBar
-                postId={post.id}
-                initialCounts={post.reactionCounts ?? { pukpuk: 0, ngakak: 0, sama: 0 }}
-                loggedIn={loggedIn}
-              />
-
-              {/* Certificate button */}
-              {post.userId && (
-                <button
-                  onClick={() => handleCertClick(post)}
-                  className="mt-3 text-xs text-gray-400 hover:text-accent transition font-medium"
-                >
-                  🏆 Buat Sertifikat
-                </button>
-              )}
-            </article>
-          );
-        })}
       </div>
 
       {loading && <LoadingState message="Memuat spill..." />}

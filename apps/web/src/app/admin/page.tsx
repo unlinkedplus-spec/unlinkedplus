@@ -244,12 +244,17 @@ function Dashboard({ onLogout }: { onLogout: () => void }) {
           <span className="text-white/40">|</span>
           <span className="text-sm font-semibold text-white/80">Panel Moderasi</span>
         </div>
-        <button
-          onClick={onLogout}
-          className="text-sm text-white/60 hover:text-white transition"
-        >
-          Keluar
-        </button>
+        <div className="flex items-center gap-4">
+          <a href="/admin/dashboard" className="text-sm text-primary font-bold hover:underline">
+            Dashboard
+          </a>
+          <button
+            onClick={onLogout}
+            className="text-sm text-white/60 hover:text-white transition"
+          >
+            Keluar
+          </button>
+        </div>
       </header>
 
       <main className="max-w-5xl mx-auto px-4 py-8">

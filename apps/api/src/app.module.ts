@@ -13,6 +13,7 @@ import { PostsModule } from './posts/posts.module';
 import { ReactionsModule } from './reactions/reactions.module';
 import { CommentsModule } from './comments/comments.module';
 import { ReportsModule } from './reports/reports.module';
+import { AdminModule } from './admin/admin.module';
 import { AvatarsModule } from './avatars/avatars.module';
 import { StoreModule } from './store/store.module';
 import { CertificatesModule } from './certificates/certificates.module';
@@ -27,7 +28,7 @@ import { validateEnvironment } from './common/environment';
     ConfigModule.forRoot({ isGlobal: true, validate: validateEnvironment }),
     CacheModule, MetricsModule,
     PrismaModule, RedisModule, HealthModule, AuthModule, UsersModule, PostsModule,
-    ReactionsModule, CommentsModule, ReportsModule, AvatarsModule, StoreModule, CertificatesModule,
+    ReactionsModule, CommentsModule, ReportsModule, AdminModule, AvatarsModule, StoreModule, CertificatesModule,
     PollsModule, ConfessionsModule,
   ],
   providers: [

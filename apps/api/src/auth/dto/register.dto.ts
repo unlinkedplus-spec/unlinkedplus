@@ -1,5 +1,5 @@
 import { Transform } from 'class-transformer';
-import { IsByteLength, IsOptional, IsString, Matches, MaxLength, MinLength } from 'class-validator';
+import { IsByteLength, IsEmail, IsOptional, IsString, Matches, MaxLength, MinLength } from 'class-validator';
 
 export class RegisterDto {
   @IsOptional()
@@ -14,4 +14,10 @@ export class RegisterDto {
   @MinLength(12)
   @IsByteLength(12, 72, { message: 'Password harus 12–72 byte (bcrypt)' })
   password!: string;
+
+  @IsOptional()
+  @Transform(({ value }) => typeof value === 'string' ? value.trim().toLowerCase() : value)
+  @IsEmail({}, { message: 'Email tidak valid' })
+  @MaxLength(254)
+  email?: string;
 }

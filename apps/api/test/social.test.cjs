@@ -202,7 +202,11 @@ function fixture(initialXp = 0) {
   };
   return {
     state, calls, fail: (op) => { fail = op; },
-    posts: new PostsService(prisma), reactions: new ReactionsService(prisma),
+    posts: new PostsService(prisma, {
+      getVersion: async () => 1,
+      getOrSet: async (_key, _ttl, factory) => factory(),
+      bumpVersion: async () => {},
+    }), reactions: new ReactionsService(prisma),
     comments: new CommentsService(prisma), reports: new ReportsService(prisma),
     xp: () => state.profile.get(OWNER).mentalXp,
   };

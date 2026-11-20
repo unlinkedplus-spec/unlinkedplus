@@ -11,5 +11,13 @@ export function validateEnvironment(env: Record<string, unknown>) {
   if (!['true', 'false'].includes(String(env.COOKIE_SECURE))) throw new Error('COOKIE_SECURE harus true atau false');
   if (origin.protocol === 'https:' && env.COOKIE_SECURE !== 'true') throw new Error('HTTPS memerlukan secure cookie');
   if (env.PAYMENT_MODE && !['disabled', 'simulation'].includes(String(env.PAYMENT_MODE))) throw new Error('PAYMENT_MODE hanya disabled atau simulation');
+  const mailDriver = String(env.MAIL_DRIVER ?? 'disabled');
+  if (!['disabled', 'console', 'webhook'].includes(mailDriver)) {
+    throw new Error('MAIL_DRIVER hanya disabled, console, atau webhook');
+  }
+  if (mailDriver === 'webhook') {
+    const webhook = new URL(String(env.MAIL_WEBHOOK_URL ?? ''));
+    if (!['http:', 'https:'].includes(webhook.protocol)) throw new Error('MAIL_WEBHOOK_URL harus http/https');
+  }
   return env;
 }

@@ -21,6 +21,7 @@ export default function AppPage() {
   const [checking, setChecking] = useState(true);
   const [activeSection, setActiveSection] = useState<'feed' | 'confession' | 'spill' | 'avatar' | 'shop' | 'profile'>('feed');
   const [authModal, setAuthModal] = useState(false);
+  const [resetToken, setResetToken] = useState('');
   const [showShop, setShowShop] = useState(false);
   const [newPost, setNewPost] = useState<Post | null>(null);
 
@@ -37,12 +38,25 @@ export default function AppPage() {
 
   useEffect(() => { void checkAuth(); }, [checkAuth]);
 
+  useEffect(() => {
+    const token = new URLSearchParams(window.location.search).get('reset');
+    if (token) {
+      setResetToken(token);
+      setAuthModal(true);
+    }
+  }, []);
+
   function handleAuthRequired() {
+    setResetToken('');
     setAuthModal(true);
   }
 
   function handleAuthSuccess() {
     setAuthModal(false);
+    if (resetToken) {
+      setResetToken('');
+      router.replace('/app');
+    }
     void checkAuth();
   }
 
@@ -300,6 +314,7 @@ export default function AppPage() {
 
       {authModal && (
         <AuthModal
+          resetToken={resetToken}
           onSuccess={handleAuthSuccess}
           onClose={() => setAuthModal(false)}
         />

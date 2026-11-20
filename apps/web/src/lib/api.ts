@@ -4,6 +4,10 @@
  * baseURL is NEXT_PUBLIC_API_URL (e.g. http://192.168.1.20/api) or /api in dev via Next.js rewrite.
  */
 import type {
+  AdminOverview,
+  AdminPost,
+  AdminReport,
+  AdminUser,
   AvatarConfig,
   AvatarItem,
   AuthResponse,
@@ -13,6 +17,7 @@ import type {
   PaginatedResponse,
   Poll,
   Post,
+  RecoveryResponse,
   Transaction,
   User,
   UserStats,
@@ -56,6 +61,35 @@ export const authLogin = (data: { username: string; password: string }) =>
 export const authMe = () => req<User>('GET', '/auth/me');
 
 export const authLogout = () => req<{ success: boolean }>('POST', '/auth/logout');
+
+/** Attach an email to the current account so it can be used for password recovery. */
+export const authSetEmail = (email: string) =>
+  req<RecoveryResponse>('POST', '/auth/email', { email });
+
+/** Always resolves with the same shape whether or not the email exists. */
+export const requestPasswordReset = (email: string) =>
+  req<RecoveryResponse>('POST', '/auth/forgot-password', { email });
+
+export const resetPassword = (token: string, password: string) =>
+  req<RecoveryResponse>('POST', '/auth/reset-password', { token, password });
+
+// Admin dashboard
+export const adminOverview = () => req<AdminOverview>('GET', '/admin/overview');
+
+export const adminUsers = (page = 1, limit = 20) =>
+  req<PaginatedResponse<AdminUser>>('GET', `/admin/users?page=${page}&limit=${limit}`);
+
+export const adminPosts = (page = 1, limit = 20) =>
+  req<PaginatedResponse<AdminPost>>('GET', `/admin/posts?page=${page}&limit=${limit}`);
+
+export const adminReports = (page = 1, limit = 20) =>
+  req<PaginatedResponse<AdminReport>>('GET', `/admin/reports?page=${page}&limit=${limit}`);
+
+export const adminResolveReport = (id: string, action: 'dismiss' | 'hide') =>
+  req<AdminReport>('PATCH', `/admin/reports/${id}`, { action });
+
+export const adminSetUserStatus = (id: string, status: 'active' | 'disabled') =>
+  req<AdminUser>('PATCH', `/admin/users/${id}/status`, { status });
 
 // Posts
 export const getPosts = (page = 1) =>
