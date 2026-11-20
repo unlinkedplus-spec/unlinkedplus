@@ -111,19 +111,19 @@ External CDN dependencies (loaded from `<script>` tags — no install needed):
 
 ## localStorage Keys
 
-All keys are prefixed `sambatin_` to avoid collisions.
+All keys are prefixed `unlinkedplus_` to avoid collisions.
 
 | Key | Type | Description |
 |-----|------|-------------|
-| `sambatin_quota` | number | Remaining waitlist spots (starts at 142) |
-| `sambatin_waitlist` | array | Submitted email/phone entries |
-| `sambatin_avatar` | object `{character, accessories[]}` | Current avatar character and equipped accessories |
-| `sambatin_purchases` | array of strings | IDs of purchased shop items |
-| `sambatin_posts` | array of objects | All feed posts (seeded with 5 dummies on first run) |
-| `sambatin_reactions` | object keyed by postId | Reaction counts and which reactions the user has given |
-| `sambatin_xp` | number | Cumulative XP (Mental Baja Points) |
-| `sambatin_username` | string | Display username shown in posts and profile |
-| `sambatin_active_tab` | string | Last active bottom-nav tab, restored on reload |
+| `unlinkedplus_quota` | number | Remaining waitlist spots (starts at 142) |
+| `unlinkedplus_waitlist` | array | Submitted email/phone entries |
+| `unlinkedplus_avatar` | object `{character, accessories[]}` | Current avatar character and equipped accessories |
+| `unlinkedplus_purchases` | array of strings | IDs of purchased shop items |
+| `unlinkedplus_posts` | array of objects | All feed posts (seeded with 5 dummies on first run) |
+| `unlinkedplus_reactions` | object keyed by postId | Reaction counts and which reactions the user has given |
+| `unlinkedplus_xp` | number | Cumulative XP (Mental Baja Points) |
+| `unlinkedplus_username` | string | Display username shown in posts and profile |
+| `unlinkedplus_active_tab` | string | Last active bottom-nav tab, restored on reload |
 
 ---
 

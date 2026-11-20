@@ -254,7 +254,7 @@
      -------------------------------------------------------- */
   function getPosts() {
     try {
-      var raw = localStorage.getItem('sambatin_posts');
+      var raw = localStorage.getItem('unlinkedplus_posts');
       if (raw) return JSON.parse(raw);
     } catch (e) {}
     return null;
@@ -262,7 +262,7 @@
 
   function _savePosts(posts) {
     try {
-      localStorage.setItem('sambatin_posts', JSON.stringify(posts));
+      localStorage.setItem('unlinkedplus_posts', JSON.stringify(posts));
     } catch (e) {}
   }
 
@@ -317,14 +317,14 @@
       var charId = 'panda';
       var accs   = [];
       try {
-        var avState = JSON.parse(localStorage.getItem('sambatin_avatar') || '{}');
+        var avState = JSON.parse(localStorage.getItem('unlinkedplus_avatar') || '{}');
         charId = avState.character || 'panda';
         accs   = avState.accessories || [];
       } catch (e) {}
 
-      var username = localStorage.getItem('sambatin_username') ||
+      var username = localStorage.getItem('unlinkedplus_username') ||
         ('BudakKantor_' + (Math.floor(Math.random() * 9000) + 1000));
-      localStorage.setItem('sambatin_username', username);
+      localStorage.setItem('unlinkedplus_username', username);
 
       var post = {
         id: 'post_' + Date.now(),

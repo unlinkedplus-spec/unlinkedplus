@@ -21,7 +21,7 @@
     if (!btn || !input || !success || !counter) { return; }
 
     // Initialise quota from localStorage (default 142)
-    var stored = parseInt(localStorage.getItem('sambatin_quota'), 10);
+    var stored = parseInt(localStorage.getItem('unlinkedplus_quota'), 10);
     var quota  = isNaN(stored) ? 142 : stored;
     counter.textContent = quota;
 
@@ -38,13 +38,13 @@
       if (quota > 0) {
         quota -= 1;
       }
-      localStorage.setItem('sambatin_quota', String(quota));
+      localStorage.setItem('unlinkedplus_quota', String(quota));
       counter.textContent = quota;
 
       // Store submission
-      var list = JSON.parse(localStorage.getItem('sambatin_waitlist') || '[]');
+      var list = JSON.parse(localStorage.getItem('unlinkedplus_waitlist') || '[]');
       list.push(value);
-      localStorage.setItem('sambatin_waitlist', JSON.stringify(list));
+      localStorage.setItem('unlinkedplus_waitlist', JSON.stringify(list));
 
       // Update UI
       input.value = '';

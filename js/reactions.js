@@ -1,7 +1,7 @@
 /* ============================================================
    unlinked+ — reactions.js
    IIFE exposing window.Reactions.
-   LocalStorage keys: sambatin_reactions, sambatin_xp.
+   LocalStorage keys: unlinkedplus_reactions, unlinkedplus_xp.
    ============================================================ */
 (function () {
   'use strict';
@@ -22,7 +22,7 @@
      -------------------------------------------------------- */
   function _getAll() {
     try {
-      return JSON.parse(localStorage.getItem('sambatin_reactions') || '{}');
+      return JSON.parse(localStorage.getItem('unlinkedplus_reactions') || '{}');
     } catch (e) {
       return {};
     }
@@ -30,22 +30,22 @@
 
   function _saveAll(obj) {
     try {
-      localStorage.setItem('sambatin_reactions', JSON.stringify(obj));
+      localStorage.setItem('unlinkedplus_reactions', JSON.stringify(obj));
     } catch (e) {}
   }
 
   function _getXP() {
-    return parseInt(localStorage.getItem('sambatin_xp') || '0', 10);
+    return parseInt(localStorage.getItem('unlinkedplus_xp') || '0', 10);
   }
 
   function _saveXP(n) {
     try {
-      localStorage.setItem('sambatin_xp', String(n));
+      localStorage.setItem('unlinkedplus_xp', String(n));
     } catch (e) {}
   }
 
   function _fireXPEvent() {
-    window.dispatchEvent(new CustomEvent('sambatin:xp-changed', { bubbles: true }));
+    window.dispatchEvent(new CustomEvent('unlinked+:xp-changed', { bubbles: true }));
   }
 
   /* --------------------------------------------------------

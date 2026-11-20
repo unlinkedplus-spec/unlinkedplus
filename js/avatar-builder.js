@@ -273,13 +273,13 @@
      -------------------------------------------------------- */
   function _saveState() {
     try {
-      localStorage.setItem('sambatin_avatar', JSON.stringify(_state));
+      localStorage.setItem('unlinkedplus_avatar', JSON.stringify(_state));
     } catch (e) {}
   }
 
   function _loadState() {
     try {
-      var raw = localStorage.getItem('sambatin_avatar');
+      var raw = localStorage.getItem('unlinkedplus_avatar');
       if (raw) {
         var parsed = JSON.parse(raw);
         if (parsed && parsed.character) {
@@ -294,7 +294,7 @@
      -------------------------------------------------------- */
   function _isPurchased(itemId) {
     try {
-      var purchases = JSON.parse(localStorage.getItem('sambatin_purchases') || '[]');
+      var purchases = JSON.parse(localStorage.getItem('unlinkedplus_purchases') || '[]');
       return purchases.indexOf(itemId) !== -1;
     } catch (e) {
       return false;
@@ -367,7 +367,7 @@
 
           /* Premium gate */
           if (_PREMIUM.indexOf(accId) !== -1 && !_isPurchased(accId)) {
-            window.dispatchEvent(new CustomEvent('sambatin:open-shop', { detail: { itemId: accId } }));
+            window.dispatchEvent(new CustomEvent('unlinked+:open-shop', { detail: { itemId: accId } }));
             return;
           }
 

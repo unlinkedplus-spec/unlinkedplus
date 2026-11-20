@@ -1,7 +1,7 @@
 /* ============================================================
    unlinked+ — shop.js
    IIFE exposing window.Shop.
-   LocalStorage key: sambatin_purchases (array of item ids).
+   LocalStorage key: unlinkedplus_purchases (array of item ids).
    ============================================================ */
 (function () {
   'use strict';
@@ -73,7 +73,7 @@
      -------------------------------------------------------- */
   function _getPurchases() {
     try {
-      return JSON.parse(localStorage.getItem('sambatin_purchases') || '[]');
+      return JSON.parse(localStorage.getItem('unlinkedplus_purchases') || '[]');
     } catch (e) {
       return [];
     }
@@ -160,7 +160,7 @@
     var purchases = _getPurchases();
     if (purchases.indexOf(_currentItem.id) === -1) {
       purchases.push(_currentItem.id);
-      localStorage.setItem('sambatin_purchases', JSON.stringify(purchases));
+      localStorage.setItem('unlinkedplus_purchases', JSON.stringify(purchases));
     }
 
     var modal = document.getElementById('modal-qris');

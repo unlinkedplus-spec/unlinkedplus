@@ -1,6 +1,6 @@
-# Implementation Plan — SambatIn (Anti-LinkedIn)
+# Implementation Plan — Unlinked+ (Anti-LinkedIn)
 
-> **Architecture summary:** Pure vanilla HTML/CSS/JS, no build step. Two HTML pages (`index.html`, `app.html`), three CSS files, seven JS files. All JS uses the IIFE pattern (`(function(){ ... window.ModuleName = {...}; })()`) to avoid global collisions. Modules communicate via `localStorage` (keys prefixed `sambatin_`) and native `CustomEvent` fired on `window`. SVG avatars are drawn entirely with inline SVG paths/circles/rectangles — no emoji for character bodies.
+> **Architecture summary:** Pure vanilla HTML/CSS/JS, no build step. Two HTML pages (`index.html`, `app.html`), three CSS files, seven JS files. All JS uses the IIFE pattern (`(function(){ ... window.ModuleName = {...}; })()`) to avoid global collisions. Modules communicate via `localStorage` (keys prefixed `unlinkedplus_`) and native `CustomEvent` fired on `window`. SVG avatars are drawn entirely with inline SVG paths/circles/rectangles — no emoji for character bodies.
 
 ---
 
@@ -18,7 +18,7 @@
 
 - [ ] 3. Create `d:\Anti-LinkedIn\index.html` — landing/waitlist page, full HTML5 document.
       Load order in `<head>`: Google Fonts (Nunito + Inter), `styles/main.css`, `styles/landing.css`. Body structure:
-      - `<nav class="top-nav">`: logo "SambatIn 💔", CTA link `<a href="app.html">Coba App</a>`.
+      - `<nav class="top-nav">`: logo "Unlinked+ 💔", CTA link `<a href="app.html">Coba App</a>`.
       - `<section class="hero-section">`: hero-badge, `.hero-headline` "LinkedIn untuk Orang yang Lagi Gagal.", `.hero-subheadline`, then `.waitlist-form` card containing: urgency badge with `<span id="quota-count">142</span>`, text input `#waitlist-input`, button `#waitlist-btn`, hidden `<p id="waitlist-success">`.
       - `<section class="cert-preview-section">`: heading, `<textarea id="cert-input" maxlength="120">`, `<div id="cert-card-preview" class="cert-card-preview">` (contains all certificate markup: title, `<span id="cert-name-preview">Kamu</span>`, `<span id="cert-failure-preview">[ketik di atas]</span>`, stempel, watermark), `<button id="cert-download-landing">Download PNG</button>`.
       - `<section class="features-section">`: 3 `.feature-card` divs (🎭 Anonim, 🤖 AI Sensor, 🏆 Sertifikat).
@@ -28,7 +28,7 @@
       Verify: Open `index.html` — all three sections visible, no broken images, no console errors.
 
 - [ ] 4. Create `d:\Anti-LinkedIn\js\landing.js` — IIFE, landing page interactivity.
-      Three responsibilities: (a) Waitlist form — on submit, read/decrement `sambatin_quota` from localStorage (init 142), update `#quota-count`, store email in `sambatin_waitlist` array, show `#waitlist-success`. (b) Certificate live preview — bind `input` on `#cert-input`, update `#cert-failure-preview` text in real time; bind click on `#cert-download-landing`, call `html2canvas(document.getElementById('cert-card-preview'), { scale: 2 })` then trigger PNG download as `sertifikat-kegagalan.png`. (c) Feature card entrance — `IntersectionObserver` on `.feature-card` elements, add class `visible` (triggers `fadeInUp`) when 20% in viewport.
+      Three responsibilities: (a) Waitlist form — on submit, read/decrement `unlinkedplus_quota` from localStorage (init 142), update `#quota-count`, store email in `unlinkedplus_waitlist` array, show `#waitlist-success`. (b) Certificate live preview — bind `input` on `#cert-input`, update `#cert-failure-preview` text in real time; bind click on `#cert-download-landing`, call `html2canvas(document.getElementById('cert-card-preview'), { scale: 2 })` then trigger PNG download as `sertifikat-kegagalan.png`. (c) Feature card entrance — `IntersectionObserver` on `.feature-card` elements, add class `visible` (triggers `fadeInUp`) when 20% in viewport.
       Files: `d:\Anti-LinkedIn\js\landing.js`
       Verify: Type in cert textarea → preview updates. Submit form → counter decrements, success message shows. Click Download PNG → `.png` file downloads.
 
@@ -71,14 +71,14 @@
       - `kacamata` (premium): left lens `<circle cx="127" cy="118" r="18">` fill none stroke `#1A1A1A` stroke-width 3; right lens `<circle cx="173" cy="118" r="18">` same; bridge `<line x1="145" y1="120" x2="155" y2="120">` stroke dark; temple lines extending out; group transform `rotate(5 150 118)` for the "melorot" tilt.
 
       `AvatarBuilder.getAvatarSVG(characterId, accessories, size)`: returns full SVG string for embedding or use as innerHTML.
-      `AvatarBuilder.init()`: reads localStorage `sambatin_avatar` (default: `{character:'panda', accessories:[]}`), renders into `#avatar-svg`, binds `.character-card` clicks and `.accessory-row` clicks.
+      `AvatarBuilder.init()`: reads localStorage `unlinkedplus_avatar` (default: `{character:'panda', accessories:[]}`), renders into `#avatar-svg`, binds `.character-card` clicks and `.accessory-row` clicks.
       `AvatarBuilder.unlockAccessory(id)`: called by Shop after purchase — just re-renders the accessory row without the premium gate.
       `AvatarBuilder.equipAccessory(id)` / `unequipAccessory(id)`: toggle equipped list, re-render SVG, save state.
       Files: `d:\Anti-LinkedIn\js\avatar-builder.js`
       Verify: Open Avatar tab — all 4 character cards show name labels; clicking each changes SVG preview. Equipping free accessories visually adds them to the avatar. Clicking kacamata without purchase opens shop modal.
 
 - [ ] 8. Create `d:\Anti-LinkedIn\js\app.js` — IIFE main controller.
-      On `DOMContentLoaded`: (1) Tab navigation — bind click on each `.nav-item[data-tab]`, activate the matching `.tab-panel`, store in `sambatin_active_tab`, restore on load. When switching to `avatar` tab, call `AvatarBuilder.init()`. When switching to `profile` tab, call `populateProfile()`. (2) Call `Feed.init()` and `Shop.init()`. (3) Modal backdrop — `#modal-overlay` click closes all modals. (4) XP/level update — listen for `sambatin:xp-changed` CustomEvent, call `updateLevelDisplay()`. `updateLevelDisplay()`: read `sambatin_xp`, compute level using thresholds (0-49→L1 Rapuh, 50-149→L2 Tahan Banting, 150-299→L3 Kebal Revisi, 300-499→L4 Kebal PHP HRD, 500+→L5 Suhu Sambat), update `#user-level-badge` text, compute `#xp-fill` width as percentage within current band. `populateProfile()`: render avatar SVG (200px), username from `sambatin_username`, level, XP bar, stats (count posts in `sambatin_posts`, sum reactions), owned badges from `sambatin_purchases`. `showToast(msg)`: create `.toast` div, append to body, `.show` class, remove after 2500ms.
+      On `DOMContentLoaded`: (1) Tab navigation — bind click on each `.nav-item[data-tab]`, activate the matching `.tab-panel`, store in `unlinkedplus_active_tab`, restore on load. When switching to `avatar` tab, call `AvatarBuilder.init()`. When switching to `profile` tab, call `populateProfile()`. (2) Call `Feed.init()` and `Shop.init()`. (3) Modal backdrop — `#modal-overlay` click closes all modals. (4) XP/level update — listen for `unlinked+:xp-changed` CustomEvent, call `updateLevelDisplay()`. `updateLevelDisplay()`: read `unlinkedplus_xp`, compute level using thresholds (0-49→L1 Rapuh, 50-149→L2 Tahan Banting, 150-299→L3 Kebal Revisi, 300-499→L4 Kebal PHP HRD, 500+→L5 Suhu Unlinked+), update `#user-level-badge` text, compute `#xp-fill` width as percentage within current band. `populateProfile()`: render avatar SVG (200px), username from `unlinkedplus_username`, level, XP bar, stats (count posts in `unlinkedplus_posts`, sum reactions), owned badges from `unlinkedplus_purchases`. `showToast(msg)`: create `.toast` div, append to body, `.show` class, remove after 2500ms.
       Files: `d:\Anti-LinkedIn\js\app.js`
       Verify: Tab switching works. Level badge updates after posting. Profile tab shows correct data. Toast appears.
 
@@ -87,12 +87,12 @@
 ## FEAT-003: Fail Feed + AI Sensor + Reactions + Certificate
 
 - [ ] 9. Create `d:\Anti-LinkedIn\js\reactions.js` — IIFE, exposes `window.Reactions`.
-      LocalStorage: `sambatin_reactions` (object: `{ [postId]: { pukpuk, ngakak, sama, myReactions:{pukpuk:bool, ngakak:bool, sama:bool} } }`), `sambatin_xp` (number, default 0). `addReaction(postId, type)`: toggle — if `myReactions[type]` true, decrement count and XP by 1 and set false; else increment count and XP by 1 and set true. Save to localStorage. Fire `new CustomEvent('sambatin:xp-changed', { bubbles:true })` on `window`. `addXP(amount)`: read, add, write `sambatin_xp`, fire event. `getReactions(postId)`: return reaction object for post (initialize to `{pukpuk:0, ngakak:0, sama:0, myReactions:{}}` if not set). `getLevelName(xp)` and `getLevel(xp)`: pure functions using threshold constants.
+      LocalStorage: `unlinkedplus_reactions` (object: `{ [postId]: { pukpuk, ngakak, sama, myReactions:{pukpuk:bool, ngakak:bool, sama:bool} } }`), `unlinkedplus_xp` (number, default 0). `addReaction(postId, type)`: toggle — if `myReactions[type]` true, decrement count and XP by 1 and set false; else increment count and XP by 1 and set true. Save to localStorage. Fire `new CustomEvent('unlinked+:xp-changed', { bubbles:true })` on `window`. `addXP(amount)`: read, add, write `unlinkedplus_xp`, fire event. `getReactions(postId)`: return reaction object for post (initialize to `{pukpuk:0, ngakak:0, sama:0, myReactions:{}}` if not set). `getLevelName(xp)` and `getLevel(xp)`: pure functions using threshold constants.
       Files: `d:\Anti-LinkedIn\js\reactions.js`
-      Verify: After clicking reactions in the feed, `sambatin_reactions` in DevTools localStorage shows updated counts. `sambatin_xp` increments. Level badge in header updates.
+      Verify: After clicking reactions in the feed, `unlinkedplus_reactions` in DevTools localStorage shows updated counts. `unlinkedplus_xp` increments. Level badge in header updates.
 
 - [ ] 10. Create `d:\Anti-LinkedIn\js\feed.js` — IIFE, exposes `window.Feed`.
-       LocalStorage: `sambatin_posts` (array). Seed data (5 posts hardcoded, inserted only on first run when `sambatin_posts` is null): see FEAT-003 description for full post texts. `Feed.init()`: load posts, render all, bind form. `renderPost(post)`: return HTML string for `.post-card`. Post card structure: `.post-header` (avatar SVG 48×48 via `AvatarBuilder.getAvatarSVG(post.characterId, post.accessories, 48)`, username `<strong>`, level badge `<span class="badge" style="background: LEVEL_COLOR">`, category badge colored by category). Post text `<p>`. Timestamp `<small>` (compute relative time: 'baru saja', 'x menit lalu', 'x jam lalu', 'x hari lalu'). `.reaction-row`: three buttons with emoji + label + count — `🫂 Puk-Puk (N)`, `😂 Ngakak Maaf (N)`, `🤝 Sama Banget (N)` — each with `data-post-id` and `data-reaction`. `.cert-btn` button `data-post-id`. After rendering, bind reaction clicks to `Reactions.addReaction()` and re-render just that post's reaction counts in-place (find buttons by `data-post-id`, update text). Bind cert buttons to `Certificate.openModal(post)`. AI Sensor: bind `input` on `#post-text` — bannedPhrases array (10 phrases, lowercase check with `text.toLowerCase().includes(phrase)`); if any match, `#ai-sensor-warning.hidden = false`, `#post-submit-btn.disabled = true`; else reverse. Update `#char-count` text. Post creation: on `#post-submit-btn` click, validate (category !== '' and text non-empty and sensor clean), build post object `{id: Date.now(), username: localStorage.sambatin_username || 'BudakKorporat_'+..., characterId, accessories, category, text, timestamp: Date.now()}`, unshift into posts array, save, `Reactions.addXP(10)`, prepend rendered card to `#feed-container`, scroll to top, clear form.
+       LocalStorage: `unlinkedplus_posts` (array). Seed data (5 posts hardcoded, inserted only on first run when `unlinkedplus_posts` is null): see FEAT-003 description for full post texts. `Feed.init()`: load posts, render all, bind form. `renderPost(post)`: return HTML string for `.post-card`. Post card structure: `.post-header` (avatar SVG 48×48 via `AvatarBuilder.getAvatarSVG(post.characterId, post.accessories, 48)`, username `<strong>`, level badge `<span class="badge" style="background: LEVEL_COLOR">`, category badge colored by category). Post text `<p>`. Timestamp `<small>` (compute relative time: 'baru saja', 'x menit lalu', 'x jam lalu', 'x hari lalu'). `.reaction-row`: three buttons with emoji + label + count — `🫂 Puk-Puk (N)`, `😂 Ngakak Maaf (N)`, `🤝 Sama Banget (N)` — each with `data-post-id` and `data-reaction`. `.cert-btn` button `data-post-id`. After rendering, bind reaction clicks to `Reactions.addReaction()` and re-render just that post's reaction counts in-place (find buttons by `data-post-id`, update text). Bind cert buttons to `Certificate.openModal(post)`. AI Sensor: bind `input` on `#post-text` — bannedPhrases array (10 phrases, lowercase check with `text.toLowerCase().includes(phrase)`); if any match, `#ai-sensor-warning.hidden = false`, `#post-submit-btn.disabled = true`; else reverse. Update `#char-count` text. Post creation: on `#post-submit-btn` click, validate (category !== '' and text non-empty and sensor clean), build post object `{id: Date.now(), username: localStorage.unlinkedplus_username || 'BudakKorporat_'+..., characterId, accessories, category, text, timestamp: Date.now()}`, unshift into posts array, save, `Reactions.addXP(10)`, prepend rendered card to `#feed-container`, scroll to top, clear form.
        Files: `d:\Anti-LinkedIn\js\feed.js`
        Verify: Feed shows 5 dummy posts on first load. Banned phrase disables submit. Valid post appears at top of feed. Reaction counts update in real time.
 
@@ -106,12 +106,12 @@
 ## FEAT-004: Shop + QRIS Simulation + Profile + Polish
 
 - [ ] 12. Create `d:\Anti-LinkedIn\js\shop.js` — IIFE, exposes `window.Shop`.
-       Catalog (4 items, hardcoded): kacamata (Rp10.000), badge-sultan (Rp15.000), badge-suhu (Rp12.000), pack-expressi (Rp15.000). `Shop.init()`: render catalog into `#shop-grid`. `renderShopItem(item)`: `.shop-item-card` with emoji (large, font-size 3rem), name, description, price ('Rp' + price.toLocaleString('id-ID')), if already in `sambatin_purchases` show `<span class="badge" style="background:green;color:white">Dimiliki ✓</span>`, else `<button class="btn-primary btn-sm beli-btn" data-item-id="${item.id}">Beli</button>`. Bind `.beli-btn` clicks to `Shop.openModal(item)`. `Shop.openModal(item)`: set `#qris-item-name` text, `#qris-item-price` text, generate fake QR SVG in `#qris-code-box` (10×10 grid of 10×10px `<rect>` elements, each filled black or white using `(charCodeAt(0)*col*row) % 3 === 0` for determinism), show `#modal-qris` and `#modal-overlay`. `confirmPurchase()`: add `item.id` to `sambatin_purchases` array, hide modals, call `triggerConfetti()`, if `item.type === 'accessory'` call `AvatarBuilder.unlockAccessory(item.id)`, call `Shop.init()` to re-render shop, call `window.showToast('Pembelian berhasil! 🎉')`. `triggerConfetti()`: `window.confetti({ particleCount: 150, spread: 90, origin: { y: 0.6 }, colors: ['#F5C518','#FF6B35','#1A2744','#ffffff','#FF6B35'] })`. Bind `#qris-confirm-btn` to `confirmPurchase()`, `#qris-cancel-btn` to close modal.
+       Catalog (4 items, hardcoded): kacamata (Rp10.000), badge-sultan (Rp15.000), badge-suhu (Rp12.000), pack-expressi (Rp15.000). `Shop.init()`: render catalog into `#shop-grid`. `renderShopItem(item)`: `.shop-item-card` with emoji (large, font-size 3rem), name, description, price ('Rp' + price.toLocaleString('id-ID')), if already in `unlinkedplus_purchases` show `<span class="badge" style="background:green;color:white">Dimiliki ✓</span>`, else `<button class="btn-primary btn-sm beli-btn" data-item-id="${item.id}">Beli</button>`. Bind `.beli-btn` clicks to `Shop.openModal(item)`. `Shop.openModal(item)`: set `#qris-item-name` text, `#qris-item-price` text, generate fake QR SVG in `#qris-code-box` (10×10 grid of 10×10px `<rect>` elements, each filled black or white using `(charCodeAt(0)*col*row) % 3 === 0` for determinism), show `#modal-qris` and `#modal-overlay`. `confirmPurchase()`: add `item.id` to `unlinkedplus_purchases` array, hide modals, call `triggerConfetti()`, if `item.type === 'accessory'` call `AvatarBuilder.unlockAccessory(item.id)`, call `Shop.init()` to re-render shop, call `window.showToast('Pembelian berhasil! 🎉')`. `triggerConfetti()`: `window.confetti({ particleCount: 150, spread: 90, origin: { y: 0.6 }, colors: ['#F5C518','#FF6B35','#1A2744','#ffffff','#FF6B35'] })`. Bind `#qris-confirm-btn` to `confirmPurchase()`, `#qris-cancel-btn` to close modal.
        Files: `d:\Anti-LinkedIn\js\shop.js`
        Verify: Shop tab shows 4 items. Clicking Beli opens QRIS modal with QR pattern. Confirming purchase fires confetti, re-renders item as owned, toast appears.
 
 - [ ] 13. Add profile tab content and final CSS polish.
-       In `app.js`, implement `populateProfile()`: build HTML string for `#profile-content` with avatar SVG (200×200), `<h2 id="profile-username">`, level name, XP bar, stats table (Total Sambatan, Total Reaksi). In `app.css`, finalize all hover/focus/active states, verify `padding-bottom: 80px` on `.tab-content`, confirm `@media (min-width: 768px)` overrides for avatar layout (2-col), shop grid (3-col), feed cards (max-width 600px centered). Add `scroll-behavior: smooth` to `html`. Confirm confetti library and html2canvas are loaded before the JS that uses them.
+       In `app.js`, implement `populateProfile()`: build HTML string for `#profile-content` with avatar SVG (200×200), `<h2 id="profile-username">`, level name, XP bar, stats table (Total Unlinked+an, Total Reaksi). In `app.css`, finalize all hover/focus/active states, verify `padding-bottom: 80px` on `.tab-content`, confirm `@media (min-width: 768px)` overrides for avatar layout (2-col), shop grid (3-col), feed cards (max-width 600px centered). Add `scroll-behavior: smooth` to `html`. Confirm confetti library and html2canvas are loaded before the JS that uses them.
        Files: `d:\Anti-LinkedIn\js\app.js`, `d:\Anti-LinkedIn\styles\app.css`
        Verify: Profile tab renders avatar, username, level, XP, and stats. No horizontal scroll at 375px on any tab. Shop and avatar builder use multi-column at 768px+.
 
@@ -149,15 +149,15 @@ app.html   ← loads main.css, app.css, then JS in order:
 
 | Key | Type | Owner | Purpose |
 |-----|------|-------|---------|
-| `sambatin_quota` | number | landing.js | Waitlist spots remaining |
-| `sambatin_waitlist` | array | landing.js | Submitted emails/phones |
-| `sambatin_avatar` | object `{character, accessories[]}` | avatar-builder.js | Current avatar state |
-| `sambatin_purchases` | array of item IDs | shop.js | Purchased items |
-| `sambatin_posts` | array of post objects | feed.js | All posts |
-| `sambatin_reactions` | object by postId | reactions.js | Reaction counts + user's reactions |
-| `sambatin_xp` | number | reactions.js | Current XP total |
-| `sambatin_username` | string | app.js | Display username |
-| `sambatin_active_tab` | string | app.js | Last active tab |
+| `unlinkedplus_quota` | number | landing.js | Waitlist spots remaining |
+| `unlinkedplus_waitlist` | array | landing.js | Submitted emails/phones |
+| `unlinkedplus_avatar` | object `{character, accessories[]}` | avatar-builder.js | Current avatar state |
+| `unlinkedplus_purchases` | array of item IDs | shop.js | Purchased items |
+| `unlinkedplus_posts` | array of post objects | feed.js | All posts |
+| `unlinkedplus_reactions` | object by postId | reactions.js | Reaction counts + user's reactions |
+| `unlinkedplus_xp` | number | reactions.js | Current XP total |
+| `unlinkedplus_username` | string | app.js | Display username |
+| `unlinkedplus_active_tab` | string | app.js | Last active tab |
 
 ## SVG Avatar Drawing Approach
 
