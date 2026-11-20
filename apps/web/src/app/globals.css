@@ -9,26 +9,8 @@
     scroll-behavior: smooth;
   }
   body {
-    /* cream canvas — warm, not corporate white */
-    background-color: #FFFBF2;
+    background-color: #FAFAFA;
     color: #172B4D;
     font-family: 'Inter', sans-serif;
-  }
-  ::selection {
-    background: #B9A6FF;
-    color: #172B4D;
-  }
-}
-
-@layer components {
-  /* Playful but readable surfaces used across the dashboard. */
-  .surface-card {
-    @apply rounded-[26px] border border-navy/5 bg-white/95 shadow-soft;
-  }
-  .pill-soft {
-    @apply inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-bold;
-  }
-  .focus-ring {
-    @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-lavender focus-visible:ring-offset-2 focus-visible:ring-offset-cream;
   }
 }

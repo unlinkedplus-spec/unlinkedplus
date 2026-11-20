@@ -1,121 +1,101 @@
 import Link from 'next/link';
-import BrandMascot from '../components/BrandMascot';
-import NavIcon, { type NavIconName } from '../components/NavIcon';
 import WaitlistForm from '../components/WaitlistForm';
-
-const LANDING_NAV: { icon: NavIconName; label: string; href: string }[] = [
-  { icon: 'home',   label: 'Beranda', href: '/app' },
-  { icon: 'pen',    label: 'Spill',   href: '/app?tab=spill' },
-  { icon: 'avatar', label: 'Avatar',  href: '/app?tab=avatar' },
-  { icon: 'store',  label: 'Toko',    href: '/app?tab=shop' },
-  { icon: 'profile', label: 'Profil', href: '/app?tab=profile' },
-];
+import { buildAvatarSVG } from '../lib/avatar-svg';
 
 export default function LandingPage() {
   return (
     <main className="min-h-screen bg-background text-navy">
       {/* Navbar */}
-      <nav className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
-        <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-sunshine/30">
-            <BrandMascot size={36} float={false} />
-          </div>
-          <div>
-            <span className="font-display text-2xl font-black text-navy">
-              unlinked<span className="text-primary">+</span>
-            </span>
-            <p className="mt-0.5 text-[11px] font-semibold text-navy/50">Less Flex. More Human.</p>
-          </div>
+      <nav className="flex items-center justify-between px-6 py-4 max-w-7xl mx-auto">
+        <div>
+          <span className="font-display font-black text-2xl text-navy">
+            unlinked<span className="text-primary">+</span>
+          </span>
+          <p className="text-xs text-gray-500 mt-0.5">Less Flex. More Human.</p>
         </div>
         <div className="flex items-center gap-3">
-          <Link href="/app" className="text-sm font-semibold text-navy transition hover:text-navy/70">
+          <Link href="/app" className="text-sm font-medium text-navy hover:text-navy/80 transition">
             Masuk
           </Link>
-          <Link href="/app?tab=spill" className="focus-ring rounded-full bg-navy px-5 py-2 text-sm font-bold text-white shadow-pop transition hover:-translate-y-0.5 hover:bg-navy/90">
+          <Link href="/app" className="bg-navy text-white text-sm font-bold px-5 py-2 rounded-full hover:bg-navy/90 transition">
             Gabung sekarang →
           </Link>
         </div>
       </nav>
 
-      {/* Hero — expressive, mascot-led, anti-corporate */}
-      <section className="relative mx-auto mb-8 mt-4 max-w-7xl overflow-hidden rounded-[36px] bg-navy px-6 py-10 text-cream shadow-soft md:px-12 md:py-14">
-        <div className="absolute -right-16 -top-24 h-72 w-72 rounded-full bg-lavender/30 blur-2xl" />
-        <div className="absolute -bottom-24 left-1/3 h-64 w-64 rounded-full bg-sunshine/20 blur-3xl" />
-        <div className="absolute right-8 top-8 hidden h-16 w-16 rotate-12 rounded-3xl border border-sunshine/40 md:block" />
-        <div className="relative flex flex-col items-center gap-10 md:flex-row md:gap-14">
-          <div className="flex-1">
-            <p className="mb-4 inline-flex items-center gap-2 rounded-full border border-sunshine/40 bg-sunshine/10 px-3 py-1.5 text-[11px] font-black uppercase tracking-widest text-sunshine">
-              <NavIcon name="sparkles" size={13} /> Anti-LinkedIn meets Gen Z Community
-            </p>
-            <h1 className="mb-5 font-display text-4xl font-black leading-[1.08] md:text-6xl">
-              LinkedIn buat kamu yang{' '}
-              <span className="relative inline-block text-sunshine">
-                lagi gagal
-                <span className="absolute -bottom-1 left-0 h-2 w-full rounded-full bg-lavender/70" />
-              </span>
-              .
-            </h1>
-            <p className="mb-7 max-w-xl text-sm leading-relaxed text-cream/80 md:text-base">
-              Capek lihat orang pamer pencapaian? Di sini nggak apa-apa kalau ceritamu belum berakhir indah. Taruh bebanmu, pelan-pelan juga sampai.
-            </p>
-            <div className="mb-5 flex flex-wrap items-center gap-3">
-              <WaitlistForm mode="hero" />
-              <Link href="/app?tab=spill" className="focus-ring rounded-full border border-cream/30 bg-cream/10 px-6 py-3 text-sm font-bold text-cream transition hover:bg-cream/20">
-                Spill sekarang
-              </Link>
-              <Link href="/app" className="text-sm font-semibold text-cream/70 underline decoration-lavender decoration-2 underline-offset-4 transition hover:text-cream">
-                Baca cerita dulu
-              </Link>
-            </div>
-            <p className="text-xs text-cream/60">Pakai nama samaran. Bukan nama jabatan.</p>
+      {/* Hero Section */}
+      <section className="bg-primary/20 rounded-3xl mx-6 mt-6 mb-8 p-8 md:p-12 max-w-7xl mx-auto flex flex-col md:flex-row items-center gap-8">
+        <div className="flex-1">
+          <p className="text-xs font-bold text-navy/70 uppercase tracking-widest mb-3">
+            KARIER BOLEH BERANTAKAN. KAMU TETAP BERHARGA.
+          </p>
+          <h1 className="font-display font-black text-3xl md:text-5xl text-navy leading-tight mb-4">
+            LinkedIn untuk orang yang lagi gagal.
+          </h1>
+          <p className="text-navy/80 text-sm md:text-base mb-6 max-w-lg">
+            Capek lihat orang pamer pencapaian di sebelah? Di sini, nggak apa-apa kalau ceritamu belum berakhir indah.
+          </p>
+          <div className="flex flex-wrap gap-3 mb-4">
+            <WaitlistForm mode="hero" />
+            <Link href="/app" className="bg-white text-navy font-bold px-6 py-3 rounded-full text-sm border border-navy/20 hover:bg-gray-50 transition">
+              Baca cerita dulu
+            </Link>
           </div>
-
-          <div className="relative flex shrink-0 items-center justify-center py-6 md:py-0">
-            <BrandMascot size={260} bubble="Hari berat? Taruh dulu di sini. 💙" />
+          <p className="text-xs text-navy/60">
+            Pakai nama samaran. Bukan nama jabatan.
+          </p>
+        </div>
+        <div className="w-48 h-48 md:w-64 md:h-64 shrink-0 relative">
+          <svg viewBox="0 0 300 300" className="w-full h-full" aria-hidden="true">
+            <g dangerouslySetInnerHTML={{ __html: buildAvatarSVG({ character: 'panda', accessories: [] }) }} />
+          </svg>
+          <div className="absolute -top-4 -right-4 bg-white rounded-2xl px-4 py-2 shadow-lg text-xs font-medium text-navy">
+            Hari berat? Taruh dulu di sini. 💙
+          </div>
+          <div className="absolute -bottom-4 -left-4 bg-white rounded-2xl px-4 py-2 shadow-lg text-xs font-medium text-navy">
+            Nggak harus sukses untuk punya cerita. ❤️
           </div>
         </div>
       </section>
 
-      {/* Divider — brand promises kept verbatim */}
-      <div className="mx-auto mb-8 flex max-w-7xl flex-wrap items-center gap-4 px-6 text-sm font-bold text-navy/60">
+      {/* Divider */}
+      <div className="max-w-7xl mx-auto px-6 mb-8 flex items-center gap-4 text-sm font-medium text-navy/60">
         <span>Memutus yang Toksik</span>
-        <span className="text-lg text-primary">+</span>
+        <span className="text-primary text-lg">+</span>
         <span>Menambah yang Esensial</span>
       </div>
 
       {/* 3-Column Layout */}
-      <div className="mx-auto grid max-w-7xl grid-cols-1 gap-6 px-6 pb-12 lg:grid-cols-12">
+      <div className="max-w-7xl mx-auto px-6 pb-12 grid grid-cols-1 lg:grid-cols-12 gap-6">
         {/* Left Sidebar - RUANG KAMU */}
-        <aside className="surface-card p-6 lg:col-span-3">
-          <div className="mb-6 flex items-center gap-3">
-            <BrandMascot size={48} float={false} />
-            <div>
-              <h3 className="font-display text-sm font-black text-navy">RUANG KAMU</h3>
-              <p className="text-[10px] text-navy/45">Tempat tanpa penilaian.</p>
-            </div>
-          </div>
-          <nav className="space-y-1.5">
-            {LANDING_NAV.map((item, index) => (
+        <aside className="lg:col-span-3 bg-white rounded-2xl p-6 border border-gray-100">
+          <h3 className="font-display font-bold text-sm text-navy mb-4">RUANG KAMU</h3>
+          <nav className="space-y-2">
+            {[
+              { id: 'feed', icon: '🏠', label: 'Beranda', active: true },
+              { id: 'spill', icon: '✍️', label: 'Spill', active: false },
+              { id: 'avatar', icon: '🧑‍💼', label: 'Avatar', active: false },
+              { id: 'shop', icon: '🛒', label: 'Toko', active: false },
+              { id: 'profile', icon: '👤', label: 'Profil', active: false },
+            ].map((item) => (
               <Link
-                key={item.label}
-                href={item.href}
-                className={`focus-ring flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-bold transition-all hover:-translate-y-0.5 ${
-                  index === 0
-                    ? 'bg-lavender/25 text-navy shadow-sm'
-                    : 'text-navy/60 hover:bg-cream hover:text-navy'
+                key={item.id}
+                href={`/app?tab=${item.id}`}
+                className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition w-full text-left ${
+                  item.active
+                    ? 'bg-primary/10 text-navy'
+                    : 'text-gray-600 hover:bg-gray-100'
                 }`}
               >
-                <span className={`flex h-8 w-8 items-center justify-center rounded-xl ${index === 0 ? 'bg-navy text-sunshine' : 'bg-cream text-navy/60'}`}>
-                  <NavIcon name={item.icon} size={17} />
-                </span>
-                {item.label}
-                {index === 0 && <span className="ml-auto h-2 w-2 rounded-full bg-sunshine" />}
+                <span className="text-lg">{item.icon}</span>
+                <span>{item.label}</span>
+                {item.active && <span className="ml-auto w-2 h-2 rounded-full bg-primary" />}
               </Link>
             ))}
           </nav>
-          <div className="mt-8 border-t border-navy/10 pt-6">
-            <p className="text-xs font-bold text-navy/50">Pelan-pelan juga sampai.</p>
-            <p className="mt-1 text-[10px] text-navy/35">
+          <div className="mt-8 pt-6 border-t border-gray-100">
+            <p className="text-xs text-gray-400 font-medium">Pelan-pelan juga sampai.</p>
+            <p className="text-[10px] text-gray-300 mt-1">
               Tidak semua hal harus jadi pencapaian hari ini.
             </p>
           </div>
@@ -123,34 +103,36 @@ export default function LandingPage() {
 
         {/* Main Content - RUANG CERITA KITA */}
         <main className="lg:col-span-6">
-          <div className="surface-card p-6">
-            <div className="mb-6 flex items-center justify-between">
-              <h2 className="font-display text-xl font-black text-navy">Hari ini, apa adanya.</h2>
-              <Link href="/app" className="focus-ring rounded-xl border border-navy/15 px-3 py-1.5 text-xs font-bold text-navy transition hover:bg-cream">
+          <div className="bg-white rounded-2xl p-6 border border-gray-100">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="font-display font-black text-xl text-navy">Hari ini, apa adanya.</h2>
+              <Link href="/app" className="text-xs text-navy border border-navy/20 px-3 py-1.5 rounded-lg hover:bg-navy/5 transition">
                 ↻ Lihat cerita terbaru
               </Link>
             </div>
 
-            <div className="mb-6 rounded-2xl border border-lavender/40 bg-cream p-4">
+            {/* Input area */}
+            <div className="bg-background rounded-xl p-4 mb-6 border border-gray-200">
               <div className="flex items-start gap-3">
-                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-sunshine/40">
-                  <NavIcon name="pen" size={18} />
-                </span>
-                <div>
-                  <p className="text-sm font-bold text-navy">Ada yang mau kamu ceritakan?</p>
-                  <p className="mt-0.5 text-xs text-navy/55">Taruh bebanmu sebentar di sini.</p>
+                <span className="text-xl">✏️</span>
+                <div className="flex-1">
+                  <p className="text-sm text-navy/70">
+                    Ada yang mau kamu ceritakan? Taruh bebanmu sebentar di sini.
+                  </p>
                 </div>
               </div>
             </div>
 
-            <div className="py-10 text-center">
-              <div className="mb-4 flex justify-center"><BrandMascot size={84} /></div>
-              <h3 className="mb-2 font-display text-lg font-black text-navy">Belum ada spill di sini.</h3>
-              <p className="mx-auto mb-6 max-w-xs text-sm text-navy/50">
+            {/* Empty state */}
+            <div className="text-center py-12">
+              <div className="text-4xl mb-4">💔</div>
+              <h3 className="font-display font-bold text-lg text-navy mb-2">Belum ada spill di sini.</h3>
+              <p className="text-sm text-gray-500 mb-6 max-w-xs mx-auto">
                 Tidak harus punya cerita hebat. Hari yang berat juga layak didengar.
               </p>
-              <Link href="/app?tab=spill" className="focus-ring mx-auto flex w-fit items-center gap-2 rounded-full bg-sunshine px-6 py-2.5 text-sm font-black text-navy shadow-pop transition hover:-translate-y-0.5">
-                <NavIcon name="pen" size={16} /> Tulis cerita pertama
+              <Link href="/app?tab=spill" className="bg-primary text-navy font-bold px-6 py-2.5 rounded-full text-sm hover:bg-primary/90 transition flex items-center gap-2 mx-auto w-fit">
+                <span>✏️</span>
+                <span>Tulis cerita pertama</span>
               </Link>
             </div>
           </div>
@@ -158,20 +140,19 @@ export default function LandingPage() {
 
         {/* Right Sidebar - PENGINGAT KECIL */}
         <aside className="lg:col-span-3">
-          <div className="surface-card mb-6 overflow-hidden p-5">
-            <div className="mb-3 flex items-center gap-2">
-              <BrandMascot size={44} float={false} />
-              <h3 className="font-display text-sm font-black text-navy">PENGINGAT KECIL</h3>
-            </div>
-            <p className="mb-4 text-xs leading-relaxed text-navy/70">
+          <div className="bg-primary/10 rounded-2xl p-5 mb-6">
+            <h3 className="font-display font-bold text-sm text-navy mb-3">PENGINGAT KECIL</h3>
+            <p className="text-xs text-navy/80 mb-4">
               Kamu bukan CV-mu. Kamu manusia utuh, bahkan ketika karier sedang berantakan.
             </p>
-            <div className="text-[10px] font-bold text-navy/50">— unlinked+</div>
+            <div className="text-[10px] text-navy/60 font-medium">
+              — unlinked+
+            </div>
           </div>
 
-          <div className="surface-card p-5">
-            <h4 className="mb-3 font-display text-sm font-black text-navy">Di sini, kita...</h4>
-            <ul className="space-y-2 text-xs text-navy/60">
+          <div className="bg-white rounded-2xl p-5 border border-gray-100">
+            <h4 className="font-display font-bold text-sm text-navy mb-3">Di sini, kita...</h4>
+            <ul className="text-xs text-gray-600 space-y-2">
               <li className="flex items-start gap-2">
                 <span className="text-primary">•</span>
                 <span>Saling dukung. Bukan saling adu nasib.</span>
@@ -186,7 +167,7 @@ export default function LandingPage() {
       </div>
 
       {/* Footer */}
-      <footer className="px-6 py-8 text-center text-sm text-navy/40">
+      <footer className="py-8 px-6 text-center text-gray-400 text-sm">
         <p>© 2025 unlinked+ — Dibuat dengan ❤️ dan banyak rejected offer letters.</p>
       </footer>
     </main>

@@ -5,9 +5,6 @@ import { useRouter } from 'next/navigation';
 import { authMe } from '../../lib/api';
 import type { Post, User } from '../../lib/types';
 import BottomNav, { type TabId } from '../../components/BottomNav';
-import BrandMascot from '../../components/BrandMascot';
-import NavIcon, { type NavIconName } from '../../components/NavIcon';
-import TrendingRail from '../../components/TrendingRail';
 import FailFeed from '../../components/FailFeed';
 import CreatePost from '../../components/CreatePost';
 import AvatarBuilder from '../../components/AvatarBuilder';
@@ -27,7 +24,6 @@ export default function AppPage() {
   const [resetToken, setResetToken] = useState('');
   const [showShop, setShowShop] = useState(false);
   const [newPost, setNewPost] = useState<Post | null>(null);
-  const [trendingTag, setTrendingTag] = useState('');
 
   const checkAuth = useCallback(async () => {
     try {
@@ -94,142 +90,91 @@ export default function AppPage() {
 
   const loggedIn = user !== null;
 
-  // Sidebar navigation — grouped so "ruang kamu" and "tindakan" read clearly.
-  const navItems: { id: TabId; icon: NavIconName; label: string; group: 'ruang' | 'kamu' }[] = [
-    { id: 'feed',       icon: 'home',    label: 'Beranda',  group: 'ruang' },
-    { id: 'confession', icon: 'mask',    label: 'Confess',  group: 'ruang' },
-    { id: 'spill',      icon: 'pen',     label: 'Spill',    group: 'ruang' },
-    { id: 'avatar',     icon: 'avatar',  label: 'Avatar',   group: 'kamu' },
-    { id: 'shop',       icon: 'store',   label: 'Toko',     group: 'kamu' },
-    { id: 'profile',    icon: 'profile', label: 'Profil',   group: 'kamu' },
+  // Desktop sidebar navigation
+  const navItems = [
+    { id: 'feed' as const, icon: '🏠', label: 'Beranda' },
+    { id: 'confession' as const, icon: '🎭', label: 'Confess' },
+    { id: 'spill' as const, icon: '✍️', label: 'Spill' },
+    { id: 'avatar' as const, icon: '🧑‍💼', label: 'Avatar' },
+    { id: 'shop' as const, icon: '🛒', label: 'Toko' },
+    { id: 'profile' as const, icon: '👤', label: 'Profil' },
   ];
 
   return (
     <div className="min-h-screen bg-background flex flex-col md:flex">
       {/* Desktop Header */}
-      <header className="sticky top-0 z-30 mx-auto flex max-w-lg items-center justify-between border-b border-navy/10 bg-white/95 px-4 py-3 backdrop-blur md:hidden">
-        <div className="flex items-center gap-2">
-          <BrandMascot size={34} float={false} />
-          <div>
-            <span className="block font-display text-lg font-black leading-none text-navy">
-              unlinked<span className="text-primary">+</span>
-            </span>
-            <span className="text-[9px] font-semibold text-navy/45">Less Flex. More Human.</span>
-          </div>
-        </div>
+      <header className="md:hidden sticky top-0 z-30 bg-white border-b border-gray-100 px-4 py-3 flex items-center justify-between max-w-lg mx-auto">
+        <span className="font-display font-black text-xl text-navy">
+          unlinked<span className="text-primary">+</span>
+        </span>
         {!loggedIn ? (
           <button
-            type="button"
             onClick={handleAuthRequired}
-            className="focus-ring rounded-full bg-navy px-4 py-1.5 text-xs font-bold text-white transition hover:bg-navy/90"
+            className="text-xs bg-navy text-white font-bold px-4 py-1.5 rounded-full hover:bg-navy/90 transition"
           >
             Login / Daftar
           </button>
         ) : (
-          <span className="text-xs font-semibold text-navy/60">👤 {user.username}</span>
+          <span className="text-xs text-gray-500 font-medium">👤 {user.username}</span>
         )}
       </header>
 
       {/* Desktop Layout */}
       <div className="hidden md:flex flex-1 max-w-7xl mx-auto w-full">
         {/* Left Sidebar - RUANG KAMU */}
-        <aside className="flex w-72 flex-col border-r border-navy/10 bg-white p-6">
-          <div className="mb-8 flex items-center gap-3">
-            <BrandMascot size={52} float={false} />
-            <div>
-              <span className="block font-display text-2xl font-black leading-none text-navy">
-                unlinked<span className="text-primary">+</span>
-              </span>
-              <p className="mt-1 text-[11px] font-semibold text-navy/45">Less Flex. More Human.</p>
-            </div>
+        <aside className="w-64 border-r border-gray-200 bg-white p-6 flex flex-col">
+          <div className="mb-8">
+            <span className="font-display font-black text-2xl text-navy">
+              unlinked<span className="text-primary">+</span>
+            </span>
+            <p className="text-xs text-gray-500 mt-1">Less Flex. More Human.</p>
           </div>
 
-          <nav aria-label="Navigasi samping" className="flex-1 space-y-5">
-            {(['ruang', 'kamu'] as const).map((group) => (
-              <div key={group}>
-                <p className="mb-2 px-3 text-[10px] font-black uppercase tracking-widest text-navy/35">
-                  {group === 'ruang' ? 'Ruang Cerita' : 'Buat Dirimu'}
-                </p>
-                <div className="space-y-1.5">
-                  {navItems.filter((item) => item.group === group).map((item) => {
-                    const isActive = activeSection === item.id;
-                    return (
-                      <button
-                        key={item.id}
-                        type="button"
-                        onClick={() => setActiveSection(item.id)}
-                        aria-current={isActive ? 'page' : undefined}
-                        className={`focus-ring flex w-full items-center gap-3 rounded-2xl px-3 py-2.5 text-sm font-bold transition-all duration-200 ${
-                          isActive
-                            ? 'bg-lavender/25 text-navy shadow-sm'
-                            : 'text-navy/55 hover:-translate-y-0.5 hover:bg-cream hover:text-navy'
-                        }`}
-                      >
-                        <span className={`flex h-8 w-8 items-center justify-center rounded-xl ${isActive ? 'bg-navy text-sunshine' : 'bg-cream text-navy/50'}`}>
-                          <NavIcon name={item.icon} size={17} />
-                        </span>
-                        {item.label}
-                        {isActive && <span className="ml-auto h-2 w-2 rounded-full bg-sunshine" />}
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
+          <nav className="flex-1 space-y-2">
+            {navItems.map((item) => (
+              <button
+                key={item.id}
+                onClick={() => setActiveSection(item.id)}
+                className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition ${
+                  activeSection === item.id
+                    ? 'bg-primary/10 text-navy'
+                    : 'text-gray-600 hover:bg-gray-100'
+                }`}
+              >
+                <span className="text-lg">{item.icon}</span>
+                <span>{item.label}</span>
+                {activeSection === item.id && <span className="ml-auto w-2 h-2 rounded-full bg-primary" />}
+              </button>
             ))}
           </nav>
 
-          <div className="mt-auto border-t border-navy/10 pt-6">
-            <p className="text-xs font-bold text-navy/50">Pelan-pelan juga sampai.</p>
-            <p className="mt-1 text-[10px] text-navy/35">
+          <div className="mt-auto pt-6 border-t border-gray-100">
+            <p className="text-xs text-gray-400 font-medium">Pelan-pelan juga sampai.</p>
+            <p className="text-[10px] text-gray-300 mt-1">
               Setiap langkah kecil tetap ada kemajuan.
             </p>
           </div>
         </aside>
 
         {/* Main Content - RUANG CERITA KITA */}
-        <main className="flex-1 bg-background p-6">
-          <div className="relative mb-7 overflow-hidden rounded-[30px] bg-navy p-6 text-cream shadow-soft">
-            <div className="absolute -right-10 -top-16 h-52 w-52 rounded-full bg-lavender/25 blur-2xl" />
-            <div className="absolute bottom-0 left-1/3 h-24 w-40 rounded-full bg-sunshine/15 blur-2xl" />
-            <div className="relative flex items-center justify-between gap-6">
-              <div>
-                <p className="mb-2 inline-flex items-center gap-1.5 rounded-full bg-sunshine/15 px-3 py-1 text-[10px] font-black uppercase tracking-widest text-sunshine">
-                  <NavIcon name="sparkles" size={12} /> Ruang Cerita Kita
-                </p>
-                <h1 className="font-display text-2xl font-black">Hari ini, apa adanya.</h1>
-                <p className="mt-1 max-w-md text-xs leading-relaxed text-cream/70">
-                  Taruh bebanmu sebentar di sini. Nggak harus sukses untuk punya cerita.
-                </p>
-                <p className="mt-3 text-[10px] font-semibold text-cream/50">Memutus yang Toksik + Menambah yang Esensial</p>
-              </div>
-              <BrandMascot size={108} bubble="Kamu nggak sendirian. 🤝" />
+        <main className="flex-1 p-6 bg-background">
+          <div className="mb-6 flex items-center justify-between">
+            <div>
+              <h1 className="font-display font-black text-2xl text-navy">Hari ini, apa adanya.</h1>
+              <p className="text-sm text-gray-500 mt-1">Taruh bebanmu sebentar di sini.</p>
             </div>
-          </div>
-
-          <div className="mb-5 flex items-center justify-between">
-            <p className="text-xs font-semibold text-navy/50">
-              {loggedIn ? `Halo, ${user.username}. Cerita siapa yang lagi berat?` : 'Baca dulu boleh, ikut cerita juga boleh.'}
-            </p>
             <button
-              type="button"
               onClick={() => void (activeSection === 'feed' ? window.location.reload() : setActiveSection('feed'))}
-              className="focus-ring inline-flex items-center gap-1.5 rounded-xl border border-navy/15 px-3 py-1.5 text-xs font-bold text-navy transition hover:bg-cream"
+              className="text-xs text-navy border border-navy/20 px-3 py-1.5 rounded-lg hover:bg-navy/5 transition"
             >
-              <NavIcon name="sparkles" size={13} /> Muat ulang
+              ↻ Muat ulang
             </button>
           </div>
 
           {activeSection === 'feed' && (
-            <div className="mx-auto max-w-2xl space-y-4">
-              <TrendingRail active={trendingTag} onSelect={setTrendingTag} />
+            <div className="max-w-2xl mx-auto">
               <PollCard loggedIn={loggedIn} onAuthRequired={handleAuthRequired} />
-              <FailFeed
-                loggedIn={loggedIn}
-                onAuthRequired={handleAuthRequired}
-                newPost={newPost}
-                hashtag={trendingTag}
-                onClearHashtag={() => setTrendingTag('')}
-              />
+              <FailFeed loggedIn={loggedIn} onAuthRequired={handleAuthRequired} newPost={newPost} />
             </div>
           )}
 
@@ -289,26 +234,33 @@ export default function AppPage() {
           )}
         </main>
 
-        {/* Right Sidebar - TRENDING + PENGINGAT KECIL */}
-        <aside className="hidden w-80 space-y-5 border-l border-navy/10 bg-white p-6 lg:block">
-          <TrendingRail active={trendingTag} onSelect={setTrendingTag} />
-
-          <div className="surface-card overflow-hidden p-5">
-            <div className="mb-3 flex items-center gap-3">
-              <BrandMascot size={52} float={false} bubble="Pelan-pelan. 💛" />
-              <div>
-                <h3 className="font-display text-sm font-black text-navy">PENGINGAT KECIL</h3>
-                <p className="text-[10px] text-navy/45">— unlinked+</p>
-              </div>
-            </div>
-            <p className="mb-4 text-xs leading-relaxed text-navy/70">
+        {/* Right Sidebar - PENGINGAT KECIL */}
+        <aside className="w-72 border-l border-gray-200 bg-white p-6 hidden lg:block">
+          <div className="bg-primary/10 rounded-2xl p-5 mb-6">
+            <h3 className="font-display font-bold text-sm text-navy mb-3">PENGINGAT KECIL</h3>
+            <p className="text-xs text-navy/80 mb-4">
               Kamu bukan CV-mu. Di sini, kita menghargai perjalanan, bukan hasil akhir.
             </p>
-            <ul className="space-y-1.5 border-t border-navy/10 pt-4 text-xs text-navy/55">
-              <li className="flex items-center gap-2"><NavIcon name="hug" size={13} /> Saling dukung</li>
-              <li className="flex items-center gap-2"><NavIcon name="check" size={13} /> Jujur & apa adanya</li>
-              <li className="flex items-center gap-2"><NavIcon name="mask" size={13} /> Tanpa penilaian</li>
-            </ul>
+            <div className="text-[10px] text-navy/60 font-medium">
+              — unlinked+
+            </div>
+          </div>
+
+          <div className="text-xs text-gray-500 space-y-3">
+            <div>
+              <span className="font-bold text-navy">Di sini, kita...</span>
+              <ul className="mt-2 space-y-1 pl-3">
+                <li>• Saling dukung</li>
+                <li>• Jujur & apa adanya</li>
+                <li>• Tanpa penilaian</li>
+              </ul>
+            </div>
+          </div>
+
+          <div className="mt-6 p-4 bg-navy/5 rounded-xl">
+            <p className="text-[10px] text-navy/70 italic">
+              "Nggak harus sukses untuk punya cerita."
+            </p>
           </div>
         </aside>
       </div>
@@ -316,16 +268,9 @@ export default function AppPage() {
       {/* Mobile Tab Content */}
       <main className="md:hidden">
         {activeSection === 'feed' && (
-          <div className="mx-auto max-w-lg space-y-4 px-4 pt-4">
-            <TrendingRail active={trendingTag} onSelect={setTrendingTag} />
+          <div className="max-w-lg mx-auto px-4 pt-4">
             <PollCard loggedIn={loggedIn} onAuthRequired={handleAuthRequired} />
-            <FailFeed
-              loggedIn={loggedIn}
-              onAuthRequired={handleAuthRequired}
-              newPost={newPost}
-              hashtag={trendingTag}
-              onClearHashtag={() => setTrendingTag('')}
-            />
+            <FailFeed loggedIn={loggedIn} onAuthRequired={handleAuthRequired} newPost={newPost} />
           </div>
         )}
         {activeSection === 'confession' && (

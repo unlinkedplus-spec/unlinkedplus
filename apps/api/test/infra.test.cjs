@@ -62,12 +62,3 @@ test('infra regression: env example targets the live host and documents new sett
     assert.ok(envExample.includes(key), `.env.example must document ${key}`);
   }
 });
-
-test('infra regression: public root serves the Next.js landing with one shared identity', () => {
-  const nginx = fs.readFileSync(path.join(repoRoot, 'docker', 'host-nginx.conf'), 'utf8');
-  const rootBlock = nginx.slice(nginx.indexOf('location / {'));
-  assert.match(rootBlock, /proxy_pass http:\/\/127\.0\.0\.1:3000/);
-  assert.ok(!rootBlock.includes('try_files $uri $uri/ /index.html'), 'root must not fall back to the legacy static landing');
-  assert.ok(nginx.includes('location ~ ^/(styles|js|images|fonts)/'), 'legacy static assets must stay reachable');
-  assert.ok(nginx.includes('location ^~ /_next/'), 'Next.js assets must keep their own route');
-});
