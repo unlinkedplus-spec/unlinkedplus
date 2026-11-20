@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import WaitlistForm from '../components/WaitlistForm';
 import { buildAvatarSVG } from '../lib/avatar-svg';
 
@@ -13,12 +14,12 @@ export default function LandingPage() {
           <p className="text-xs text-gray-500 mt-0.5">Less Flex. More Human.</p>
         </div>
         <div className="flex items-center gap-3">
-          <button className="text-sm font-medium text-navy hover:text-navy/80 transition">
+          <Link href="/app" className="text-sm font-medium text-navy hover:text-navy/80 transition">
             Masuk
-          </button>
-          <button className="bg-navy text-white text-sm font-bold px-5 py-2 rounded-full hover:bg-navy/90 transition">
+          </Link>
+          <Link href="/app" className="bg-navy text-white text-sm font-bold px-5 py-2 rounded-full hover:bg-navy/90 transition">
             Gabung sekarang →
-          </button>
+          </Link>
         </div>
       </nav>
 
@@ -35,12 +36,10 @@ export default function LandingPage() {
             Capek lihat orang pamer pencapaian di sebelah? Di sini, nggak apa-apa kalau ceritamu belum berakhir indah.
           </p>
           <div className="flex flex-wrap gap-3 mb-4">
-            <button className="bg-navy text-white font-bold px-6 py-3 rounded-full text-sm hover:bg-navy/90 transition">
-              Gabung, jadi diri sendiri →
-            </button>
-            <button className="bg-white text-navy font-bold px-6 py-3 rounded-full text-sm border border-navy/20 hover:bg-gray-50 transition">
+            <WaitlistForm mode="hero" />
+            <Link href="/app" className="bg-white text-navy font-bold px-6 py-3 rounded-full text-sm border border-navy/20 hover:bg-gray-50 transition">
               Baca cerita dulu
-            </button>
+            </Link>
           </div>
           <p className="text-xs text-navy/60">
             Pakai nama samaran. Bukan nama jabatan.
@@ -73,14 +72,15 @@ export default function LandingPage() {
           <h3 className="font-display font-bold text-sm text-navy mb-4">RUANG KAMU</h3>
           <nav className="space-y-2">
             {[
-              { id: 'beranda', icon: '🏠', label: 'Beranda', active: true },
+              { id: 'feed', icon: '🏠', label: 'Beranda', active: true },
               { id: 'spill', icon: '✍️', label: 'Spill', active: false },
               { id: 'avatar', icon: '🧑‍💼', label: 'Avatar', active: false },
-              { id: 'toko', icon: '🛒', label: 'Toko', active: false },
-              { id: 'profil', icon: '👤', label: 'Profil', active: false },
+              { id: 'shop', icon: '🛒', label: 'Toko', active: false },
+              { id: 'profile', icon: '👤', label: 'Profil', active: false },
             ].map((item) => (
-              <button
+              <Link
                 key={item.id}
+                href={`/app?tab=${item.id}`}
                 className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition w-full text-left ${
                   item.active
                     ? 'bg-primary/10 text-navy'
@@ -90,7 +90,7 @@ export default function LandingPage() {
                 <span className="text-lg">{item.icon}</span>
                 <span>{item.label}</span>
                 {item.active && <span className="ml-auto w-2 h-2 rounded-full bg-primary" />}
-              </button>
+              </Link>
             ))}
           </nav>
           <div className="mt-8 pt-6 border-t border-gray-100">
@@ -106,9 +106,9 @@ export default function LandingPage() {
           <div className="bg-white rounded-2xl p-6 border border-gray-100">
             <div className="flex items-center justify-between mb-6">
               <h2 className="font-display font-black text-xl text-navy">Hari ini, apa adanya.</h2>
-              <button className="text-xs text-navy border border-navy/20 px-3 py-1.5 rounded-lg hover:bg-navy/5 transition">
-                ↻ Muat ulang
-              </button>
+              <Link href="/app" className="text-xs text-navy border border-navy/20 px-3 py-1.5 rounded-lg hover:bg-navy/5 transition">
+                ↻ Lihat cerita terbaru
+              </Link>
             </div>
 
             {/* Input area */}
@@ -130,10 +130,10 @@ export default function LandingPage() {
               <p className="text-sm text-gray-500 mb-6 max-w-xs mx-auto">
                 Tidak harus punya cerita hebat. Hari yang berat juga layak didengar.
               </p>
-              <button className="bg-primary text-navy font-bold px-6 py-2.5 rounded-full text-sm hover:bg-primary/90 transition flex items-center gap-2 mx-auto">
+              <Link href="/app?tab=spill" className="bg-primary text-navy font-bold px-6 py-2.5 rounded-full text-sm hover:bg-primary/90 transition flex items-center gap-2 mx-auto w-fit">
                 <span>✏️</span>
                 <span>Tulis cerita pertama</span>
-              </button>
+              </Link>
             </div>
           </div>
         </main>

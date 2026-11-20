@@ -39,10 +39,16 @@ export default function AppPage() {
   useEffect(() => { void checkAuth(); }, [checkAuth]);
 
   useEffect(() => {
-    const token = new URLSearchParams(window.location.search).get('reset');
+    const params = new URLSearchParams(window.location.search);
+    const token = params.get('reset');
     if (token) {
       setResetToken(token);
       setAuthModal(true);
+    }
+    // Landing-page navigation links deep-link into the correct tab.
+    const requestedTab = params.get('tab');
+    if (requestedTab && (['feed', 'confession', 'spill', 'avatar', 'shop', 'profile'] as const).includes(requestedTab as TabId)) {
+      setActiveSection(requestedTab as TabId);
     }
   }, []);
 
