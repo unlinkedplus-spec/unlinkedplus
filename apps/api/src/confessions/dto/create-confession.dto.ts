@@ -1,4 +1,4 @@
-import { IsBoolean, IsOptional, IsString, Length, Validate } from 'class-validator';
+import { IsBoolean, IsDateString, IsOptional, IsString, Length, Validate } from 'class-validator';
 import { NoFlexPhrase } from '../../posts/anti-flex.const';
 import { Trim } from '../../posts/social.validation';
 
@@ -14,6 +14,6 @@ export class CreateConfessionDto {
   isAnonymous?: boolean;
 
   @IsOptional()
-  @IsString()
+  @IsDateString()
   scheduledAt?: string;
 }

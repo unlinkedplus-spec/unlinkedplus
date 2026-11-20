@@ -6,6 +6,17 @@
 (function () {
   'use strict';
 
+  /* Escape untrusted values before they enter an HTML/attribute context.
+     Posts and usernames originate from localStorage or user input. */
+  function esc(value) {
+    return String(value == null ? '' : value)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
+
   /* --------------------------------------------------------
      AI Sensor — 10 banned phrases
      -------------------------------------------------------- */
@@ -151,12 +162,12 @@
     var samaReacted   = rxn.myReactions && rxn.myReactions.sama   ? ' reacted' : '';
 
     /* Mockup layout: "BudakKantor · Lv.2 · 2 jam lalu" */
-    var metaLine = post.username +
+    var metaLine = esc(post.username) +
       ' <span class="post-meta-dot">·</span> Lv.' + lvlObj.level +
       ' <span class="post-meta-dot">·</span> ' + _relativeTime(post.timestamp);
 
     return (
-      '<div class="post-card" id="post-' + post.id + '">' +
+      '<div class="post-card" id="post-' + esc(post.id) + '">' +
         '<div class="post-header">' +
           '<div class="post-avatar-wrap">' +
             '<svg viewBox="0 0 300 300" xmlns="http://www.w3.org/2000/svg">' + avatarSVG + '</svg>' +
@@ -168,23 +179,23 @@
                 lvlObj.name +
               '</span>' +
               '<span class="cat-badge" style="background:' + catColor + '22;color:' + catColor + '">' +
-                post.category +
+                esc(post.category) +
               '</span>' +
             '</div>' +
           '</div>' +
         '</div>' +
-        '<p class="post-text">' + post.text + '</p>' +
+        '<p class="post-text">' + esc(post.text) + '</p>' +
         '<div class="reaction-row">' +
-          '<button class="reaction-btn' + pukpukReacted + '" data-post-id="' + post.id + '" data-reaction="pukpuk">' +
+          '<button class="reaction-btn' + pukpukReacted + '" data-post-id="' + esc(post.id) + '" data-reaction="pukpuk">' +
             '🫂 Puk-Puk <span class="rxn-count">(' + (rxn.pukpuk || 0) + ')</span>' +
           '</button>' +
-          '<button class="reaction-btn' + ngakakReacted + '" data-post-id="' + post.id + '" data-reaction="ngakak">' +
+          '<button class="reaction-btn' + ngakakReacted + '" data-post-id="' + esc(post.id) + '" data-reaction="ngakak">' +
             '😂 Ngakak Maaf <span class="rxn-count">(' + (rxn.ngakak || 0) + ')</span>' +
           '</button>' +
-          '<button class="reaction-btn' + samaReacted + '" data-post-id="' + post.id + '" data-reaction="sama">' +
+          '<button class="reaction-btn' + samaReacted + '" data-post-id="' + esc(post.id) + '" data-reaction="sama">' +
             '🤝 Sama Banget <span class="rxn-count">(' + (rxn.sama || 0) + ')</span>' +
           '</button>' +
-          '<button class="cert-btn" data-post-id="' + post.id + '">📜 Sertifikat</button>' +
+          '<button class="cert-btn" data-post-id="' + esc(post.id) + '">📜 Sertifikat</button>' +
         '</div>' +
       '</div>'
     );

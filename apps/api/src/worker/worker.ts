@@ -26,7 +26,7 @@ async function bootstrap() {
   };
   process.once('SIGINT', stop);
   process.once('SIGTERM', stop);
-  logger.log('Certificate worker is running');
+  logger.log('Certificate worker and scheduled post publisher are running');
 }
 
 void bootstrap().catch(() => {

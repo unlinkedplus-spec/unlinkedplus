@@ -73,6 +73,7 @@ export class ConfessionsService {
   async create(userId: string, input: CreateConfessionDto) {
     const dto = validateInput(CreateConfessionDto, input);
     const scheduledAt = dto.scheduledAt ? new Date(dto.scheduledAt) : null;
+    const isScheduled = !!scheduledAt && scheduledAt.getTime() > Date.now();
 
     return this.prisma.$transaction(async (tx) => {
       const post = await tx.post.create({
@@ -83,7 +84,7 @@ export class ConfessionsService {
           isConfession: true,
           isAnonymous: dto.isAnonymous ?? true,
           scheduledAt,
-          status: scheduledAt && scheduledAt > new Date() ? 'scheduled' : 'active',
+          status: isScheduled ? 'scheduled' : 'active',
         },
         select: {
           id: true,
@@ -94,7 +95,11 @@ export class ConfessionsService {
         },
       });
 
-      await changeXp(tx, userId, XP_REWARDS.postCreated);
+      // XP is granted only when the confession actually becomes public.
+      // Future posts are published (and rewarded) by ScheduledPublisher.
+      if (!isScheduled) {
+        await changeXp(tx, userId, XP_REWARDS.postCreated);
+      }
 
       return post;
     }, { isolationLevel: 'ReadCommitted' });
