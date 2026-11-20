@@ -234,7 +234,7 @@ function initComposer() {
       charCount.textContent = '0/1200';
       spillButton.disabled = true;
 
-      showNotification('Spill berhasil dipublikasikan! 🎉');
+      showNotification('Pratinjau spill ditambahkan di demo ini (belum tersimpan/server).');
     });
   }
 
@@ -353,10 +353,7 @@ function initPostInteractions() {
   const refreshBtn = document.querySelector('.refresh');
   if (refreshBtn) {
     refreshBtn.addEventListener('click', function() {
-      showNotification('Memuat ulang cerita...');
-      setTimeout(() => {
-        showNotification('Cerita berhasil dimuat ulang!');
-      }, 1000);
+      showNotification('Demo statis: tidak ada data baru dari server untuk dimuat ulang.');
     });
   }
 
@@ -364,7 +361,7 @@ function initPostInteractions() {
   const sponsoredBtn = document.querySelector('.sponsored-copy button');
   if (sponsoredBtn) {
     sponsoredBtn.addEventListener('click', function() {
-      showNotification('Mengarahkan ke halaman kursus...');
+      showNotification('Tautan kursus tidak tersedia di demo statis ini.');
     });
   }
 
@@ -478,7 +475,7 @@ function initModals() {
         window.Features.setActive('Komunitas');
         return;
       }
-      showNotification('Mengarahkan ke halaman komunitas...');
+      showNotification('Halaman komunitas tidak tersedia di demo statis ini.');
     });
   }
 
@@ -486,7 +483,7 @@ function initModals() {
   const socialLinks = document.querySelectorAll('.social-links span');
   socialLinks.forEach(link => {
     link.addEventListener('click', function() {
-      showNotification('Mengarahkan ke media sosial...');
+      showNotification('Tautan media sosial tidak tersedia di demo statis ini.');
     });
   });
 }
@@ -516,7 +513,7 @@ function showAuthModal() {
     const form = modal.querySelector('#auth-form');
     form.addEventListener('submit', function(e) {
       e.preventDefault();
-      showNotification('Berhasil login! Selamat datang! 🎉');
+      showNotification('Demo statis: akun tidak dibuat. Daftar melalui halaman /app.');
       closeModal('auth-modal');
     });
   }

@@ -42,7 +42,7 @@ function authContext({ user = { id: 'user-1', status: 'active' }, mails = [] } =
     del: () => ({ exec: async () => [] }),
   }) } };
   const config = { get: (key) => key === 'FRONTEND_URL' ? 'http://localhost:3000' : undefined };
-  const mail = { sendPasswordReset: async (input) => { mails.push(input); } };
+  const mail = { sendPasswordReset: async (input) => { mails.push(input); return true; } };
   const jwt = { signAsync: async () => 'token' };
   const ctx = {
     prisma, redis, config, mail, mails, jwt, created, updated, used, revoked, claimed, record: null,

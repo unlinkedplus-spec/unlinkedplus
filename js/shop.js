@@ -177,7 +177,7 @@
     Shop.init();
 
     if (typeof window.showToast === 'function') {
-      window.showToast('🎉 Pembelian berhasil! ' + _currentItem.name + ' sudah kamu miliki.');
+      window.showToast('Simulasi selesai: ' + _currentItem.name + ' ditandai dimiliki di perangkat ini. Tidak ada pembayaran nyata.');
     }
 
     _currentItem = null;

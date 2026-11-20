@@ -272,17 +272,17 @@
     </div>
   </div>
 
-  <!-- QRIS Modal -->
+  <!-- QRIS Simulation Modal (no real payment is processed) -->
   <div id="modal-qris" class="modal-card" hidden>
     <div class="qris-modal-body">
       <div class="qris-item-info">
         <h3 id="qris-item-name"></h3>
         <p id="qris-item-price" style="color:var(--color-orange);font-weight:900;font-size:1.3rem"></p>
       </div>
-      <p style="font-size:0.85rem;color:var(--color-gray-400);margin-bottom:8px">Scan QRIS untuk membayar:</p>
+      <p style="font-size:0.85rem;color:var(--color-gray-400);margin-bottom:8px"><strong>SIMULASI</strong> — kode ini bukan QRIS pembayaran nyata. Tidak ada uang yang ditagih atau diterima.</p>
       <div id="qris-code-box" class="qris-code-box"></div>
       <div class="qris-actions">
-        <button id="qris-confirm-btn" class="btn-primary">✅ Konfirmasi Bayar</button>
+        <button id="qris-confirm-btn" class="btn-primary">✅ Simulasikan Pembayaran</button>
         <button id="qris-cancel-btn" class="btn-ghost">Batal</button>
       </div>
     </div>

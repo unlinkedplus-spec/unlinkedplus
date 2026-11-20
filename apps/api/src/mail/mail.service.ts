@@ -13,7 +13,8 @@ export class MailService {
 
   constructor(private readonly config: ConfigService) {}
 
-  async sendPasswordReset(input: PasswordResetMail): Promise<void> {
+  /** Returns true only when a message was actually handed to a delivery driver. */
+  async sendPasswordReset(input: PasswordResetMail): Promise<boolean> {
     const driver = String(this.config.get('MAIL_DRIVER') ?? 'disabled');
     const subject = 'Reset kata sandi unlinked+';
     const text = [
@@ -31,12 +32,13 @@ export class MailService {
 
     if (driver === 'disabled') {
       this.logger.warn('MAIL_DRIVER=disabled — email reset tidak dikirim. Gunakan kode pemulihan.');
-      return;
+      return false;
     }
 
+    // Console output is a developer diagnostic, not delivery to the recipient.
     if (driver === 'console') {
-      this.logger.warn(`[MAIL:console] ${subject} → ${input.to}: ${input.resetUrl}`);
-      return;
+      this.logger.warn(`[MAIL:console] ${subject} → ${input.to} (tautan tidak dicetak)`);
+      return false;
     }
 
     const url = this.config.get<string>('MAIL_WEBHOOK_URL');
@@ -60,6 +62,7 @@ export class MailService {
         }),
       });
       if (!response.ok) throw new Error(`webhook status ${response.status}`);
+      return true;
     } catch (error) {
       this.logger.error(`Gagal mengirim email reset: ${error instanceof Error ? error.message : String(error)}`);
       throw new ServiceUnavailableException('Email reset belum bisa dikirim. Coba lagi nanti.');

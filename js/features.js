@@ -471,7 +471,7 @@
       });
       save(K.spills, spills);
       input.value = '';
-      toast('Spill terkirim ke Beranda, Discover, dan Profil.');
+      toast('Spill tersimpan di demo lokal (Beranda/Discover/Profil), bukan di server.');
       paintFeed(host);
     });
 
@@ -922,7 +922,7 @@
         options: opts.map(function (t, i) { return { id: 'o' + i, text: t, votes: 0 }; })
       });
       save(K.polls, polls);
-      toast('Poll dipublikasikan.');
+      toast('Poll tersimpan di demo lokal (belum dipublikasikan ke server).');
       renderPoll(host);
     });
 
@@ -1473,7 +1473,7 @@
         }).join('') +
       '</div>' +
 
-      '<div class="fv-plus-secure">🛡️ Pembayaran aman &amp; terpercaya melalui QRIS, kartu, dan e-wallet.</div>' +
+      '<div class="fv-plus-secure">🛡️ Simulasi langganan — tidak ada pembayaran, QRIS, kartu, atau e-wallet yang diproses.</div>' +
 
       '<button id="pl-upgrade" class="fv-btn primary fv-plus-cta">' +
         (active ? 'Perpanjang Paket ' + plan.name : 'Upgrade Sekarang — ' + rupiah(plan.price)) + ' →' +
@@ -1505,7 +1505,7 @@
       if (window.confetti) {
         window.confetti({ particleCount: 180, spread: 90, origin: { y: 0.55 } });
       }
-      toast('unlinked+ Plus aktif. Iklan di feed hilang.');
+      toast('Mode Plus demo aktif di perangkat ini (bukan langganan berbayar).');
       renderPlus(host);
     });
 
@@ -1515,7 +1515,7 @@
         if (!window.confirm('Berhenti berlangganan? Manfaat Plus langsung berhenti.')) return;
         localStorage.removeItem(K.plus);
         applyPlusState();
-        toast('Langganan dihentikan. Iklan kembali muncul di feed.');
+        toast('Mode Plus demo dimatikan di perangkat ini.');
         renderPlus(host);
       });
     }

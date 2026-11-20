@@ -139,8 +139,12 @@ export class AuthService {
     const frontend = String(this.config.get('FRONTEND_URL') ?? '').replace(/\/$/, '');
     const resetUrl = `${frontend}/app?reset=${encodeURIComponent(token)}`;
     try {
-      await this.mail.sendPasswordReset({ to: dto.email, resetUrl, expiresInMinutes: Math.round(RESET_TOKEN_SECONDS / 60) });
-      return { success: true, emailSent: true };
+      const delivered = await this.mail.sendPasswordReset({
+        to: dto.email,
+        resetUrl,
+        expiresInMinutes: Math.round(RESET_TOKEN_SECONDS / 60),
+      });
+      return { success: true, emailSent: delivered === true };
     } catch (error) {
       this.logger.warn(`Email reset gagal dikirim: ${error instanceof Error ? error.message : String(error)}`);
       return { success: true, emailSent: false };
