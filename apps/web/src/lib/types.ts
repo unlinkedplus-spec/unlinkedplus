@@ -29,14 +29,18 @@ export interface ReactionCounts {
   sama: number;
 }
 
+// Public authors are pseudonymous: no internal user id is ever sent with a
+// post or comment (see PUBLIC_AUTHOR_SELECT in the API).
+export type PostAuthor = Omit<User, 'id' | 'role'>;
+
 export interface Post {
   id: string;
-  userId: string | null;
   category: string;
   content: string;
   createdAt: string;
   status: string;
-  user: User | null;
+  isAnonymous?: boolean;
+  user: PostAuthor | null;
   reactionCounts: ReactionCounts;
   _count?: { reactions: number; comments: number };
 }

@@ -88,3 +88,48 @@ test('real persistence, ownership, sessions, XP, comments, store and PNG queue',
   assert.equal((await owner.call('/auth/me')).username, `qa_owner_${suffix}`);
   console.log(`Created test accounts qa_owner_${suffix}, qa_other_${suffix}; use only a disposable deployment.`);
 });
+
+test('anonymous identity is not re-identifiable across confession, feed, comments and moderation', { timeout: 90000 }, async () => {
+  const author = client(), reader = client();
+  const anonPassword = randomBytes(24).toString('hex');
+  await author.call('/auth/register', { method: 'POST', expected: 201, body: { username: `qa_anon_${suffix}`, password: anonPassword } });
+  await reader.call('/auth/register', { method: 'POST', expected: 201, body: { username: `qa_reader_${suffix}`, password: anonPassword } });
+
+  const confession = await author.call('/confessions', {
+    method: 'POST', expected: 201,
+    body: { content: `QA ${suffix}: pengujian identitas anonim lintas permukaan.`, isAnonymous: true },
+  });
+  assert.ok(confession.id);
+
+  async function assertAnonymous(view) {
+    assert.equal(view.user, null, 'anonymous author must be hidden on every public surface');
+    assert.ok(!('userId' in view), 'internal author id must never be returned publicly');
+  }
+
+  const confessions = await reader.call('/confessions');
+  await assertAnonymous(confessions.data.find((row) => row.id === confession.id));
+
+  // Feed responses are cached briefly; wait past the cache TTL before checking.
+  await delay(6000);
+  const feed = await reader.call('/posts');
+  await assertAnonymous(feed.data.find((row) => row.id === confession.id));
+  await assertAnonymous(await reader.call(`/posts/${confession.id}`));
+
+  const comment = await reader.call(`/posts/${confession.id}/comments`, {
+    method: 'POST', expected: 201, body: { content: 'Komentar tampilan anonim.' },
+  });
+  assert.ok(!('userId' in comment), 'comment responses must not carry internal author ids');
+  const comments = await reader.call(`/posts/${confession.id}/comments`);
+  await assertAnonymousButNamed(comments.data.find((row) => row.id === comment.id));
+
+  function assertAnonymousButNamed(row) {
+    assert.ok(row.user?.username, 'pseudonymous commenter name remains visible');
+    assert.ok(!('userId' in row), 'internal commenter id must not be exposed');
+    assert.ok(!('id' in row.user), 'internal user id must not be nested in a public author');
+  }
+  for (const row of feed.data) {
+    if (row.user) assert.ok(!('id' in row.user), 'feed authors must be pseudonymous, never raw ids');
+  }
+
+  console.log(`Anonymous identity regression OK for ${confession.id}; no real identity exposed.`);
+});

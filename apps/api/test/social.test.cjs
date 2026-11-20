@@ -39,7 +39,7 @@ const { ResolveReportDto } = load('reports/dto/resolve-report.dto');
 const { BANNED_PHRASES, containsFlexPhrase } = load('posts/anti-flex.const');
 const { validateInput, pagination, PaginationDto } = load('posts/social.validation');
 const { POST_SELECT, COMMENT_SELECT } = load('posts/social.persistence');
-const { PUBLIC_USER_SELECT } = load('users/user.select');
+const { PUBLIC_USER_SELECT, PUBLIC_AUTHOR_SELECT } = load('users/user.select');
 const { calculateLevel } = load('common/helpers/xp-level.helper');
 const { ValidationPipe } = require('@nestjs/common');
 
@@ -288,8 +288,9 @@ test('creation awards exactly ten XP, updates level and returns public author da
   assert.equal(post.user.profile.mentalXp, 50);
   assert.deepEqual(post.reactionCounts, { pukpuk: 0, ngakak: 0, sama: 0 });
   assertNoSecrets(post);
-  assert.equal(POST_SELECT.user.select, PUBLIC_USER_SELECT);
-  assert.equal(COMMENT_SELECT.user.select, PUBLIC_USER_SELECT);
+  assert.equal(POST_SELECT.user.select, PUBLIC_AUTHOR_SELECT);
+  assert.equal(COMMENT_SELECT.user.select, PUBLIC_AUTHOR_SELECT);
+  assert.ok(!('id' in PUBLIC_AUTHOR_SELECT), 'public author projection must not expose user ids');
   await assert.rejects(f.posts.create(OWNER, { ...postInput, category: 'other' }), hasStatus(400));
   assert.equal(f.xp(), 50);
 });

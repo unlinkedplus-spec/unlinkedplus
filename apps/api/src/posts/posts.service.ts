@@ -5,7 +5,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { CreatePostDto } from './dto/create-post.dto';
 import {
   assertActivePost, changeXp, deactivatePost, emptyReactionCounts, lockPost,
-  POST_SELECT, reactionCounts, reactionCountsByPost,
+  POST_SELECT, publicPost, reactionCounts, reactionCountsByPost,
 } from './social.persistence';
 import { assertUuid, pagination, validateInput } from './social.validation';
 
@@ -40,7 +40,7 @@ export class PostsService {
       const total = await tx.post.count({ where });
       const counts = await reactionCountsByPost(tx, rows.map((row) => row.id));
       return {
-        data: rows.map((row) => ({ ...row, reactionCounts: counts.get(row.id)! })),
+        data: rows.map((row) => publicPost({ ...row, reactionCounts: counts.get(row.id)! })),
         total, page: paging.page, totalPages: Math.ceil(total / paging.limit),
       };
     }, { isolationLevel: 'RepeatableRead' });
@@ -54,7 +54,7 @@ export class PostsService {
       });
       await changeXp(tx, userId, XP_REWARDS.postCreated);
       const created = await tx.post.findUniqueOrThrow({ where: { id: post.id }, select: POST_SELECT });
-      return { ...created, reactionCounts: emptyReactionCounts() };
+      return publicPost({ ...created, reactionCounts: emptyReactionCounts() });
     }, { isolationLevel: 'ReadCommitted' });
     await this.cache.bumpVersion(PostsService.FEED_CACHE_VERSION);
     return result;
@@ -65,7 +65,7 @@ export class PostsService {
     return this.prisma.$transaction(async (tx) => {
       const post = await tx.post.findFirst({ where: { id, status: 'active' }, select: POST_SELECT });
       if (!post) throw new NotFoundException('Post tidak ditemukan');
-      return { ...post, reactionCounts: await reactionCounts(tx, id) };
+      return publicPost({ ...post, reactionCounts: await reactionCounts(tx, id) });
     }, { isolationLevel: 'RepeatableRead' });
   }
 

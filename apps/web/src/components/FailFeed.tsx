@@ -118,7 +118,7 @@ export default function FailFeed({ loggedIn, onAuthRequired, newPost }: Props) {
           loggedIn={loggedIn}
         />
 
-        {post.userId && (
+        {loggedIn && (
           <button
             onClick={() => handleCertClick(post)}
             className="mt-3 text-xs text-gray-400 hover:text-accent transition font-medium"

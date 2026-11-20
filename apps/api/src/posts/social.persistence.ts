@@ -1,7 +1,7 @@
 import { NotFoundException } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { calculateLevel, XP_REWARDS } from '../common/helpers/xp-level.helper';
-import { PUBLIC_USER_SELECT } from '../users/user.select';
+import { PUBLIC_AUTHOR_SELECT } from '../users/user.select';
 import { assertUuid } from './social.validation';
 
 export const REACTION_TYPES = ['pukpuk', 'ngakak', 'sama'] as const;
@@ -11,16 +11,24 @@ export const emptyReactionCounts = (): ReactionCounts => ({ pukpuk: 0, ngakak: 0
 export const isReactionType = (type: string): type is ReactionType =>
   (REACTION_TYPES as readonly string[]).includes(type);
 
+// Public projections never expose the internal author id. Anonymous posts
+// additionally hide the author entirely, on every surface (feed, detail,
+// create response) so an anonymous confession cannot be re-identified from
+// another endpoint. Moderation keeps its own explicit select with ids.
 export const POST_SELECT = {
-  id: true, userId: true, category: true, content: true, status: true, createdAt: true,
-  user: { select: PUBLIC_USER_SELECT },
+  id: true, category: true, content: true, status: true, createdAt: true, isAnonymous: true,
+  user: { select: PUBLIC_AUTHOR_SELECT },
   _count: { select: { reactions: true, comments: { where: { status: 'active' } } } },
 } satisfies Prisma.PostSelect;
 
 export const COMMENT_SELECT = {
-  id: true, postId: true, userId: true, content: true, status: true, createdAt: true,
-  user: { select: PUBLIC_USER_SELECT },
+  id: true, postId: true, content: true, status: true, createdAt: true,
+  user: { select: PUBLIC_AUTHOR_SELECT },
 } satisfies Prisma.CommentSelect;
+
+export function publicPost<T extends { isAnonymous: boolean; user: unknown }>(post: T): T {
+  return post.isAnonymous ? { ...post, user: null } : post;
+}
 
 export interface LockedPost {
   id: string;
