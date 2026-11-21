@@ -103,7 +103,7 @@ export default function FeaturePage({ slug, authenticated }: { slug: FeatureSlug
       return <PollCard loggedIn={authenticated} onAuthRequired={() => setAuthOpen(true)} />;
     }
     if (slug === 'store' || slug === 'toko') {
-      return <ShopModal onClose={() => { window.location.href = '/'; }} />;
+      return <ShopModal onClose={() => { window.location.href = '/home'; }} />;
     }
     if (slug === 'spill') {
       if (!authenticated) {
@@ -153,7 +153,7 @@ export default function FeaturePage({ slug, authenticated }: { slug: FeatureSlug
           </div>
         );
       }
-      return <ProfileTab onLogout={() => { window.location.href = '/'; }} />;
+      return <ProfileTab onLogout={() => { window.location.href = '/home'; }} />;
     }
     if (slug === 'opportunity-board') {
       return (
@@ -212,7 +212,7 @@ export default function FeaturePage({ slug, authenticated }: { slug: FeatureSlug
           <Link href="/features/toko"><span>▣</span>Toko</Link>
           <Link href="/features/profil"><span>♙</span>Profil</Link>
         </nav>
-        {authOpen && <AuthModal onSuccess={() => { setAuthOpen(false); window.location.href = '/'; }} onClose={() => setAuthOpen(false)} defaultTab="login" />}
+        {authOpen && <AuthModal onSuccess={() => { setAuthOpen(false); window.location.href = '/home'; }} onClose={() => setAuthOpen(false)} defaultTab="login" />}
       </div>
     );
   }
@@ -280,7 +280,7 @@ export default function FeaturePage({ slug, authenticated }: { slug: FeatureSlug
         </div>
       </div>
       {authOpen && (
-        <AuthModal onSuccess={() => { setAuthOpen(false); window.location.href = '/'; }} onClose={() => setAuthOpen(false)} defaultTab="login" />
+        <AuthModal onSuccess={() => { setAuthOpen(false); window.location.href = '/home'; }} onClose={() => setAuthOpen(false)} defaultTab="login" />
       )}
     </div>
   );

@@ -146,7 +146,7 @@ export default function ExactMockup({ view, authenticated }: { view: View; authe
       {authTab && (
         <AuthModal
           defaultTab={authTab}
-          onSuccess={() => { setAuthTab(null); window.location.href = '/'; }}
+          onSuccess={() => { setAuthTab(null); window.location.href = '/home'; }}
           onClose={() => setAuthTab(null)}
         />
       )}

@@ -13,19 +13,22 @@ const landing = fs.readFileSync(path.join(webRoot, 'app', 'page.tsx'), 'utf8');
 const appPage = fs.readFileSync(path.join(webRoot, 'app', 'app', 'page.tsx'), 'utf8');
 const waitlist = fs.readFileSync(path.join(webRoot, 'components', 'WaitlistForm.tsx'), 'utf8');
 
-test('H4 regression: root serves the two-state Beranda with navigable CTAs', () => {
-  assert.match(landing, /import \{ cookies \} from ['"]next\/headers['"]/);
-  assert.match(landing, /jar\.get\('unlinked_session'\)/);
-  assert.match(landing, /<ExactMockup view=/);
-  assert.match(landing, /authenticated \? 'beranda' : 'landing'/);
-  assert.ok(fs.existsSync(path.join(webRoot, 'components', 'ExactMockup.tsx')),
-    'exact mockup component must exist');
+test('Hybrid rendering: / is SSG landing and /home is dynamic dashboard', () => {
+  assert.match(landing, /import ExactMockup from/);
+  assert.match(landing, /view="landing" authenticated=\{false\}/);
+  assert.ok(!landing.includes('cookies()'), 'SSG root must not read cookies at request time');
+
+  const home = fs.readFileSync(path.join(webRoot, 'app', 'home', 'page.tsx'), 'utf8');
+  assert.match(home, /import \{ cookies \} from ['"]next\/headers['"]/);
+  assert.match(home, /redirect\('\/'\)/);
+  assert.match(home, /view="beranda" authenticated/);
+
   const dash = fs.readFileSync(path.join(webRoot, 'components', 'ExactMockup.tsx'), 'utf8');
   assert.match(dash, /mockup-identik\/chibi-landing\.png/);
   assert.match(dash, /mockup-identik\/same-boat\.png/);
   assert.match(dash, /['"]\/features\/spill['"]/);
-  assert.match(dash, /['"]\/app['"]/);
   assert.match(dash, /createPost\(/);
+  assert.match(dash, /window\.location\.href = '\/home'/);
 });
 
 test('H4 regression: app honours landing deep links', () => {

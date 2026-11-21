@@ -83,9 +83,10 @@ test('Spill Without Judgment: Gate 1 anonymous identity remains intact', () => {
   assert.ok(!postType.includes('userId'));
 });
 
-test('Spill Without Judgment: two-state root proxies to Next.js and keeps static assets', () => {
+test('Spill Without Judgment: SSG root and dynamic /home both proxy to Next.js', () => {
   const rootBlock = nginx.slice(nginx.indexOf('location / {'));
   assert.match(rootBlock, /proxy_pass http:\/\/127\.0\.0\.1:3000/);
+  assert.match(nginx, /location ~ \^\/home\(\/\|\$\)/);
   assert.match(nginx, /location ~ \^\/\(styles\|js\|images\|fonts\)\//);
   assert.match(nginx, /root \/var\/www\/unlinked-plus/);
   assert.match(nginx, /location = \/preview/);

@@ -1,12 +1,10 @@
-import { cookies } from 'next/headers';
 import ExactMockup from '../components/ExactMockup';
 
 /**
- * Public root = exact Chibi Community mockup from the approved ZIP.
- * After login the same origin serves the exact Same Boat Beranda mockup.
+ * STATIC / SSG landing (Chibi Community).
+ * No request-time session read: publicly cacheable and SEO friendly.
+ * The dynamic dashboard lives at /home.
  */
-export default async function Home() {
-  const jar = await cookies();
-  const authenticated = Boolean(jar.get('unlinked_session'));
-  return <ExactMockup view={authenticated ? 'beranda' : 'landing'} authenticated={authenticated} />;
+export default function Home() {
+  return <ExactMockup view="landing" authenticated={false} />;
 }

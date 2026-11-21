@@ -64,7 +64,7 @@ export default function AppPage() {
   function handleAuthSuccess() {
     setAuthModal(false);
     setResetToken('');
-    router.push('/');
+    router.push('/home');
   }
 
   function handleLogout() {

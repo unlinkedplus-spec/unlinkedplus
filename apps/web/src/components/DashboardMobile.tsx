@@ -253,7 +253,7 @@ export default function DashboardMobile({ variant, authenticated }: { variant: V
         <Link href="/features/profil"><span>♙</span>Profil</Link>
       </nav>
 
-      {authOpen && <AuthModal onSuccess={() => { setAuthOpen(false); window.location.reload(); }} onClose={() => setAuthOpen(false)} defaultTab="login" />}
+      {authOpen && <AuthModal onSuccess={() => { setAuthOpen(false); window.location.href = '/home'; }} onClose={() => setAuthOpen(false)} defaultTab="login" />}
     </div>
   );
 }

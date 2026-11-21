@@ -35,7 +35,7 @@ test('Exact landing: every CTA and menu opens auth or a real feature', () => {
   assert.match(component, /import AuthModal from '\.\/AuthModal'/);
   assert.match(component, /setAuthTab\('login'\)/);
   assert.match(component, /setAuthTab\('register'\)/);
-  assert.match(component, /window\.location\.href = '\/'/);
+  assert.match(component, /window\.location\.href = '\/home'/);
   assert.match(component, /aria-label="Lihat Preview"/);
   assert.match(component, /kenapa-\$\{i\}/);
   assert.match(component, /fitur-\$\{i\}/);
