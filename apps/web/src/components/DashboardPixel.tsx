@@ -13,6 +13,7 @@ import { relativeTime } from '../lib/time';
 import { buildAvatarSVG } from '../lib/avatar-svg';
 import AuthModal from './AuthModal';
 import DashboardMobile from './DashboardMobile';
+import AccountMenu from './AccountMenu';
 
 export type DashboardVariant = 'chibi' | 'sameboat';
 
@@ -150,7 +151,9 @@ export default function DashboardPixel({ variant, authenticated, preview = false
           <button className="px-hit" style={{ left: 1304, top: 18, width: 116, height: 50 }}
             onClick={() => { if (authenticated) window.location.href = '/features/profil'; else setAuthOpen(true); }}
             aria-label="Gabung Sekarang / Profil" />
-          <Link className="px-hit" style={{ left: 1460, top: 6, width: 58, height: 58 }} href="/features/profil" aria-label="Avatar" />
+          <AccountMenu authenticated={authenticated}
+            trigger={{ left: 1460, top: 6, width: 58, height: 58 }}
+            menu={{ left: 1248, top: 74 }} />
           <input className="px-input" style={{ left: 570, top: 20, width: 390, height: 30, padding: 0, fontSize: 12 }}
             placeholder="Cari cerita, topik, atau teman seperjuangan..." aria-label="Cari" readOnly />
           <Link className="px-hit" style={{ left: 1244, top: 16, width: 42, height: 42 }} href="/app?tab=shop" aria-label="Toko" />

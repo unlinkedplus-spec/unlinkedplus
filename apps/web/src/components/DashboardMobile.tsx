@@ -8,6 +8,7 @@ import type { Post } from '../lib/types';
 import { relativeTime } from '../lib/time';
 import { buildAvatarSVG } from '../lib/avatar-svg';
 import AuthModal from './AuthModal';
+import AccountMenu from './AccountMenu';
 
 type Variant = 'chibi' | 'sameboat';
 
@@ -134,9 +135,8 @@ export default function DashboardMobile({ variant, authenticated }: { variant: V
         <img src="/images/mascot-avatar.png" alt="" />
         <span className="dm-word">unlinked<b>+</b></span>
         <span className="dm-tag">Less Flex, More Human.</span>
-        <Link className="dm-user" href="/features/profil" aria-label="Profil">
-          <span dangerouslySetInnerHTML={{ __html: buildAvatarSVG({ character: 'panda', accessories: [] }) }} />
-        </Link>
+        <AccountMenu authenticated={authenticated} mobile
+          trigger={{ left: 0, top: 0, width: 0, height: 0 }} ariaLabel="Menu akun" />
       </header>
 
       <div className="dm-wrap">

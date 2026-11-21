@@ -13,6 +13,7 @@ import AuthModal from './AuthModal';
 import VideoSpill from './VideoSpill';
 import NotificationsPanel from './NotificationsPanel';
 import AdPreferencesPanel from './AdPreferencesPanel';
+import AccountMenu from './AccountMenu';
 import type { Post } from '../lib/types';
 import { useContentFor } from '../lib/use-content';
 
@@ -225,6 +226,9 @@ export default function FeaturePage({ slug, authenticated }: { slug: FeatureSlug
           <img src="/images/mascot-avatar.png" alt="" />
           <span className="fm-word">unlinked<b>+</b></span>
           <span className="fm-tag">{meta.title}</span>
+          <AccountMenu authenticated={authenticated} mobile
+            trigger={{ left: 0, top: 0, width: 0, height: 0 }}
+            ariaLabel="Menu akun" />
         </header>
         <main className="fm-panel">{panel}</main>
         <nav className="fm-bottom">
@@ -286,6 +290,9 @@ export default function FeaturePage({ slug, authenticated }: { slug: FeatureSlug
         <div className="fp-canvas">
           <div className="fp-top" />
           <div className="fp-side" />
+          <AccountMenu authenticated={authenticated}
+            trigger={{ left: 1424, top: 16, width: 112, height: 54 }}
+            menu={{ left: 1248, top: 74 }} />
           <Link className="fp-hit fp-nav" style={{ left: 24, top: 8, width: 240, height: 56 }} href="/" aria-label="Beranda" />
           <Link className="fp-hit fp-nav" style={{ left: 24, top: 144, width: 208, height: 46 }} href="/" aria-label="Discover" />
           <Link className="fp-hit fp-nav" style={{ left: 24, top: 194, width: 208, height: 46 }} href="/features/spill" aria-label="Spill" />

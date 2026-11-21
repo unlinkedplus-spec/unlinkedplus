@@ -88,6 +88,25 @@ test('Navigation hover animations are shared and respect reduced motion', () => 
   assert.match(readWeb('app', 'cms', 'CmsClient.tsx'), /tab-fx/);
 });
 
+test('Account dropdown is shared across Beranda, feature pages, /app and mobile', () => {
+  const shared = readWeb('components', 'AccountMenu.tsx');
+  assert.match(shared, /role="menu"/);
+  assert.match(shared, /data-hotspot="account-dropdown"/);
+  for (const href of ['/features/profil', '/features/notifications', '/features/iklan', '/features/toko']) {
+    assert.ok(shared.includes(href), `shared menu must link ${href}`);
+  }
+  for (const file of [
+    readWeb('components', 'FeaturePage.tsx'),
+    readWeb('components', 'DashboardPixel.tsx'),
+    readWeb('components', 'DashboardMobile.tsx'),
+  ]) {
+    assert.match(file, /<AccountMenu/, 'every authenticated surface must render the shared account menu');
+  }
+  const css = readWeb('app', 'globals.css');
+  assert.match(css, /\.acct-menu/);
+  assert.match(css, /\.acct-menu-mobile/);
+});
+
 test('Stuck login is impossible: admin panels have a session timeout fallback', () => {
   for (const file of [
     readWeb('app', 'cms', 'CmsClient.tsx'),
