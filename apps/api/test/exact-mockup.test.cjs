@@ -108,6 +108,10 @@ test('Beranda Fitur Seru rows line up with the mockup and the video chip works',
     .map((id) => byId[id].y);
   tops.forEach((y, i) => assert.equal(y, 404 + i * 46, 'row ' + i + ' must follow the measured pitch'));
 
+  assert.equal(byId['avatar-top'].action, 'account-menu', 'avatar must open a dropdown, not jump away');
+  assert.match(component, /data-hotspot="account-dropdown"/);
+  assert.match(component, /role="menuitem"/);
+  assert.match(component, /href="\/features\/iklan"/, 'dropdown must expose ad preferences');
   assert.equal(byId['compose-video'].href, '/features/video');
   assert.equal(byId['compose-poll'].href, '/features/poll');
   assert.equal(byId['nav-beranda'].href, '/home');

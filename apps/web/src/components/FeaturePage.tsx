@@ -12,13 +12,14 @@ import ProfileTab from './ProfileTab';
 import AuthModal from './AuthModal';
 import VideoSpill from './VideoSpill';
 import NotificationsPanel from './NotificationsPanel';
+import AdPreferencesPanel from './AdPreferencesPanel';
 import type { Post } from '../lib/types';
 import { useContentFor } from '../lib/use-content';
 
 export type FeatureSlug =
   | 'poll' | 'personality-test' | 'meme-studio'
   | 'store' | 'toko' | 'opportunity-board' | 'mental-reset'
-  | 'spill' | 'avatar' | 'profil' | 'video' | 'notifications'
+  | 'spill' | 'avatar' | 'profil' | 'video' | 'notifications' | 'iklan'
   | 'unlinked-rooms' | 'support-circles' | 'dear-future-me'
   | 'tiny-wins' | 'hall-of-almost';
 
@@ -35,6 +36,7 @@ const META: Record<FeatureSlug, { title: string; kicker: string; desc: string }>
   profil: { title: 'Profil', kicker: 'RUANG KAMU', desc: 'Profil, level, dan cerita kamu. Keluar dari sini kapan saja.' },
   video: { title: 'Video Spill', kicker: 'CERITA BERGERAK', desc: 'Bagikan cerita singkat dengan tautan video. Tanpa unggah file, tanpa pelacakan penonton.' },
   notifications: { title: 'Aktivitas', kicker: 'SINYAL KECIL', desc: 'Reaksi dan komentar pada cerita kamu. Bukan papan popularitas.' },
+  iklan: { title: 'Preferensi Iklan', kicker: 'KONTROL KAMU', desc: 'Iklan tetap berlabel dan dibatasi. Diatur olehmu, tidak diambil dari isi Spill.' },
   'unlinked-rooms': { title: 'Unlinked Rooms', kicker: 'KOMUNITAS', desc: 'Ruang kecil berdasarkan pengalaman dan minat—bukan kompetisi followers.' },
   'support-circles': { title: 'Support Circles', kicker: 'DUKUNGAN', desc: 'Lingkaran dukungan kecil untuk saling mendengar, bukan menghakimi.' },
   'dear-future-me': { title: 'Dear Future Me', kicker: 'SURAT UNTUK DIRI', desc: 'Tulis pesan untuk dirimu sendiri dan tentukan kapan boleh dibuka kembali.' },
@@ -170,6 +172,9 @@ export default function FeaturePage({ slug, authenticated }: { slug: FeatureSlug
     }
     if (slug === 'notifications') {
       return <NotificationsPanel authenticated={authenticated} onAuthRequired={() => setAuthOpen(true)} />;
+    }
+    if (slug === 'iklan') {
+      return <AdPreferencesPanel authenticated={authenticated} onAuthRequired={() => setAuthOpen(true)} />;
     }
     if (slug === 'opportunity-board') {
       return (

@@ -8,7 +8,8 @@
 import Link from 'next/link';
 import { useCallback, useEffect, useState } from 'react';
 import {
-  createComment, createPost, getComments, getPosts, recordAdImpression, toggleReaction,
+  authLogout, authMe, createComment, createPost, getComments, getPosts,
+  recordAdImpression, toggleReaction,
 } from '../lib/api';
 import type { Post } from '../lib/types';
 import AuthModal from './AuthModal';
@@ -61,6 +62,8 @@ export default function ExactMockup({ view, authenticated }: { view: View; authe
   const [comments, setComments] = useState<CommentRow[]>([]);
   const [commentText, setCommentText] = useState('');
   const [busy, setBusy] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [accountUser, setAccountUser] = useState<{ username: string } | null>(null);
   const cmsContent = useLandingContent();
 
   useEffect(() => {
@@ -74,6 +77,7 @@ export default function ExactMockup({ view, authenticated }: { view: View; authe
   useEffect(() => {
     if (!authenticated) return;
     void recordAdImpression().then((r) => setShowAd(r.allowed)).catch(() => setShowAd(true));
+    void authMe().then((u) => setAccountUser(u)).catch(() => setAccountUser(null));
   }, [authenticated]);
 
   const notify = useCallback((message: string) => {
@@ -164,6 +168,11 @@ export default function ExactMockup({ view, authenticated }: { view: View; authe
     }
   }
 
+  async function logout() {
+    await authLogout().catch(() => undefined);
+    window.location.href = '/';
+  }
+
   function run(action: string) {
     switch (action) {
       case 'login': setAuthTab('login'); break;
@@ -177,6 +186,7 @@ export default function ExactMockup({ view, authenticated }: { view: View; authe
       case 'comment': void openComments(); break;
       case 'save': savePost(); break;
       case 'share': void share(); break;
+      case 'account-menu': setMenuOpen((open) => !open); break;
       default: break;
     }
   }
@@ -210,6 +220,27 @@ export default function ExactMockup({ view, authenticated }: { view: View; authe
         .ex-cms-label b{display:block;font:800 12px/1.3 Nunito,sans-serif}
         .ex-cms-label small{display:block;font-size:10px;line-height:1.4;color:#5A6484;margin-top:3px}
         .ex-cms-label img{width:38px;height:38px;object-fit:cover;border-radius:9px;flex:none}
+        /* Account dropdown: Figma-like card with slide-in hover rows. */
+        .ex-account-backdrop{position:absolute;inset:0;z-index:25;background:transparent}
+        .ex-account{position:absolute;left:1248px;top:74px;width:272px;z-index:26;
+          background:#fff;border:1px solid #EDEFF6;border-radius:18px;padding:10px;
+          box-shadow:0 18px 48px rgba(23,43,77,.18);font-family:Inter,sans-serif}
+        .ex-account-head{display:flex;align-items:center;gap:10px;padding:10px 10px 12px;border-bottom:1px solid #EEF0F7;margin-bottom:6px}
+        .ex-account-head img{width:40px;height:40px;border-radius:12px;background:#FFF3D4;object-fit:contain}
+        .ex-account-head b{font:900 14px Nunito,sans-serif;color:#172B4D;display:block}
+        .ex-account-head small{font-size:10px;color:#8A94AD}
+        .ex-account a,.ex-account button{position:relative;display:flex;align-items:center;gap:10px;width:100%;
+          border:0;background:transparent;border-radius:12px;padding:10px 12px;cursor:pointer;text-decoration:none;
+          font:700 12px Inter,sans-serif;color:#2E3D5C;text-align:left;overflow:hidden}
+        .ex-account a::before,.ex-account button::before{content:'';position:absolute;inset:0;background:#FFF3D4;
+          transform:scaleX(0);transform-origin:left;transition:transform .24s ease}
+        .ex-account a:hover::before,.ex-account button:hover::before,
+        .ex-account a:focus-visible::before,.ex-account button:focus-visible::before{transform:scaleX(1)}
+        .ex-account .ic{width:26px;height:26px;border-radius:8px;background:#F1F3FB;display:grid;place-items:center;font-size:14px;flex:none}
+        .ex-account .label,.ex-account .sub{position:relative;z-index:1}
+        .ex-account .sub{display:block;font-size:10px;font-weight:500;color:#8A94AD;margin-top:2px}
+        .ex-account .divider{height:1px;background:#EEF0F7;margin:6px 4px}
+        .ex-account .danger{color:#B42318}
         .ex-toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#172B4D;color:#fff;
           font:700 12px Inter,sans-serif;padding:12px 18px;border-radius:999px;z-index:80;box-shadow:0 10px 30px rgba(23,43,77,.25)}
         .ex-modal{position:fixed;inset:0;background:rgba(23,43,77,.45);z-index:70;display:flex;align-items:center;justify-content:center;padding:20px}
@@ -280,6 +311,42 @@ export default function ExactMockup({ view, authenticated }: { view: View; authe
                 value={content} onChange={(e) => setContent(e.target.value)}
                 placeholder="Ada yang mau kamu ceritakan?" />
               {!showAd && <div className="ex-note" style={{ left: 480, top: 860 }}>Iklan disembunyikan sesuai preferensi/batas harian kamu.</div>}
+            </>
+          )}
+
+          {!isLanding && menuOpen && (
+            <>
+              <div className="ex-account-backdrop" aria-hidden="true" onClick={() => setMenuOpen(false)} />
+              <div className="ex-account" role="menu" aria-label="Menu akun" data-hotspot="account-dropdown">
+                <div className="ex-account-head">
+                  <img src="/images/mascot-avatar.png" alt="" />
+                  <div>
+                    <b>@{accountUser?.username ?? 'kamu'}</b>
+                    <small>Manusia biasa, bukan pencapaian.</small>
+                  </div>
+                </div>
+                <Link href="/features/profil" role="menuitem" onClick={() => setMenuOpen(false)}>
+                  <span className="ic">♙</span>
+                  <span className="label">Profil Saya<span className="sub">Avatar, bio, dan perjalananmu</span></span>
+                </Link>
+                <Link href="/features/notifications" role="menuitem" onClick={() => setMenuOpen(false)}>
+                  <span className="ic">♡</span>
+                  <span className="label">Aktivitas<span className="sub">Reaksi & komentar pada ceritamu</span></span>
+                </Link>
+                <Link href="/features/iklan" role="menuitem" onClick={() => setMenuOpen(false)}>
+                  <span className="ic">⚙</span>
+                  <span className="label">Preferensi Iklan<span className="sub">Iklan berlabel, tanpa target sensitif</span></span>
+                </Link>
+                <Link href="/features/toko" role="menuitem" onClick={() => setMenuOpen(false)}>
+                  <span className="ic">▣</span>
+                  <span className="label">Toko & Avatar<span className="sub">Kosmetik, bukan status sosial</span></span>
+                </Link>
+                <div className="divider" />
+                <button type="button" role="menuitem" className="danger" onClick={() => void logout()}>
+                  <span className="ic">↩</span>
+                  <span className="label">Keluar<span className="sub">Kembali ke landing</span></span>
+                </button>
+              </div>
             </>
           )}
         </div>

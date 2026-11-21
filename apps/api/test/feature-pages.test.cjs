@@ -23,7 +23,7 @@ test('Fitur Seru: all six entries navigate to real feature pages', () => {
 });
 
 test('Video Spill and Aktivitas are real routes, not dead chips', () => {
-  for (const slug of ['video', 'notifications']) {
+  for (const slug of ['video', 'notifications', 'iklan']) {
     assert.ok(feature.includes(`'${slug}'`), `FeaturePage must define ${slug}`);
     assert.ok(route.includes(`'${slug}'`), `route must allow ${slug}`);
   }
