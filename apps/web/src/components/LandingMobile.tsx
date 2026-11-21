@@ -54,22 +54,22 @@ export default function LandingMobile({ onLogin, onRegister }: Props) {
       </header>
 
       <main className="mx-auto w-full max-w-md px-4">
-        <section className="relative mt-6 overflow-hidden rounded-3xl bg-gradient-to-br from-[#FFF1D0] via-[#FFE3A0] to-[#FFD987] p-5">
-          {/* Signature Chibi illustration from the approved mockup. */}
+        <section className="mt-6 overflow-hidden rounded-3xl bg-gradient-to-br from-[#FFF1D0] via-[#FFE3A0] to-[#FFD987] p-5">
+          <p className="mb-3 inline-flex items-center gap-2 rounded-full bg-white/80 px-3 py-1 text-[10px] font-bold text-navy">
+            ✦ Memutus yang Toksik, Menambah yang Esensial
+          </p>
+          <h1 className="font-display text-[28px] font-black leading-[1.05] tracking-tight">
+            Tempatnya Orang-Orang Jujur soal <span className="rounded-lg bg-primary px-2">Hidup.</span>
+          </h1>
+          <p className="mt-3 text-xs leading-relaxed text-navy/80">
+            Spill cerita, temukan teman senasib, dan tumbuh bareng di unlinked+.
+          </p>
+
+          {/* Signature Chibi illustration: its own block, never overlaying copy. */}
           <img src="/images/dash/hero-chibi.png" alt="Chibi unlinked+ sedang spill di laptop"
-            className="pointer-events-none absolute -bottom-2 -right-6 w-[62%] opacity-90 mix-blend-multiply" />
-          <div className="relative z-10 max-w-[74%]">
-            <p className="mb-3 inline-flex items-center gap-2 rounded-full bg-white/80 px-3 py-1 text-[10px] font-bold text-navy">
-              ✦ Memutus yang Toksik, Menambah yang Esensial
-            </p>
-            <h1 className="font-display text-[27px] font-black leading-[1.05] tracking-tight">
-              Tempatnya Orang-Orang Jujur soal <span className="rounded-lg bg-primary px-2">Hidup.</span>
-            </h1>
-            <p className="mt-3 text-xs leading-relaxed text-navy/80">
-              Spill cerita, temukan teman senasib, dan tumbuh bareng di unlinked+.
-            </p>
-          </div>
-          <div className="relative z-10 mt-5 flex flex-wrap gap-2">
+            className="mt-4 w-full rounded-2xl object-cover" />
+
+          <div className="mt-5 flex flex-wrap gap-2">
             <button onClick={onRegister}
               className="rounded-full bg-navy px-5 py-3 text-xs font-bold text-white shadow-md">
               Gabung Sekarang →
@@ -79,7 +79,7 @@ export default function LandingMobile({ onLogin, onRegister }: Props) {
               ▶ Lihat Preview
             </Link>
           </div>
-          <p className="relative z-10 mt-4 font-display text-sm font-black italic text-navy/70">
+          <p className="mt-4 font-display text-sm font-black italic text-navy/70">
             “Hidup bukan soal terlihat sukses, tapi tetap waras.”
           </p>
         </section>
@@ -124,11 +124,10 @@ export default function LandingMobile({ onLogin, onRegister }: Props) {
           </div>
         </section>
 
-        <section className="relative mt-8 overflow-hidden rounded-3xl bg-gradient-to-br from-[#EEF1FF] to-[#F7F3FF] p-5 text-center">
+        <section className="mt-8 overflow-hidden rounded-3xl bg-gradient-to-br from-[#EEF1FF] to-[#F7F3FF] p-5 text-center">
           <img src="/images/mascot-avatar.png" alt="Mascot unlinked+"
-            className="pointer-events-none absolute -left-3 bottom-0 w-24 opacity-90" />
-          <div className="relative z-10">
-          <b className="font-display text-lg font-black">Bergabunglah dengan komunitas yang positif!</b>
+            className="mx-auto h-16 w-16 object-contain" />
+          <b className="mt-2 block font-display text-lg font-black">Bergabunglah dengan komunitas yang positif!</b>
           <p className="mt-1 text-xs text-gray-500">Karena kamu tidak sendirian.</p>
           <button onClick={onRegister}
             className="mt-4 rounded-full bg-navy px-6 py-3 text-sm font-bold text-white">
@@ -138,7 +137,6 @@ export default function LandingMobile({ onLogin, onRegister }: Props) {
             <div><b className="block font-display text-lg font-black">120K+</b><small className="text-[10px] text-gray-500">Pengguna Aktif</small></div>
             <div><b className="block font-display text-lg font-black">2.5M+</b><small className="text-[10px] text-gray-500">Spill Dibagikan</small></div>
             <div><b className="block font-display text-lg font-black">87%</b><small className="text-[10px] text-gray-500">Happy User</small></div>
-          </div>
           </div>
         </section>
 

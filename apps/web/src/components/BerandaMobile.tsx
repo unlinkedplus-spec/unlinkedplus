@@ -78,19 +78,19 @@ export default function BerandaMobile({ authenticated }: Props) {
       </header>
 
       <main className="mx-auto w-full max-w-md px-3">
-        <section className="relative mt-3 overflow-hidden rounded-2xl bg-gradient-to-br from-[#FFF1D0] to-[#FFD987] p-4">
-          {/* Signature Same Boat illustration from the approved mockup. */}
+        <section className="mt-3 overflow-hidden rounded-2xl bg-gradient-to-br from-[#FFF1D0] to-[#FFD987] p-4">
+          <p className="text-[10px] font-bold text-navy/70">Kamu gak sendiri, kok!</p>
+          <h1 className="font-display text-[23px] font-black leading-tight">
+            Temukan teman senasib di <span className="rounded-md bg-primary px-1">Same Boat</span>
+          </h1>
+          <p className="mt-1 text-[11px] leading-snug text-navy/70">Sama-sama berjuang, sama-sama bangkit 💪</p>
+
+          {/* Signature Same Boat illustration: separate block, never over text. */}
           <img src="/images/dash/hero-sameboat.png" alt="Ilustrasi Same Boat unlinked+"
-            className="pointer-events-none absolute -bottom-3 -right-8 w-[58%] opacity-90 mix-blend-multiply" />
-          <div className="relative z-10 max-w-[72%]">
-            <p className="text-[10px] font-bold text-navy/70">Kamu gak sendiri, kok!</p>
-            <h1 className="font-display text-[22px] font-black leading-tight">
-              Temukan teman senasib di <span className="rounded-md bg-primary px-1">Same Boat</span>
-            </h1>
-            <p className="mt-1 text-[11px] leading-snug text-navy/70">Sama-sama berjuang, sama-sama bangkit 💪</p>
-          </div>
+            className="mt-3 w-full rounded-xl object-cover" />
+
           <Link href="/features/same-boat"
-            className="relative z-10 mt-4 inline-flex rounded-full bg-navy px-5 py-2.5 text-[11px] font-bold text-white">
+            className="mt-3 inline-flex rounded-full bg-navy px-5 py-2.5 text-[11px] font-bold text-white">
             Lihat Rekomendasi →
           </Link>
         </section>
