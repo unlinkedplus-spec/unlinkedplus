@@ -13,6 +13,8 @@ import {
 } from '../lib/api';
 import type { Post } from '../lib/types';
 import AuthModal from './AuthModal';
+import LandingMobile from './LandingMobile';
+import BerandaMobile from './BerandaMobile';
 import hotspots from '../lib/mockup-hotspots.json';
 import { useLandingContent } from '../lib/use-content';
 import type { LandingContentItem } from '../lib/types';
@@ -50,6 +52,7 @@ const LANDING_CMS: Record<string, { slug: string; title: string }> = {
 
 export default function ExactMockup({ view, authenticated }: { view: View; authenticated: boolean }) {
   const [scale, setScale] = useState(1);
+  const [mobile, setMobile] = useState(false);
   const [content, setContent] = useState('');
   const [showAd, setShowAd] = useState(!authenticated);
   const [authTab, setAuthTab] = useState<'login' | 'register' | null>(null);
@@ -67,7 +70,10 @@ export default function ExactMockup({ view, authenticated }: { view: View; authe
   const cmsContent = useLandingContent();
 
   useEffect(() => {
-    const fit = () => setScale(Math.min(1, window.innerWidth / W));
+    const fit = () => {
+      setMobile(window.innerWidth < 900 || new URLSearchParams(window.location.search).has('mobile'));
+      setScale(Math.min(1, window.innerWidth / W));
+    };
     fit();
     setDebug(new URLSearchParams(window.location.search).has('hotspots'));
     window.addEventListener('resize', fit);
@@ -194,6 +200,29 @@ export default function ExactMockup({ view, authenticated }: { view: View; authe
   function writeSearch() {
     const q = searchQ.trim();
     window.location.href = q ? `/features/same-boat?q=${encodeURIComponent(q)}` : '/features/same-boat';
+  }
+
+  // Mobile uses dedicated proportional Tailwind layouts instead of shrinking
+  // the fixed 1536px canvas to a tiny, half-height preview.
+  if (mobile) {
+    if (isLanding) {
+      return (
+        <>
+          <LandingMobile
+            onLogin={() => setAuthTab('login')}
+            onRegister={() => setAuthTab('register')}
+          />
+          {authTab && (
+            <AuthModal
+              defaultTab={authTab}
+              onSuccess={() => { setAuthTab(null); window.location.href = '/home'; }}
+              onClose={() => setAuthTab(null)}
+            />
+          )}
+        </>
+      );
+    }
+    return <BerandaMobile authenticated={authenticated} />;
   }
 
   return (

@@ -90,7 +90,7 @@ export default function DashboardMobile({ variant, authenticated }: { variant: V
         .dm-cta.alt{background:#fff;color:#172B4D;border:1px solid #172B4D33;margin-left:8px}
         .dm-topics{margin-top:12px;background:#fff;border:1px solid #EDEFF6;border-radius:14px;padding:12px;display:flex;gap:8px;align-items:center;overflow-x:auto;white-space:nowrap}
         .dm-topics b{font-size:12px;flex:none}
-        .chip{background:#F1EEFF;color:#3F4E78;border-radius:999px;padding:6px 10px;font-size:10.5px;font-weight:700;flex:none}
+        .dm-chip{background:#F1EEFF;color:#3F4E78;border-radius:999px;padding:6px 10px;font-size:10.5px;font-weight:700;flex:none}
         .dm-card{background:#fff;border:1px solid #EDEFF6;border-radius:16px;padding:14px;margin-top:12px}
         .dm-card h3{font:800 13px Nunito,sans-serif;margin:0 0 10px}
         .dm-composer{display:flex;gap:10px;align-items:flex-start}
@@ -98,7 +98,10 @@ export default function DashboardMobile({ variant, authenticated }: { variant: V
         .dm-composer .av svg{width:36px;height:36px}
         .dm-composer textarea{flex:1;border:0;outline:0;resize:none;font:500 12.5px/1.5 Inter,sans-serif;min-height:58px;color:#172B4D}
         .dm-tools{display:flex;align-items:center;gap:12px;margin-top:8px;padding-top:10px;border-top:1px solid #F0F1F7;flex-wrap:wrap}
-        .dm-tools span{font-size:10.5px;color:#5A6484;font-weight:600}
+        .dm-tools span,.dm-tools button{font-size:10.5px;color:#5A6484;font-weight:600}
+        .dm-tool{background:transparent;border:0;cursor:pointer;padding:0;color:#5A6484;font-size:10.5px;font-weight:600}
+        .dm-emoji{display:flex;gap:6px;background:#fff;border:1px solid #E6E9F4;border-radius:12px;padding:8px;margin-top:8px;box-shadow:0 8px 20px rgba(23,43,77,.12)}
+        .dm-emoji button{background:transparent;border:0;font-size:18px;cursor:pointer}
         .dm-spill{margin-left:auto;background:#F5C542;border:0;border-radius:999px;padding:8px 14px;font:800 11px Inter,sans-serif;color:#172B4D;cursor:pointer}
         .dm-post{display:flex;gap:10px}
         .dm-post .av{width:34px;height:34px;border-radius:50%;overflow:hidden;flex:none;background:#F1EEFF}
@@ -156,7 +159,7 @@ export default function DashboardMobile({ variant, authenticated }: { variant: V
           {isChibi && <Link className="dm-cta alt" href="/">Jelajahi Komunitas</Link>}
         </section>
 
-        <div className="dm-topics"><b>🔥 Topik Populer:</b>{TOPICS.map((t) => <span className="chip" key={t}>{t}</span>)}</div>
+        <div className="dm-topics"><b>🔥 Topik Populer:</b>{TOPICS.map((t) => <span className="dm-chip" key={t}>{t}</span>)}</div>
 
         <div className="dm-card">
           <h3>Ruang Kamu</h3>

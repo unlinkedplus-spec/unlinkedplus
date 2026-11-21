@@ -72,6 +72,49 @@
 }
 .fp-back:hover::after, .lf-back:hover::after { transform: scaleX(1); }
 
+/* Shared feature-page component classes. Kept in globals.css (not styled-jsx)
+   so mobile and desktop render identically and cascade order cannot drift. */
+.fp-kicker{font:800 11px Nunito,sans-serif;letter-spacing:1px;color:#6A7590;margin:0 0 8px}
+.fp-title{font:900 30px Nunito,sans-serif;letter-spacing:-1px;margin:0 0 8px}
+.fp-desc{font-size:13px;line-height:1.6;color:#5A6484;margin:0 0 24px;max-width:720px}
+.fp-back{display:inline-flex;align-items:center;gap:8px;font-size:12px;font-weight:700;color:#3F6BC7;text-decoration:none;margin-bottom:18px}
+.fp-card{background:#fff;border:1px solid #EDEFF6;border-radius:16px;padding:22px;max-width:820px;margin-bottom:14px}
+.fp-big{font:900 19px Nunito,sans-serif;margin-bottom:10px}
+.fp-muted{font-size:13px;line-height:1.65;color:#5A6484;margin:0 0 10px}
+.fp-note{font-size:11px;color:#8A94AD;background:#F7F8FE;border-radius:10px;padding:10px 12px;margin-top:14px}
+.fp-choices{display:flex;flex-direction:column;gap:10px;max-width:680px}
+.fp-choice{text-align:left;border:1px solid #E6E9F4;background:#F9FAFF;border-radius:12px;padding:13px 16px;font-size:13px;font-weight:600;color:#2E3D5C;cursor:pointer}
+.fp-choice:hover{border-color:#F5C542;background:#FFFBEC}
+.fp-progress{font-size:11px;color:#8A94AD;margin-bottom:12px}
+.fp-result{background:linear-gradient(120deg,#FFF3D4,#F2EDFF);border-radius:16px;padding:22px;max-width:680px}
+.fp-result b{font:900 24px Nunito,sans-serif;display:block;margin-bottom:8px}
+.fp-input{width:100%;border:1px solid #E6E9F4;border-radius:12px;padding:12px 14px;font-size:13px;margin-bottom:12px;outline:0}
+.fp-preview{background:#FFF3D4;border-radius:16px;padding:18px;max-width:520px;display:flex;flex-direction:column;align-items:center;gap:12px}
+.fp-preview svg{width:280px;height:230px}
+.fp-caption{font:900 20px Nunito,sans-serif;text-align:center;color:#172B4D}
+.fp-btn{background:#F5C542;border:0;border-radius:999px;padding:11px 20px;font:800 12px Inter,sans-serif;color:#172B4D;cursor:pointer}
+.fp-btn:disabled{opacity:.55;cursor:default}
+.fm-panel .fp-title{font-size:24px}
+.fm-panel .fp-card,.fm-panel .fp-result,.fm-panel .fp-preview{max-width:none}
+
+/* Landing feature-page list class used by every card list. */
+.lf-list{display:flex;flex-direction:column;gap:10px}
+
+/* Mobile shell for feature pages (shared across variants). */
+.fm-root{background:#F7F8FE;min-height:100vh;color:#172B4D;font-family:Inter,sans-serif;padding-bottom:76px}
+.fm-top{position:sticky;top:0;z-index:30;background:#fff;border-bottom:1px solid #EEF0F7;display:flex;align-items:center;gap:8px;padding:10px 14px}
+.fm-top img{width:36px;height:36px;object-fit:contain}
+.fm-word{font:900 20px Nunito,sans-serif;letter-spacing:-.6px}.fm-word b{color:#F5C542}
+.fm-tag{font-size:9px;color:#8A94AD;font-weight:600;margin-left:2px}
+.fm-panel{padding:16px}
+.fm-bottom{position:fixed;bottom:0;left:0;right:0;z-index:40;background:#fff;border-top:1px solid #EEF0F7;display:flex;padding:6px 4px max(10px,env(safe-area-inset-bottom))}
+.fm-bottom a{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;text-decoration:none;font-size:9px;font-weight:700;color:#8A94AD}
+.fm-bottom a.on{color:#172B4D}.fm-bottom a.on::before{content:'';height:3px;width:22px;background:#F5C542;border-radius:9px;margin-bottom:2px}
+.fm-bottom span{font-size:17px;line-height:1}
+
+/* Safe-area bottom padding for the shared bottom nav. */
+.safe-pb{padding-bottom:max(8px,env(safe-area-inset-bottom))}
+
 /* Shared Figma-style account dropdown (canvas-based pages). */
 .acct-trigger{position:absolute;z-index:24;background:transparent;border:0;padding:0;cursor:pointer}
 .acct-backdrop{position:absolute;inset:0;z-index:25;background:transparent}
@@ -79,7 +122,7 @@
   border:1px solid #EDEFF6;border-radius:18px;padding:10px;box-shadow:0 18px 48px rgba(23,43,77,.18);
   font-family:Inter,sans-serif}
 .acct-head{display:flex;align-items:center;gap:10px;padding:10px 10px 12px;border-bottom:1px solid #EEF0F7;margin-bottom:6px}
-.acct-avatar{width:40px;height:40px;border-radius:12px;background:#FFF3D4;display:grid;place-items:center;font-size:20px;flex:none}
+.acct-avatar{width:40px;height:40px;border-radius:12px;background:#FFF3D4;display:grid;place-items:center;font-size:20px;flex:none;object-fit:contain}
 .acct-head b{font:900 14px Nunito,sans-serif;color:#172B4D;display:block}
 .acct-head small{font-size:10px;color:#8A94AD}
 .acct-menu a,.acct-menu button{position:relative;display:flex;align-items:center;gap:10px;width:100%;
@@ -98,7 +141,8 @@
 /* Mobile account menu: anchored to the header, not the 1536px canvas. */
 .acct-trigger-mobile{position:static;width:34px;height:34px;border-radius:10px;background:#FFF3D4;flex:none;
   display:grid;place-items:center;font-size:18px}
-.acct-trigger-mobile::before{content:'🧑‍🎤'}
+.acct-trigger-mobile::before{content:'';width:28px;height:28px;
+  background:url('/images/mascot-avatar.png') center/contain no-repeat}
 .acct-menu-mobile{position:fixed;left:auto;right:12px;top:58px;width:min(300px,calc(100vw - 24px))}
 
 @media (prefers-reduced-motion: reduce) {

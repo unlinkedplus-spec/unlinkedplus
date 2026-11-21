@@ -83,8 +83,10 @@ test('UI/UX: feature pages also switch to a mobile layout', () => {
   assert.match(feature, /const \[mobile, setMobile\] = useState\(false\)/);
   assert.match(feature, /window\.innerWidth < 900/);
   assert.match(feature, /if \(mobile\)/);
-  assert.match(feature, /fm-bottom/);
-  assert.match(feature, /position:fixed;bottom:0/);
+  assert.match(feature, /className="fm-bottom"/);
+  // The mobile shell CSS now lives in globals.css, not a local styled-jsx block.
+  assert.match(fs.readFileSync(path.join(webSrc, 'app', 'globals.css'), 'utf8'),
+    /\.fm-bottom\{position:fixed;bottom:0/);
 });
 
 test('UI/UX: composer overlays are real and do not duplicate the mockup button', () => {

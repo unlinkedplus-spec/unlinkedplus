@@ -60,7 +60,7 @@ export default function AccountMenu({
           <div className={mobile ? 'acct-menu acct-menu-mobile' : 'acct-menu'}
             style={mobile ? undefined : menu} role="menu" aria-label={ariaLabel} data-hotspot="account-dropdown">
             <div className="acct-head">
-              <div className="acct-avatar">🧑‍🎤</div>
+              <img src="/images/mascot-avatar.png" alt="" className="acct-avatar object-contain" />
               <div>
                 <b>@{username ?? 'kamu'}</b>
                 <small>Manusia biasa, bukan pencapaian.</small>
