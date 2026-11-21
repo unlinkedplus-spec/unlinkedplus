@@ -16,6 +16,7 @@ import AdPreferencesPanel from './AdPreferencesPanel';
 import AccountMenu from './AccountMenu';
 import type { Post } from '../lib/types';
 import { useContentFor } from '../lib/use-content';
+import { useUnreadCount } from '../lib/use-unread';
 
 export type FeatureSlug =
   | 'poll' | 'personality-test' | 'meme-studio'
@@ -95,6 +96,7 @@ export default function FeaturePage({ slug, authenticated }: { slug: FeatureSlug
   const [created, setCreated] = useState<Post | null>(null);
   const [savedAvatar, setSavedAvatar] = useState(false);
   const cms = useContentFor(slug);
+  const { count: unread } = useUnreadCount(authenticated);
   const meta = {
     title: cms?.title || META[slug].title,
     kicker: META[slug].kicker,
@@ -267,6 +269,8 @@ export default function FeaturePage({ slug, authenticated }: { slug: FeatureSlug
         <div className="fp-canvas">
           <div className="fp-top" />
           <div className="fp-side" />
+          <div className="chrome-badge-cover" aria-hidden="true" />
+          {unread > 0 && <div className="chrome-badge">{unread > 9 ? '9+' : unread}</div>}
           <AccountMenu authenticated={authenticated}
             trigger={{ left: 1424, top: 16, width: 112, height: 54 }}
             menu={{ left: 1248, top: 74 }} />

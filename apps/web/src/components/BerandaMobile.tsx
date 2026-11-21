@@ -11,6 +11,7 @@ import { SPILL_MODE_META, getLevelName } from '../lib/types';
 import type { SpillMode } from '../lib/types';
 import { relativeTime } from '../lib/time';
 import AccountMenu from './AccountMenu';
+import { useUnreadCount } from '../lib/use-unread';
 import AuthModal from './AuthModal';
 
 const TOPICS = ['#Burnout', '#Resign', '#KerjaLagi', '#Healing', '#LifeBalance', '#CareerSwitch'];
@@ -29,6 +30,7 @@ export default function BerandaMobile({ authenticated }: Props) {
   const [toast, setToast] = useState('');
   const [showAd, setShowAd] = useState(!authenticated);
   const [authTab, setAuthTab] = useState<'login' | 'register' | null>(null);
+  const { count: unread } = useUnreadCount(authenticated);
 
   const load = useCallback(async () => {
     try { const res = await getPosts(1); setPosts(res.data.slice(0, 4)); } catch { setPosts([]); }
@@ -72,7 +74,9 @@ export default function BerandaMobile({ authenticated }: Props) {
       <header className="sticky top-0 z-30 flex items-center gap-2 border-b border-gray-100 bg-white px-4 py-3">
         <img src="/images/mascot-avatar.png" alt="" className="h-8 w-8 object-contain" />
         <span className="font-display text-lg font-black tracking-tight">unlinked<span className="text-primary">+</span></span>
-        <Link href="/features/notifications" aria-label="Notifikasi" className="ml-auto relative p-2 text-lg">🔔<span className="absolute right-1 top-1 grid h-4 w-4 place-items-center rounded-full bg-red-500 text-[9px] text-white">3</span></Link>
+        <Link href="/features/notifications" aria-label="Notifikasi" className="ml-auto relative p-2 text-lg">
+          🔔{unread > 0 && <span className="absolute right-1 top-1 grid h-4 min-w-4 place-items-center rounded-full bg-red-500 px-1 text-[9px] text-white">{unread > 9 ? '9+' : unread}</span>}
+        </Link>
         <Link href="/features/notifications?tab=messages" aria-label="Pesan" className="p-2 text-lg">📭</Link>
         <AccountMenu authenticated={authenticated} mobile trigger={{ left: 0, top: 0, width: 0, height: 0 }} />
       </header>

@@ -20,6 +20,7 @@ import { CertificatesModule } from './certificates/certificates.module';
 import { PollsModule } from './polls/polls.module';
 import { ConfessionsModule } from './confessions/confessions.module';
 import { ContentModule } from './content/content.module';
+import { NotificationsModule } from './notifications/notifications.module';
 import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
 import { RateLimitGuard } from './common/guards/rate-limit.guard';
 import { validateEnvironment } from './common/environment';
@@ -30,7 +31,7 @@ import { validateEnvironment } from './common/environment';
     CacheModule, MetricsModule,
     PrismaModule, RedisModule, HealthModule, AuthModule, UsersModule, PostsModule,
     ReactionsModule, CommentsModule, ReportsModule, AdminModule, AvatarsModule, StoreModule, CertificatesModule,
-    PollsModule, ConfessionsModule, ContentModule,
+    PollsModule, ConfessionsModule, ContentModule, NotificationsModule,
   ],
   providers: [
     { provide: APP_GUARD, useClass: RateLimitGuard },

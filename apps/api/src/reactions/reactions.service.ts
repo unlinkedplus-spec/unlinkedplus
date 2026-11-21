@@ -1,5 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { XP_REWARDS } from '../common/helpers/xp-level.helper';
+import { NotificationStreamService } from '../notifications/notification-stream.service';
+import { NotificationsService } from '../notifications/notifications.service';
 import { PrismaService } from '../prisma/prisma.service';
 import {
   assertActivePost, changeXp, findActivePost, lockPost, reactionCounts, userReactions,
@@ -9,11 +11,15 @@ import { ToggleReactionDto } from './dto/toggle-reaction.dto';
 
 @Injectable()
 export class ReactionsService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly notifications?: NotificationsService,
+    private readonly stream?: NotificationStreamService,
+  ) {}
 
   async toggle(postId: string, userId: string, input: ToggleReactionDto) {
     const dto = validateInput(ToggleReactionDto, input);
-    return this.prisma.$transaction(async (tx) => {
+    const result = await this.prisma.$transaction(async (tx) => {
       const post = await lockPost(tx, postId);
       assertActivePost(post);
       const existing = await tx.reaction.findUnique({
@@ -28,13 +34,26 @@ export class ReactionsService {
       if (post.userId && post.userId !== userId) {
         const reward = XP_REWARDS.reactionReceived[dto.type];
         await changeXp(tx, post.userId, existing ? -reward : reward);
+        if (!existing && this.notifications) {
+          await this.notifications.createInTx(tx, {
+            userId: post.userId, type: 'reaction', postId, actorId: userId,
+            reactionType: dto.type,
+          });
+        }
       }
       return {
         added: !existing,
+        recipientId: post.userId,
         counts: await reactionCounts(tx, postId),
         userReactions: await userReactions(tx, postId, userId),
       };
     }, { isolationLevel: 'ReadCommitted' });
+
+    if (result.added && result.recipientId && this.notifications && this.stream) {
+      const count = await this.notifications.unreadCount(result.recipientId);
+      this.stream.push(result.recipientId, undefined, count);
+    }
+    return { added: result.added, counts: result.counts, userReactions: result.userReactions };
   }
 
   async getCounts(postId: string) {
@@ -51,3 +70,4 @@ export class ReactionsService {
     }, { isolationLevel: 'RepeatableRead' });
   }
 }
+

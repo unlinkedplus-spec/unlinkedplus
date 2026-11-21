@@ -17,6 +17,7 @@ import LandingMobile from './LandingMobile';
 import BerandaMobile from './BerandaMobile';
 import hotspots from '../lib/mockup-hotspots.json';
 import { useLandingContent } from '../lib/use-content';
+import { useUnreadCount } from '../lib/use-unread';
 import type { LandingContentItem } from '../lib/types';
 
 type View = 'landing' | 'beranda';
@@ -68,6 +69,7 @@ export default function ExactMockup({ view, authenticated }: { view: View; authe
   const [menuOpen, setMenuOpen] = useState(false);
   const [accountUser, setAccountUser] = useState<{ username: string } | null>(null);
   const cmsContent = useLandingContent();
+  const { count: unread } = useUnreadCount(authenticated);
 
   useEffect(() => {
     const fit = () => {
@@ -343,6 +345,8 @@ export default function ExactMockup({ view, authenticated }: { view: View; authe
               {/* The approved PNG bakes in "Pelen-pelan"; cover it with the correct spelling. */}
               <div className="typo-cover" aria-hidden="true" />
               <div className="typo-fix" aria-label="Pelan-pelan juga sampai.">Pelan-pelan<br />juga sampai.</div>
+              <div className="ex-badge-cover" aria-hidden="true" />
+              {unread > 0 && <div className="ex-badge" aria-label={`${unread} notifikasi belum dibaca`}>{unread > 9 ? '9+' : unread}</div>}
             </>
           )}
 

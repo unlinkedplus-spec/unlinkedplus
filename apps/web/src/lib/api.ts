@@ -16,6 +16,7 @@ import type {
   AdminUser,
   AdSettings,
   LandingContentItem,
+  NotificationItem,
   AvatarConfig,
   AvatarItem,
   AuthResponse,
@@ -189,6 +190,16 @@ export const createCertificate = (postId: string) =>
 
 export const getCertificate = (id: string) =>
   req<Certificate>('GET', `/certificates/${id}`);
+
+// Real notifications
+export const getNotifications = (page = 1) =>
+  req<PaginatedResponse<NotificationItem>>('GET', `/notifications?page=${page}`);
+export const getUnreadCount = () =>
+  req<{ count: number }>('GET', '/notifications/unread-count');
+export const markNotificationRead = (id: string) =>
+  req<{ count: number }>('PATCH', `/notifications/${id}/read`);
+export const markAllNotificationsRead = () =>
+  req<{ count: number }>('PATCH', '/notifications/read-all');
 
 // CMS content (public catalog)
 export const getLandingContent = () =>

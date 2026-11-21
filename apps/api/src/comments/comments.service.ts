@@ -1,4 +1,6 @@
 import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
+import { NotificationStreamService } from '../notifications/notification-stream.service';
+import { NotificationsService } from '../notifications/notifications.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { assertActivePost, COMMENT_SELECT, findActivePost, lockPost } from '../posts/social.persistence';
 import { assertUuid, pagination, validateInput } from '../posts/social.validation';
@@ -6,7 +8,11 @@ import { CreateCommentDto } from './dto/create-comment.dto';
 
 @Injectable()
 export class CommentsService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly notifications?: NotificationsService,
+    private readonly stream?: NotificationStreamService,
+  ) {}
 
   async findAll(postId: string, page = 1, limit = 20) {
     const paging = pagination(page, limit);
@@ -24,10 +30,26 @@ export class CommentsService {
 
   async create(postId: string, userId: string, input: CreateCommentDto) {
     const dto = validateInput(CreateCommentDto, input);
-    return this.prisma.$transaction(async (tx) => {
-      assertActivePost(await lockPost(tx, postId));
-      return tx.comment.create({ data: { postId, userId, content: dto.content }, select: COMMENT_SELECT });
+    const result = await this.prisma.$transaction(async (tx) => {
+      const post = await lockPost(tx, postId);
+      assertActivePost(post);
+      const comment = await tx.comment.create({
+        data: { postId, userId, content: dto.content }, select: COMMENT_SELECT,
+      });
+      if (post.userId && this.notifications) {
+        await this.notifications.createInTx(tx, {
+          userId: post.userId, type: 'comment', postId, actorId: userId,
+          preview: dto.content,
+        });
+      }
+      return { comment, recipientId: post.userId };
     }, { isolationLevel: 'ReadCommitted' });
+
+    if (result.recipientId && this.notifications && this.stream) {
+      const count = await this.notifications.unreadCount(result.recipientId);
+      this.stream.push(result.recipientId, undefined, count);
+    }
+    return result.comment;
   }
 
   async softDelete(id: string, userId: string) {
@@ -47,3 +69,4 @@ export class CommentsService {
     }, { isolationLevel: 'ReadCommitted' });
   }
 }
+

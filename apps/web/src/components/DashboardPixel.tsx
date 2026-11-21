@@ -14,6 +14,7 @@ import { buildAvatarSVG } from '../lib/avatar-svg';
 import AuthModal from './AuthModal';
 import DashboardMobile from './DashboardMobile';
 import AccountMenu from './AccountMenu';
+import { useUnreadCount } from '../lib/use-unread';
 
 export type DashboardVariant = 'chibi' | 'sameboat';
 
@@ -37,6 +38,7 @@ export default function DashboardPixel({ variant, authenticated, preview = false
   const [emojiOpen, setEmojiOpen] = useState(false);
   const [toolNote, setToolNote] = useState('');
   const [showAd, setShowAd] = useState(!authenticated);
+  const { count: unread } = useUnreadCount(authenticated);
   const [mine, setMine] = useState<Record<string, { pukpuk: boolean; ngakak: boolean; sama: boolean }>>({});
 
   useEffect(() => {
@@ -146,6 +148,8 @@ export default function DashboardPixel({ variant, authenticated, preview = false
 
       <div className="px-stage">
         <div className="px-canvas">
+          <div className="chrome-badge-cover" aria-hidden="true" />
+          {unread > 0 && <div className="chrome-badge">{unread > 9 ? '9+' : unread}</div>}
           {/* Real navigation over the mockup's controls */}
           <Link className="px-hit" style={{ left: 18, top: 12, width: 205, height: 64 }} href="/home" aria-label="Beranda" />
           <button className="px-hit" style={{ left: 1304, top: 18, width: 116, height: 50 }}

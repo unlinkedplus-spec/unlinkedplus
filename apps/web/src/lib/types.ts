@@ -255,6 +255,20 @@ export interface Confession {
   commentCount: number;
 }
 
+/** Real per-user activity notification. Anonymous actors stay hidden. */
+export interface NotificationItem {
+  id: string;
+  type: 'reaction' | 'comment';
+  postId: string;
+  reactionType?: string | null;
+  actor: string;
+  actorAnonymous: boolean;
+  avatarConfig: unknown;
+  preview: string | null;
+  read: boolean;
+  createdAt: string;
+}
+
 /** CMS-driven copy for the landing/feature catalog. */
 export interface LandingContentItem {
   slug: string;

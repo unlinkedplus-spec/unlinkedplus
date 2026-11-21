@@ -24,8 +24,31 @@ model User {
   inventoryItems UserInventory[]
   pollVotes      PollVote[]
   passwordResets PasswordResetToken[]
+  notifications  Notification[]  @relation("recipient")
+  actedNotifications Notification[] @relation("actor")
 
   @@map("users")
+}
+
+/// Real, per-user activity notifications. Never derived from private data.
+/// Actor identities are stored only for display and are hidden when the actor
+/// is anonymous; no advertiser/targeting data is ever involved.
+model Notification {
+  id           String    @id @default(uuid())
+  userId       String    @map("user_id")
+  type         String    @db.VarChar(20) // reaction | comment
+  postId       String    @map("post_id")
+  actorId      String?   @map("actor_id")
+  reactionType String?   @map("reaction_type") @db.VarChar(20)
+  preview      String?   @db.VarChar(240)
+  readAt       DateTime? @map("read_at")
+  createdAt    DateTime  @default(now()) @map("created_at")
+  user         User      @relation("recipient", fields: [userId], references: [id], onDelete: Cascade)
+  actor        User?     @relation("actor", fields: [actorId], references: [id], onDelete: SetNull)
+
+  @@index([userId, createdAt])
+  @@index([userId, readAt])
+  @@map("notifications")
 }
 
 model Profile {
