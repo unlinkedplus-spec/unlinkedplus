@@ -54,6 +54,17 @@ test('No undefined or leaking utility classes', () => {
   assert.ok(css.includes('.safe-pb{'), 'safe-pb must exist for BottomNav');
 });
 
+test('Baked-in mockup typo is corrected on desktop and mobile', () => {
+  assert.ok(!berandaMobile.includes('Pelen-pelan'), 'mobile must not contain the typo');
+  assert.match(berandaMobile, /Pelan-pelan juga sampai\./);
+  const mock = read('components', 'ExactMockup.tsx');
+  assert.match(mock, /typo-cover/);
+  assert.match(mock, /Pelan-pelan/);
+  const pixel = read('components', 'DashboardPixel.tsx');
+  assert.match(pixel, /typo-cover/);
+  assert.match(pixel, /Pelan-pelan/);
+});
+
 test('Signature illustrations are preserved on mobile', () => {
   assert.match(landingMobile, /images\/dash\/hero-chibi\.png/, 'landing must keep the Chibi hero');
   assert.match(landingMobile, /images\/mascot-avatar\.png/, 'landing must keep the mascot');

@@ -211,7 +211,7 @@ export default function BerandaMobile({ authenticated }: Props) {
         </section>
 
         <section className="mt-3 rounded-2xl border border-gray-100 bg-white p-4">
-          <h3 className="font-display text-sm font-black">Pelen-pelan juga sampai.</h3>
+          <h3 className="font-display text-sm font-black">Pelan-pelan juga sampai.</h3>
           <p className="mt-1 text-[11px] leading-relaxed text-gray-500">
             Tidak semua hal harus jadi pencapaian hari ini. Istirahat juga bagian dari proses.
           </p>

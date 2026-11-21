@@ -115,6 +115,12 @@
 /* Safe-area bottom padding for the shared bottom nav. */
 .safe-pb{padding-bottom:max(8px,env(safe-area-inset-bottom))}
 
+/* Correct the baked-in mockup typo "Pelen-pelan" on the Same Boat canvas.
+   The cover matches the card fill (#F3F3FD) so only the two words change. */
+.typo-cover{position:absolute;left:278px;top:758px;width:136px;height:66px;background:#F3F3FD;border-radius:6px;z-index:6}
+.typo-fix{position:absolute;left:282px;top:760px;width:130px;z-index:7;
+  font:800 italic 19px/1.12 Nunito,sans-serif;letter-spacing:-.3px;color:#172B4D}
+
 /* Shared Figma-style account dropdown (canvas-based pages). */
 .acct-trigger{position:absolute;z-index:24;background:transparent;border:0;padding:0;cursor:pointer}
 .acct-backdrop{position:absolute;inset:0;z-index:25;background:transparent}

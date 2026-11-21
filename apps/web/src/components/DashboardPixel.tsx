@@ -240,6 +240,12 @@ export default function DashboardPixel({ variant, authenticated, preview = false
           )}
 
           {/* SEC-04: suppress the mockup's baked-in ad when the user opts out or hits the cap. */}
+          {!isChibi && (
+            <>
+              <div className="typo-cover" aria-hidden="true" />
+              <div className="typo-fix" aria-label="Pelan-pelan juga sampai.">Pelan-pelan<br />juga sampai.</div>
+            </>
+          )}
           {!showAd && (
             <div className="px-cover" style={{ left: 460, top: 805, width: 715, height: 135 }}>
               <span style={{ position: 'absolute', left: 20, top: 52, fontSize: 12, color: '#8A94AD' }}>

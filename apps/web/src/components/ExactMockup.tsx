@@ -340,6 +340,9 @@ export default function ExactMockup({ view, authenticated }: { view: View; authe
                 value={content} onChange={(e) => setContent(e.target.value)}
                 placeholder="Ada yang mau kamu ceritakan?" />
               {!showAd && <div className="ex-note" style={{ left: 480, top: 860 }}>Iklan disembunyikan sesuai preferensi/batas harian kamu.</div>}
+              {/* The approved PNG bakes in "Pelen-pelan"; cover it with the correct spelling. */}
+              <div className="typo-cover" aria-hidden="true" />
+              <div className="typo-fix" aria-label="Pelan-pelan juga sampai.">Pelan-pelan<br />juga sampai.</div>
             </>
           )}
 
