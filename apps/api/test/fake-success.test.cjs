@@ -122,7 +122,7 @@ test('SEC-06: admin metrics separate simulated transactions from real income', (
   assert.match(service, /simulatedRevenue/);
   assert.match(service, /paymentStatus: 'simulated'/);
   assert.match(service, /paymentStatus: 'paid'/);
-  const webPage = path.join(__dirname, '..', '..', 'web', 'src', 'app', 'admin', 'dashboard', 'page.tsx');
+  const webPage = path.join(__dirname, '..', '..', 'web', 'src', 'app', 'admin', 'dashboard', 'AdminDashboardClient.tsx');
   if (fs.existsSync(webPage)) {
     const ui = fs.readFileSync(webPage, 'utf8');
     assert.match(ui, /Transaksi simulasi/);

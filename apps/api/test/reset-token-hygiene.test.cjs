@@ -4,8 +4,8 @@ const fs = require('node:fs');
 const path = require('node:path');
 
 const appPagePaths = [
-  path.join(__dirname, '..', '..', '..', 'apps', 'web', 'src', 'app', 'app', 'page.tsx'),
-  path.join(__dirname, '..', '..', 'web_build', 'src', 'app', 'app', 'page.tsx'),
+  path.join(__dirname, '..', '..', '..', 'apps', 'web', 'src', 'app', 'app', 'AppClient.tsx'),
+  path.join(__dirname, '..', '..', 'web_build', 'src', 'app', 'app', 'AppClient.tsx'),
 ];
 const appPagePath = appPagePaths.find((p) => fs.existsSync(p));
 if (!appPagePath) throw new Error('app page not found');

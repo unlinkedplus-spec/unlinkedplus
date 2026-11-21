@@ -10,7 +10,7 @@ const webRoot = [
 if (!webRoot) throw new Error('web source root not found');
 
 const landing = fs.readFileSync(path.join(webRoot, 'app', 'page.tsx'), 'utf8');
-const appPage = fs.readFileSync(path.join(webRoot, 'app', 'app', 'page.tsx'), 'utf8');
+const appPage = fs.readFileSync(path.join(webRoot, 'app', 'app', 'AppClient.tsx'), 'utf8');
 const waitlist = fs.readFileSync(path.join(webRoot, 'components', 'WaitlistForm.tsx'), 'utf8');
 
 test('Hybrid rendering: / is SSG landing and /home is dynamic dashboard', () => {
