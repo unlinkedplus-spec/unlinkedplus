@@ -97,4 +97,6 @@ test('Stuck login is impossible: admin panels have a session timeout fallback', 
     assert.match(file, /withTimeout/);
     assert.match(file, /Sesi tidak merespons/);
   }
+  assert.match(readWeb('app', 'admin', 'AdminClient.tsx'), /withTimeout\(authLogin/);
+  assert.match(readWeb('app', 'admin', 'AdminClient.tsx'), /Muat ulang/);
 });

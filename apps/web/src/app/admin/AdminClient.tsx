@@ -75,7 +75,7 @@ function LoginForm({ onSuccess }: { onSuccess: () => void }) {
     setError('');
     setBusy(true);
     try {
-      await authLogin({ username, password });
+      await withTimeout(authLogin({ username, password }), 10000);
       onSuccess();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Login gagal');
@@ -103,6 +103,7 @@ function LoginForm({ onSuccess }: { onSuccess: () => void }) {
               onChange={(e) => setUsername(e.target.value)}
               required
               autoFocus
+              autoComplete="username"
               className="w-full border border-gray-200 rounded-xl px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
             />
           </div>
@@ -113,12 +114,22 @@ function LoginForm({ onSuccess }: { onSuccess: () => void }) {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
+              autoComplete="current-password"
               className="w-full border border-gray-200 rounded-xl px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
             />
           </div>
 
           {error && (
-            <p className="text-red-500 text-xs bg-red-50 rounded-lg px-3 py-2">{error}</p>
+            <div className="text-red-600 text-xs bg-red-50 rounded-lg px-3 py-2 flex items-center justify-between gap-2">
+              <span>{error}</span>
+              <button type="button" onClick={() => window.location.reload()}
+                className="font-bold underline shrink-0">Muat ulang</button>
+            </div>
+          )}
+          {!error && (
+            <p className="text-[11px] text-gray-400">
+              Tidak merespons? Muat ulang halaman (Ctrl+F5), lalu coba lagi.
+            </p>
           )}
 
           <button
