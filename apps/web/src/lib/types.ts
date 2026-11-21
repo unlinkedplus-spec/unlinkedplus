@@ -255,6 +255,30 @@ export interface Confession {
   commentCount: number;
 }
 
+/** CMS-driven copy for the landing/feature catalog. */
+export interface LandingContentItem {
+  slug: string;
+  title: string;
+  description: string | null;
+  imageUrl: string | null;
+  status: string;
+}
+export interface AdminContentItem extends LandingContentItem { sortOrder: number }
+export interface AdSettings { adsEnabled: boolean; maxPerSession: number }
+export interface AdminPoll {
+  id: string; question: string; status: string; startsAt: string; endsAt: string;
+  _count: { votes: number };
+  options: Array<{ id: string; label: string; _count: { votes: number } }>;
+}
+export interface AdminStoreItem {
+  id: string; name: string; slug: string; itemType: string | null;
+  price: number; isPremium: boolean;
+}
+export interface AdminCertificate {
+  id: string; status: string; imagePath: string | null; createdAt: string;
+  post: { id: string; content: string; category: string };
+}
+
 export const POST_CATEGORIES = [
   'Ditolak HRD',
   'Salah Kirim Chat',

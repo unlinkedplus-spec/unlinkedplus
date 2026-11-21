@@ -23,6 +23,14 @@ import type {
   User,
 } from '../../../lib/types';
 
+/** A hung session check must never leave the dashboard stuck on a spinner. */
+function withTimeout<T>(promise: Promise<T>, ms = 8000): Promise<T> {
+  return Promise.race([
+    promise,
+    new Promise<T>((_, reject) => window.setTimeout(() => reject(new Error('Sesi tidak merespons')), ms)),
+  ]);
+}
+
 type State = 'loading' | 'login' | 'forbidden' | 'ready';
 
 const STAT_LABELS: { key: keyof AdminStats; label: string }[] = [
@@ -74,7 +82,7 @@ export default function AdminDashboardPage() {
     let cancelled = false;
     (async () => {
       try {
-        const me: User = await authMe();
+        const me: User = await withTimeout(authMe());
         if (!cancelled && me.role === 'admin') {
           setState('ready');
           void load();
@@ -93,8 +101,8 @@ export default function AdminDashboardPage() {
     setBusy(true);
     setLoginError('');
     try {
-      await authLogin({ username: emailOrUsername, password });
-      const me = await authMe();
+      await withTimeout(authLogin({ username: emailOrUsername, password }));
+      const me = await withTimeout(authMe());
       if (me.role !== 'admin') {
         await authLogout();
         setLoginError('Akun ini bukan admin.');
@@ -203,7 +211,8 @@ export default function AdminDashboardPage() {
             <h1 className="font-display font-black text-2xl text-navy">Dashboard Ringkasan</h1>
           </div>
           <div className="flex gap-2">
-            <Link href="/admin" className="border border-gray-200 rounded-xl px-4 py-2 text-sm font-bold text-navy hover:bg-gray-50">Moderasi</Link>
+            <Link href="/cms" className="border border-gray-200 rounded-xl px-4 py-2 text-sm font-bold text-navy hover:bg-gray-50 nav-fx">CMS</Link>
+            <Link href="/admin" className="border border-gray-200 rounded-xl px-4 py-2 text-sm font-bold text-navy hover:bg-gray-50 nav-fx">Moderasi</Link>
             <button onClick={() => void handleLogout()} className="bg-navy text-white rounded-xl px-4 py-2 text-sm font-bold hover:bg-navy/90">Keluar</button>
           </div>
         </header>

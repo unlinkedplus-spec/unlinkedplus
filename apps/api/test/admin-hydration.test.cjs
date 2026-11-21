@@ -11,7 +11,7 @@ if (!webSrc) throw new Error('web source not found');
 const read = (...parts) => fs.readFileSync(path.join(webSrc, ...parts), 'utf8');
 
 test('Admin CMS and /app hydrate: server wrappers read cookies, CSP stays nonce-based', () => {
-  for (const dir of ['admin', path.join('admin', 'dashboard'), 'app']) {
+  for (const dir of ['admin', path.join('admin', 'dashboard'), 'app', 'cms']) {
     const wrapper = read('app', dir, 'page.tsx');
     assert.match(wrapper, /import \{ cookies \} from ['"]next\/headers['"]/, `${dir} must be dynamic`);
     assert.match(wrapper, /await cookies\(\)/, `${dir} must read the session cookie per request`);
@@ -21,6 +21,7 @@ test('Admin CMS and /app hydrate: server wrappers read cookies, CSP stays nonce-
     ['admin', 'AdminClient.tsx'],
     [path.join('admin', 'dashboard'), 'AdminDashboardClient.tsx'],
     ['app', 'AppClient.tsx'],
+    ['cms', 'CmsClient.tsx'],
   ];
   for (const [dir, file] of clientFiles) {
     assert.ok(fs.existsSync(path.join(webSrc, 'app', dir, file)), `${dir}/${file} must exist`);

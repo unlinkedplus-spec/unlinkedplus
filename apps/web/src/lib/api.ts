@@ -6,10 +6,16 @@
 import type {
   AdImpression,
   AdPreferences,
+  AdminCertificate,
+  AdminContentItem,
   AdminOverview,
+  AdminPoll,
   AdminPost,
   AdminReport,
+  AdminStoreItem,
   AdminUser,
+  AdSettings,
+  LandingContentItem,
   AvatarConfig,
   AvatarItem,
   AuthResponse,
@@ -183,3 +189,31 @@ export const createCertificate = (postId: string) =>
 
 export const getCertificate = (id: string) =>
   req<Certificate>('GET', `/certificates/${id}`);
+
+// CMS content (public catalog)
+export const getLandingContent = () =>
+  req<LandingContentItem[]>('GET', '/content/landing');
+
+// CMS content (admin)
+export const getAdminContent = () =>
+  req<AdminContentItem[]>('GET', '/admin/content');
+
+export const updateAdminContent = (slug: string, data: {
+  title?: string; body?: string; imagePath?: string; status?: string;
+}) => req<AdminContentItem>('PATCH', `/admin/content/${slug}`, data);
+
+export const getAdminAds = () => req<AdSettings>('GET', '/admin/settings/ads');
+export const updateAdminAds = (data: Partial<AdSettings>) =>
+  req<AdSettings>('PATCH', '/admin/settings/ads', data);
+
+export const getAdminPolls = () => req<AdminPoll[]>('GET', '/admin/polls');
+export const setAdminPollStatus = (id: string, status: string) =>
+  req<{ id: string; status: string }>('PATCH', `/admin/polls/${id}/status`, { status });
+
+export const getAdminStoreItems = () => req<AdminStoreItem[]>('GET', '/admin/store/items');
+export const updateAdminStoreItem = (id: string, data: { price?: number; isPremium?: boolean }) =>
+  req<AdminStoreItem>('PATCH', `/admin/store/items/${id}`, data);
+
+export const getAdminCertificates = () => req<AdminCertificate[]>('GET', '/admin/certificates');
+export const setAdminCertificateStatus = (id: string, status: string) =>
+  req<{ id: string; status: string }>('PATCH', `/admin/certificates/${id}/status`, { status });

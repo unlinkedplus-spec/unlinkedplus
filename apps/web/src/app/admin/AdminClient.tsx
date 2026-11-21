@@ -3,6 +3,14 @@
 import { useCallback, useEffect, useState } from 'react';
 import { authLogin, authMe } from '../../lib/api';
 
+/** A hung session check must never leave the panel stuck on a spinner. */
+function withTimeout<T>(promise: Promise<T>, ms = 8000): Promise<T> {
+  return Promise.race([
+    promise,
+    new Promise<T>((_, reject) => window.setTimeout(() => reject(new Error('Sesi tidak merespons')), ms)),
+  ]);
+}
+
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 interface Report {
@@ -245,7 +253,10 @@ function Dashboard({ onLogout }: { onLogout: () => void }) {
           <span className="text-sm font-semibold text-white/80">Panel Moderasi</span>
         </div>
         <div className="flex items-center gap-4">
-          <a href="/admin/dashboard" className="text-sm text-primary font-bold hover:underline">
+          <a href="/cms" className="text-sm text-primary font-bold nav-fx">
+            CMS
+          </a>
+          <a href="/admin/dashboard" className="text-sm text-primary font-bold nav-fx">
             Dashboard
           </a>
           <button
@@ -362,7 +373,7 @@ export default function AdminPage() {
 
   // On mount: check if already logged in as admin
   useEffect(() => {
-    authMe()
+    withTimeout(authMe())
       .then((user) => {
         if (user.role === 'admin') {
           setState('dashboard');
@@ -374,7 +385,7 @@ export default function AdminPage() {
   }, []);
 
   function handleLoginSuccess() {
-    authMe()
+    withTimeout(authMe())
       .then((user) => {
         if (user.role === 'admin') {
           setState('dashboard');

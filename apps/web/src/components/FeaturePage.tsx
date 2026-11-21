@@ -13,6 +13,7 @@ import AuthModal from './AuthModal';
 import VideoSpill from './VideoSpill';
 import NotificationsPanel from './NotificationsPanel';
 import type { Post } from '../lib/types';
+import { useContentFor } from '../lib/use-content';
 
 export type FeatureSlug =
   | 'poll' | 'personality-test' | 'meme-studio'
@@ -90,7 +91,12 @@ export default function FeaturePage({ slug, authenticated }: { slug: FeatureSlug
   const [authOpen, setAuthOpen] = useState(false);
   const [created, setCreated] = useState<Post | null>(null);
   const [savedAvatar, setSavedAvatar] = useState(false);
-  const meta = META[slug];
+  const cms = useContentFor(slug);
+  const meta = {
+    title: cms?.title || META[slug].title,
+    kicker: META[slug].kicker,
+    desc: cms?.description || META[slug].desc,
+  };
 
   useEffect(() => {
     const fit = () => {
@@ -186,6 +192,7 @@ export default function FeaturePage({ slug, authenticated }: { slug: FeatureSlug
       <p className="fp-kicker">{meta.kicker}</p>
       <h1 className="fp-title">{meta.title}</h1>
       <p className="fp-desc">{meta.desc}</p>
+      {cms?.imageUrl && <img src={cms.imageUrl} alt="" style={{ maxWidth: 220, borderRadius: 16, marginBottom: 18 }} />}
       {body}
       {slug === 'personality-test' && <PersonalityTest />}
       {slug === 'meme-studio' && <MemeStudio />}

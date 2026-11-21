@@ -14,3 +14,64 @@
     font-family: 'Inter', sans-serif;
   }
 }
+
+/* CSS-only navigation motion. Hidden at rest so the approved mockups stay
+   pixel-identical; hover/focus reveals the animation. */
+.nav-fx { position: relative; display: inline-flex; align-items: center; }
+.nav-fx::after {
+  content: ''; position: absolute; left: 0; bottom: -3px; width: 100%; height: 2px;
+  background: #F5C542; border-radius: 99px; transform: scaleX(0);
+  transform-origin: left center; transition: transform .28s cubic-bezier(.2, .8, .2, 1);
+}
+.nav-fx:hover::after, .nav-fx:focus-visible::after { transform: scaleX(1); }
+
+.tab-fx { position: relative; overflow: hidden; }
+.tab-fx::before {
+  content: ''; position: absolute; inset: 0; background: rgba(255, 255, 255, .38);
+  transform: scaleX(0); transform-origin: left center; transition: transform .3s ease;
+}
+.tab-fx:hover::before, .tab-fx:focus-visible::before { transform: scaleX(1); }
+
+.menu-fx { position: relative; transition: background .2s ease; }
+.menu-fx::before {
+  content: ''; position: absolute; left: 0; top: 12%; height: 76%; width: 3px;
+  background: #F5C542; border-radius: 99px; transform: scaleY(0);
+  transform-origin: center; transition: transform .24s ease;
+}
+.menu-fx:hover, .menu-fx:focus-visible { background: rgba(245, 197, 66, .12); }
+.menu-fx:hover::before, .menu-fx:focus-visible::before { transform: scaleY(1); }
+
+.card-fx { transition: box-shadow .22s ease, background .22s ease; border-radius: 14px; }
+.card-fx:hover, .card-fx:focus-visible {
+  background: rgba(255, 255, 255, .55);
+  box-shadow: 0 8px 24px rgba(23, 43, 77, .10);
+}
+
+/* Legacy /app overlays get the same hover motion without changing their rest state. */
+.px-hit { transition: background .2s ease; }
+.px-hit::after {
+  content: ''; position: absolute; left: 10px; right: 10px; bottom: 5px; height: 2px;
+  background: #F5C542; border-radius: 99px; transform: scaleX(0);
+  transform-origin: left center; transition: transform .25s ease;
+}
+.px-hit:hover::after, .px-hit:focus-visible::after { transform: scaleX(1); }
+
+/* Feature-page buttons and back links use the same motion language. */
+.fp-btn, .lf-btn { position: relative; overflow: hidden; isolation: isolate; }
+.fp-btn::before, .lf-btn::before {
+  content: ''; position: absolute; inset: 0; background: rgba(23, 43, 77, .10);
+  transform: scaleX(0); transform-origin: left center; transition: transform .26s ease;
+}
+.fp-btn:hover::before, .lf-btn:hover::before,
+.fp-btn:focus-visible::before, .lf-btn:focus-visible::before { transform: scaleX(1); }
+.fp-back, .lf-back { position: relative; }
+.fp-back::after, .lf-back::after {
+  content: ''; position: absolute; left: 0; bottom: -2px; width: 100%; height: 2px;
+  background: #F5C542; transform: scaleX(0); transform-origin: left;
+  transition: transform .25s ease;
+}
+.fp-back:hover::after, .lf-back:hover::after { transform: scaleX(1); }
+
+@media (prefers-reduced-motion: reduce) {
+  .nav-fx::after, .tab-fx::before, .menu-fx::before { transition: none; }
+}

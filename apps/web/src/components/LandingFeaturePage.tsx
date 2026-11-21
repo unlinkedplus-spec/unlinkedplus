@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useCallback, useEffect, useState } from 'react';
 import { getMyStats, getPosts, authMe } from '../lib/api';
 import type { UserStats } from '../lib/types';
+import { useContentFor } from '../lib/use-content';
 
 export type LandingSlug =
   | 'unlinked-rooms' | 'support-circles' | 'dear-future-me'
@@ -52,7 +53,12 @@ function save(key: string, value: unknown) {
 const today = () => new Date().toISOString().slice(0, 10);
 
 export default function LandingFeaturePage({ slug }: { slug: LandingSlug }) {
-  const meta = META[slug];
+  const cms = useContentFor(slug);
+  const meta = {
+    title: cms?.title || META[slug].title,
+    sub: cms?.description || META[slug].sub,
+    icon: META[slug].icon,
+  };
 
   return (
     <div className="lf-root">
@@ -68,6 +74,7 @@ export default function LandingFeaturePage({ slug }: { slug: LandingSlug }) {
         .lf-hero .ic{font-size:42px;background:#fff;border-radius:16px;width:74px;height:74px;display:grid;place-items:center;flex:none}
         .lf-hero h1{font:900 28px Nunito,Arial,sans-serif;margin:0 0 6px;letter-spacing:-.6px}
         .lf-hero p{font-size:13px;color:#5A6484;margin:0;max-width:640px;line-height:1.5}
+        .lf-hero .hero-img{width:96px;height:96px;object-fit:cover;border-radius:14px;flex:none;background:#fff}
         .lf-card{background:#fff;border:1px solid #EDEFF6;border-radius:18px;padding:20px;margin-bottom:14px}
         .lf-card h2{font:800 16px Nunito,Arial,sans-serif;margin:0 0 14px}
         .lf-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
@@ -101,7 +108,9 @@ export default function LandingFeaturePage({ slug }: { slug: LandingSlug }) {
           <Link className="lf-back" href="/">← Kembali ke Beranda</Link>
         </header>
         <section className="lf-hero">
-          <span className="ic">{meta.icon}</span>
+          {cms?.imageUrl
+            ? <img className="hero-img" src={cms.imageUrl} alt={meta.title} />
+            : <span className="ic">{meta.icon}</span>}
           <div><h1>{meta.title}</h1><p>{meta.sub}</p></div>
         </section>
 

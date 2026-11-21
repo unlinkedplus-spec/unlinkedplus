@@ -224,16 +224,27 @@ model PasswordResetToken {
 
 model Content {
   id        String   @id @default(uuid())
+  /// Stable key used by the landing/CMS: e.g. `same-boat`, `tiny-wins`.
+  slug      String?  @unique @db.VarChar(80)
   title     String
   type      String   @db.VarChar(50)
   body      String?
   imagePath String?  @map("image_path")
   status    String   @default("draft") @db.VarChar(20)
+  sortOrder Int      @default(0) @map("sort_order")
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
   @@index([type, status])
   @@map("contents")
+}
+
+/// Operator-controlled global settings (currently ad frequency/preferences).
+model Setting {
+  key   String @id @db.VarChar(80)
+  value Json
+
+  @@map("settings")
 }
 
 model Media {

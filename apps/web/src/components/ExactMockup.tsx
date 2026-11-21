@@ -13,6 +13,8 @@ import {
 import type { Post } from '../lib/types';
 import AuthModal from './AuthModal';
 import hotspots from '../lib/mockup-hotspots.json';
+import { useLandingContent } from '../lib/use-content';
+import type { LandingContentItem } from '../lib/types';
 
 type View = 'landing' | 'beranda';
 type Spot = {
@@ -30,6 +32,21 @@ const W = hotspots.design.width;
 const H = hotspots.design.height;
 const SPOTS = hotspots as unknown as { landing: { spots: Spot[] }; beranda: { spots: Spot[] } };
 
+/** Landing copy baked into the approved PNG; overlays appear only when CMS edits it. */
+const LANDING_CMS: Record<string, { slug: string; title: string }> = {
+  'pilar-spill': { slug: 'spill', title: 'Spill Without Judgment' },
+  'pilar-same-boat': { slug: 'same-boat', title: 'Same Boat' },
+  'pilar-mental-armor': { slug: 'mental-armor', title: 'Mental Armor' },
+  'pilar-comeback': { slug: 'comeback-journey', title: 'Comeback Journey' },
+  'pilar-avatar-store': { slug: 'toko', title: 'Avatar & Store' },
+  'fitur-rooms': { slug: 'unlinked-rooms', title: 'Unlinked Rooms' },
+  'fitur-circles': { slug: 'support-circles', title: 'Support Circles' },
+  'fitur-future': { slug: 'dear-future-me', title: 'Dear Future Me' },
+  'fitur-tiny': { slug: 'tiny-wins', title: 'Tiny Wins' },
+  'fitur-hall': { slug: 'hall-of-almost', title: 'Hall of Almost' },
+  'fitur-reset': { slug: 'mental-reset', title: 'Mental Reset' },
+};
+
 export default function ExactMockup({ view, authenticated }: { view: View; authenticated: boolean }) {
   const [scale, setScale] = useState(1);
   const [content, setContent] = useState('');
@@ -44,6 +61,7 @@ export default function ExactMockup({ view, authenticated }: { view: View; authe
   const [comments, setComments] = useState<CommentRow[]>([]);
   const [commentText, setCommentText] = useState('');
   const [busy, setBusy] = useState(false);
+  const cmsContent = useLandingContent();
 
   useEffect(() => {
     const fit = () => setScale(Math.min(1, window.innerWidth / W));
@@ -184,6 +202,14 @@ export default function ExactMockup({ view, authenticated }: { view: View; authe
           outline:0;resize:none;background:#fff;color:#172B4D;font:500 13px/1.45 Inter,sans-serif}
         .ex-text::placeholder{color:#9AA3B8}
         .ex-note{position:absolute;font-size:11px;color:#8A94AD;background:#fff;border-radius:8px;padding:6px 10px;z-index:5}
+        /* CMS-edited card copy/images: only rendered when an operator changes it,
+           so the approved mockup stays pixel-identical by default. */
+        .ex-cms-label{position:absolute;pointer-events:none;background:#fff;border-radius:12px;
+          box-shadow:0 4px 16px rgba(23,43,77,.07);padding:8px 10px;overflow:hidden;z-index:4;
+          font-family:Inter,sans-serif;color:#172B4D;display:flex;gap:8px;align-items:flex-start}
+        .ex-cms-label b{display:block;font:800 12px/1.3 Nunito,sans-serif}
+        .ex-cms-label small{display:block;font-size:10px;line-height:1.4;color:#5A6484;margin-top:3px}
+        .ex-cms-label img{width:38px;height:38px;object-fit:cover;border-radius:9px;flex:none}
         .ex-toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#172B4D;color:#fff;
           font:700 12px Inter,sans-serif;padding:12px 18px;border-radius:999px;z-index:80;box-shadow:0 10px 30px rgba(23,43,77,.25)}
         .ex-modal{position:fixed;inset:0;background:rgba(23,43,77,.45);z-index:70;display:flex;align-items:center;justify-content:center;padding:20px}
@@ -204,12 +230,15 @@ export default function ExactMockup({ view, authenticated }: { view: View; authe
           <img src={src} alt={isLanding ? 'unlinked+ Chibi Community Landing' : 'unlinked+ Same Boat Beranda'} />
 
           {/* Search bar is a modal trigger: no baked text is covered. */}
-          <button className="ex-search" data-hotspot="search" aria-label="Cari cerita"
+          <button className="ex-search nav-fx" data-hotspot="search" aria-label="Cari cerita"
             style={{ left: 560, top: 22, width: 420, height: 48 }} onClick={() => setSearchOpen(true)} />
 
           {spots.map((s) => {
             const style = { left: s.x, top: s.y, width: s.w, height: s.h };
-            const cls = `ex-hit${debug ? ' ex-hit-debug' : ''}`;
+            const fx = s.id.startsWith('nav-') || s.id.startsWith('fs-') ||
+              s.id.startsWith('room-') || s.id.startsWith('social-') ? ' menu-fx'
+              : s.id.startsWith('pilar-') || s.id.startsWith('fitur-') ? ' card-fx' : ' nav-fx';
+            const cls = `ex-hit ${fx}${debug ? ' ex-hit-debug' : ''}`;
             const text = debug ? s.id : s.label;
             if (s.href) {
               return (
@@ -223,6 +252,23 @@ export default function ExactMockup({ view, authenticated }: { view: View; authe
                 onClick={() => s.action && run(s.action)}>
                 {text}
               </button>
+            );
+          })}
+
+          {isLanding && cmsContent.length > 0 && spots.map((s) => {
+            const mapped = LANDING_CMS[s.id];
+            if (!mapped) return null;
+            const item: LandingContentItem | undefined = cmsContent
+              .find((c) => c.slug === mapped.slug && c.status === 'published');
+            if (!item || (item.title === mapped.title && !item.imageUrl)) return null;
+            const pillar = s.id.startsWith('pilar-');
+            return (
+              <div key={`cms-${s.id}`} className="ex-cms-label"
+                style={{ left: s.x + (pillar ? 72 : 66), top: s.y + 6,
+                  width: s.w - (pillar ? 80 : 74), height: s.h - 12 }}>
+                {item.imageUrl && <img src={item.imageUrl} alt="" />}
+                <div><b>{item.title}</b>{item.description && <small>{item.description}</small>}</div>
+              </div>
             );
           })}
 
