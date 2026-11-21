@@ -6,7 +6,7 @@ import type { LandingSlug } from '../../../components/LandingFeaturePage';
 
 const VALID: FeatureSlug[] = [
   'poll', 'personality-test', 'meme-studio', 'store', 'toko', 'opportunity-board', 'mental-reset',
-  'spill', 'avatar', 'profil',
+  'spill', 'avatar', 'profil', 'video', 'notifications',
 ];
 const LANDING: LandingSlug[] = [
   'unlinked-rooms', 'support-circles', 'dear-future-me', 'tiny-wins', 'hall-of-almost',

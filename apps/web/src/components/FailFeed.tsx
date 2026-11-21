@@ -36,6 +36,14 @@ interface Props {
   newPost?: Post | null;
 }
 
+function videoHost(url: string): string {
+  try {
+    return new URL(url).hostname.replace(/^www\./, '');
+  } catch {
+    return 'tautan video';
+  }
+}
+
 export default function FailFeed({ loggedIn, onAuthRequired, newPost }: Props) {
   const [posts, setPosts] = useState<Post[]>([]);
   const [page, setPage] = useState(1);
@@ -116,6 +124,16 @@ export default function FailFeed({ loggedIn, onAuthRequired, newPost }: Props) {
         </div>
 
         <p className="text-sm text-navy/90 leading-relaxed mb-2">{post.content}</p>
+        {post.videoUrl && (
+          <a href={post.videoUrl} target="_blank" rel="noopener noreferrer"
+            className="mb-3 flex items-center gap-3 rounded-xl border border-gray-200 bg-navy/5 px-4 py-3 hover:border-primary transition">
+            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-navy text-white">▶</span>
+            <span className="min-w-0">
+              <span className="block text-xs font-bold text-navy">Tonton Video Spill</span>
+              <span className="block truncate text-[11px] text-gray-400">{videoHost(post.videoUrl)}</span>
+            </span>
+          </a>
+        )}
         <p className="mb-3 text-[11px] text-gray-400">🤝 {mode.hint}</p>
 
         <ReactionBar

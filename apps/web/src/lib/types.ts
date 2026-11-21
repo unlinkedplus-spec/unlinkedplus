@@ -44,6 +44,8 @@ export interface Post {
   reactionCounts: ReactionCounts;
   /** Spill Without Judgment: how the author wants readers to respond. */
   spillMode?: SpillMode;
+  /** Video Spill: allow-listed external link, no upload and no embedding. */
+  videoUrl?: string | null;
   _count?: { reactions: number; comments: number };
 }
 

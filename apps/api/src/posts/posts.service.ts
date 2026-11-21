@@ -55,6 +55,7 @@ export class PostsService {
           category: dto.category,
           content: dto.content,
           spillMode: dto.spillMode ?? 'listen',
+          videoUrl: dto.videoUrl ?? null,
         },
         select: { id: true },
       });

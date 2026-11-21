@@ -54,6 +54,9 @@ model Post {
   // Spill Without Judgment: how the author wants readers to respond.
   // Default 'listen' keeps every legacy post safe and no-pressure.
   spillMode    String        @default("listen") @map("spill_mode") @db.VarChar(20)
+  // Video Spill: an allow-listed external video link. No file upload, no
+  // third-party embed request, no sensitive data sent to the provider.
+  videoUrl     String?       @map("video_url") @db.VarChar(500)
   scheduledAt  DateTime?     @map("scheduled_at")
   user         User?         @relation(fields: [userId], references: [id], onDelete: SetNull)
   reactions    Reaction[]

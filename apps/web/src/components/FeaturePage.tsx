@@ -10,12 +10,14 @@ import CreatePost from './CreatePost';
 import AvatarBuilder from './AvatarBuilder';
 import ProfileTab from './ProfileTab';
 import AuthModal from './AuthModal';
+import VideoSpill from './VideoSpill';
+import NotificationsPanel from './NotificationsPanel';
 import type { Post } from '../lib/types';
 
 export type FeatureSlug =
   | 'poll' | 'personality-test' | 'meme-studio'
   | 'store' | 'toko' | 'opportunity-board' | 'mental-reset'
-  | 'spill' | 'avatar' | 'profil'
+  | 'spill' | 'avatar' | 'profil' | 'video' | 'notifications'
   | 'unlinked-rooms' | 'support-circles' | 'dear-future-me'
   | 'tiny-wins' | 'hall-of-almost';
 
@@ -30,6 +32,8 @@ const META: Record<FeatureSlug, { title: string; kicker: string; desc: string }>
   spill: { title: 'Spill', kicker: 'RUANG CERITA KITA', desc: 'Tulis cerita dengan mode yang kamu pilih sendiri. Pemilik Spill yang menentukan caranya dibaca.' },
   avatar: { title: 'Avatar', kicker: 'EKSPRESIKAN DIRI', desc: 'Rakit avatar kecil yang mewakili perasaanmu hari ini—bukan pencapaianmu.' },
   profil: { title: 'Profil', kicker: 'RUANG KAMU', desc: 'Profil, level, dan cerita kamu. Keluar dari sini kapan saja.' },
+  video: { title: 'Video Spill', kicker: 'CERITA BERGERAK', desc: 'Bagikan cerita singkat dengan tautan video. Tanpa unggah file, tanpa pelacakan penonton.' },
+  notifications: { title: 'Aktivitas', kicker: 'SINYAL KECIL', desc: 'Reaksi dan komentar pada cerita kamu. Bukan papan popularitas.' },
   'unlinked-rooms': { title: 'Unlinked Rooms', kicker: 'KOMUNITAS', desc: 'Ruang kecil berdasarkan pengalaman dan minat—bukan kompetisi followers.' },
   'support-circles': { title: 'Support Circles', kicker: 'DUKUNGAN', desc: 'Lingkaran dukungan kecil untuk saling mendengar, bukan menghakimi.' },
   'dear-future-me': { title: 'Dear Future Me', kicker: 'SURAT UNTUK DIRI', desc: 'Tulis pesan untuk dirimu sendiri dan tentukan kapan boleh dibuka kembali.' },
@@ -154,6 +158,12 @@ export default function FeaturePage({ slug, authenticated }: { slug: FeatureSlug
         );
       }
       return <ProfileTab onLogout={() => { window.location.href = '/home'; }} />;
+    }
+    if (slug === 'video') {
+      return <VideoSpill authenticated={authenticated} onAuthRequired={() => setAuthOpen(true)} />;
+    }
+    if (slug === 'notifications') {
+      return <NotificationsPanel authenticated={authenticated} onAuthRequired={() => setAuthOpen(true)} />;
     }
     if (slug === 'opportunity-board') {
       return (

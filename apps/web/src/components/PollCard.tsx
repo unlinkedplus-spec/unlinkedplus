@@ -65,7 +65,18 @@ export default function PollCard({ loggedIn, onAuthRequired }: Props) {
   }
 
   if (loading) return <LoadingState message="Memuat polling..." />;
-  if (!poll) return null;
+  if (!poll) {
+    return (
+      <div className="fp-card">
+        <div className="fp-big">Belum ada polling aktif.</div>
+        <p className="fp-muted">
+          Polling dibuka setelah pertanyaannya diverifikasi moderator. Kami tidak menampilkan
+          angka palsu atau suara contoh supaya grafiknya selalu jujur.
+        </p>
+        <a className="fp-btn" href="/features/spill">Bagikan cerita dulu</a>
+      </div>
+    );
+  }
 
   return (
     <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 mb-4">

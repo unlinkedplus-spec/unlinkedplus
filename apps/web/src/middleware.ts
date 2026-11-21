@@ -20,10 +20,20 @@ export function middleware(request: NextRequest) {
     "form-action 'self'",
   ].join('; ');
 
+  // The public landing is SSG: Next serves cached HTML whose inline scripts have
+  // no request nonce, so 'strict-dynamic' would block every chunk and styled-jsx
+  // rule (the page renders unstyled and its controls stop working). Scope the
+  // same-origin/unsafe-inline exception to that one prerendered route only;
+  // every dynamic route keeps the per-request nonce policy above.
+  const scriptSrc = request.nextUrl.pathname === '/'
+    ? "script-src 'self' 'unsafe-inline'"
+    : `script-src 'self' 'nonce-${nonce}' 'strict-dynamic'`;
+  const staticCsp = csp.replace(/script-src[^;]*/, scriptSrc);
+
   const headers = new Headers(request.headers);
   headers.set('x-nonce', nonce);
   const response = NextResponse.next({ request: { headers } });
-  response.headers.set('Content-Security-Policy', csp);
+  response.headers.set('Content-Security-Policy', request.nextUrl.pathname === '/' ? staticCsp : csp);
   response.headers.set('X-Content-Type-Options', 'nosniff');
   return response;
 }

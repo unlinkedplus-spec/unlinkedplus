@@ -196,7 +196,7 @@ test('SEC-05: rate limit reads THROTTLE_TTL/LIMIT from config with safe defaults
   assert.equal(seen.limit, '100');
 });
 
-test('SEC-03: CSP uses a per-request nonce instead of unsafe-inline', () => {
+test('SEC-03: nonce CSP on dynamic routes, scoped exception for the SSG landing', () => {
   const fs = require('node:fs');
   const path = require('node:path');
   const webRoot = [
@@ -209,7 +209,12 @@ test('SEC-03: CSP uses a per-request nonce instead of unsafe-inline', () => {
   assert.match(middleware, /'nonce-\$\{nonce\}'/);
   assert.match(middleware, /'strict-dynamic'/);
   assert.match(middleware, /headers\.set\('x-nonce', nonce\)/);
-  assert.ok(!middleware.includes("script-src 'self' 'unsafe-inline'"));
+  assert.ok(!middleware.includes("script-src 'self' 'unsafe-inline' 'strict-dynamic'"));
+  // SSG / has no per-request nonce in its cached HTML; the exception is scoped
+  // to that one route so hydration/CSS work again.
+  assert.match(middleware, /pathname === '\/'/);
+  assert.match(middleware, /script-src 'self' 'unsafe-inline'/);
+  assert.match(middleware, /request\.nextUrl\.pathname === '\/' \? staticCsp : csp/);
 
   const nginxPath = [
     path.join(__dirname, '..', '..', '..', 'docker', 'host-nginx.conf'),

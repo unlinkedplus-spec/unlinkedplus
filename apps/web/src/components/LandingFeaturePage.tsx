@@ -294,28 +294,57 @@ function Breathing() {
 }
 
 const SITUATIONS = [
-  'Ditolak HRD', 'Salah Kirim Chat', 'Dimarahi Bos', 'Bisnis Boncos', 'Salah Jurusan',
+  'Semua', 'Ditolak HRD', 'Salah Kirim Chat', 'Dimarahi Bos', 'Bisnis Boncos', 'Salah Jurusan',
 ];
 
 function SameBoat() {
-  const [situation, setSituation] = useState('Ditolak HRD');
-  const [posts, setPosts] = useState<Array<{ id: string; content: string; category: string; isAnonymous?: boolean; createdAt: string }>>([]);
+  const [situation, setSituation] = useState('Semua');
+  const [query, setQuery] = useState('');
+  const [applied, setApplied] = useState('');
+  const [pool, setPool] = useState<Array<{ id: string; content: string; category: string; isAnonymous?: boolean; createdAt: string }>>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    const sp = new URLSearchParams(window.location.search);
+    const initial = sp.get('q') ?? sp.get('topic') ?? '';
+    setQuery(initial);
+    setApplied(initial);
     let active = true;
     setLoading(true);
-    getPosts(1).then((res) => {
-      if (!active) return;
-      setPosts(res.data.filter((p) => p.category === situation).slice(0, 5));
-      setLoading(false);
-    }).catch(() => { if (active) { setPosts([]); setLoading(false); } });
+    Promise.all([getPosts(1), getPosts(2), getPosts(3)])
+      .then((pages) => {
+        if (!active) return;
+        const seen = new Set<string>();
+        setPool(pages.flatMap((r) => r.data).filter((p) => {
+          if (seen.has(p.id)) return false;
+          seen.add(p.id);
+          return true;
+        }));
+      })
+      .catch(() => { if (active) setPool([]); })
+      .finally(() => { if (active) setLoading(false); });
     return () => { active = false; };
-  }, [situation]);
+  }, []);
+
+  const needle = applied.trim().toLowerCase();
+  const posts = pool
+    .filter((p) => situation === 'Semua' || p.category === situation)
+    .filter((p) => !needle || p.content.toLowerCase().includes(needle) || p.category.toLowerCase().includes(needle))
+    .slice(0, 8);
 
   return (
     <>
       <section className="lf-card">
+        <h2>Cari teman senasib</h2>
+        <div style={{ display: 'flex', gap: 8, marginBottom: 14, flexWrap: 'wrap' }}>
+          <input className="lf-input" value={query} onChange={(e) => setQuery(e.target.value)}
+            onKeyDown={(e) => { if (e.key === 'Enter') setApplied(query); }}
+            placeholder="Contoh: ditolak HRD" aria-label="Cari cerita senasib" />
+          <button className="lf-btn on" onClick={() => setApplied(query)}>Cari</button>
+          {(applied || situation !== 'Semua') && (
+            <button className="lf-btn" onClick={() => { setQuery(''); setApplied(''); setSituation('Semua'); }}>Reset</button>
+          )}
+        </div>
         <h2>Pilih situasimu</h2>
         <div className="lf-grid">
           {SITUATIONS.map((s) => (
@@ -324,11 +353,13 @@ function SameBoat() {
         </div>
       </section>
       <section className="lf-card">
-        <h2>Cerita senasib · {situation}</h2>
+        <h2>Cerita senasib · {applied ? `“${applied}”` : situation}</h2>
         <div className="lf-list">
           {loading && <p className="lf-note">Memuat cerita…</p>}
           {!loading && posts.length === 0 && (
-            <p className="lf-note">Belum ada cerita di kategori ini. Kamu bisa jadi yang pertama berbagi di Spill.</p>
+            <p className="lf-note">
+              Belum ada cerita yang cocok. Kamu bisa jadi yang pertama berbagi lewat Spill—tanpa identitas asli.
+            </p>
           )}
           {posts.map((p) => (
             <div className="lf-row" key={p.id}>

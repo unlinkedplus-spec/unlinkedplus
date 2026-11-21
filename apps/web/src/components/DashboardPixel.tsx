@@ -113,7 +113,7 @@ export default function DashboardPixel({ variant, authenticated, preview = false
         .px-hit{position:absolute;display:block;cursor:pointer;background:transparent;border:0;padding:0}
         .px-cover{position:absolute;background:#fff;border-radius:16px;border:1px solid #EDEFF6;box-sizing:border-box}
         /* Cover the mockup's composer box at its exact coordinates (no double edge). */
-        .px-input{position:absolute;left:550px;top:469px;width:610px;height:58px;border:1px solid #EEF0F7;border-radius:14px;
+        .px-input{position:absolute;left:550px;top:469px;width:480px;height:58px;border:1px solid #EEF0F7;border-radius:14px;
           outline:0;resize:none;background:#fff;color:#172B4D;font:500 13px/1.45 Inter,sans-serif;padding:8px 12px;box-sizing:border-box}
         .px-input::placeholder{color:#9AA3B8}
         .px-tool{position:absolute;display:flex;align-items:center;justify-content:center;background:transparent;border:0;cursor:pointer;
@@ -146,9 +146,10 @@ export default function DashboardPixel({ variant, authenticated, preview = false
       <div className="px-stage">
         <div className="px-canvas">
           {/* Real navigation over the mockup's controls */}
-          <Link className="px-hit" style={{ left: 24, top: 8, width: 240, height: 56 }} href="/" aria-label="Beranda" />
-          <Link className="px-hit" style={{ left: 1300, top: 12, width: 152, height: 44 }}
-            href={authenticated ? '/features/profil' : '/app'} aria-label="Gabung Sekarang / Profil" />
+          <Link className="px-hit" style={{ left: 18, top: 12, width: 205, height: 64 }} href="/home" aria-label="Beranda" />
+          <button className="px-hit" style={{ left: 1304, top: 18, width: 116, height: 50 }}
+            onClick={() => { if (authenticated) window.location.href = '/features/profil'; else setAuthOpen(true); }}
+            aria-label="Gabung Sekarang / Profil" />
           <Link className="px-hit" style={{ left: 1460, top: 6, width: 58, height: 58 }} href="/features/profil" aria-label="Avatar" />
           <input className="px-input" style={{ left: 570, top: 20, width: 390, height: 30, padding: 0, fontSize: 12 }}
             placeholder="Cari cerita, topik, atau teman seperjuangan..." aria-label="Cari" readOnly />
@@ -158,41 +159,41 @@ export default function DashboardPixel({ variant, authenticated, preview = false
           {isChibi ? (
             <>
               <Link className="px-hit" style={{ left: 283, top: 344, width: 228, height: 46 }} href="/features/spill" aria-label="Buat Spill Sekarang" />
-              <Link className="px-hit" style={{ left: 520, top: 344, width: 198, height: 46 }} href="/" aria-label="Jelajahi Komunitas" />
+              <Link className="px-hit" style={{ left: 520, top: 344, width: 198, height: 46 }} href="/features/same-boat" aria-label="Jelajahi Komunitas" />
             </>
           ) : (
-            <Link className="px-hit" style={{ left: 283, top: 310, width: 230, height: 46 }} href="/" aria-label="Lihat Rekomendasi" />
+            <Link className="px-hit" style={{ left: 282, top: 304, width: 222, height: 46 }} href="/features/same-boat" aria-label="Lihat Rekomendasi" />
           )}
 
           {/* Sidebar navigation */}
-          <Link className="px-hit" style={{ left: 24, top: 96, width: 208, height: 46 }} href="/" aria-label="Beranda" />
-          <Link className="px-hit" style={{ left: 24, top: 144, width: 208, height: 46 }} href="/" aria-label="Discover" />
-          <Link className="px-hit" style={{ left: 24, top: 194, width: 208, height: 46 }} href="/features/spill" aria-label="Spill" />
-          <Link className="px-hit" style={{ left: 24, top: 244, width: 208, height: 46 }} href="/" aria-label="Komunitas" />
-          <Link className="px-hit" style={{ left: 24, top: 294, width: 208, height: 46 }} href="/features/profil" aria-label="Profil" />
+          <Link className="px-hit" style={{ left: 18, top: 102, width: 222, height: 52 }} href="/home" aria-label="Beranda" />
+          <Link className="px-hit" style={{ left: 18, top: 156, width: 222, height: 46 }} href="/features/same-boat" aria-label="Discover" />
+          <Link className="px-hit" style={{ left: 18, top: 204, width: 222, height: 46 }} href="/features/spill" aria-label="Spill" />
+          <Link className="px-hit" style={{ left: 18, top: 252, width: 222, height: 46 }} href="/features/unlinked-rooms" aria-label="Komunitas" />
+          <Link className="px-hit" style={{ left: 18, top: 300, width: 222, height: 46 }} href="/features/profil" aria-label="Profil" />
           {/* Fitur Seru — every item is a real page */}
           {[
-            ['poll', 374], ['personality-test', 424], ['meme-studio', 474],
-            ['store', 524], ['opportunity-board', 574], ['mental-reset', 624],
+            ['poll', 404], ['personality-test', 450], ['meme-studio', 496],
+            ['store', 542], ['opportunity-board', 588], ['mental-reset', 634],
           ].map(([slug, top]) => (
             <Link key={slug as string} className="px-hit" style={{ left: 24, top: top as number, width: 208, height: 44 }}
               href={`/features/${slug}`} aria-label={String(slug)} />
           ))}
           {/* Ruang Kamu */}
-          <Link className="px-hit" style={{ left: 256, top: 510, width: 190, height: 44 }} href="/" aria-label="Ruang Beranda" />
-          <Link className="px-hit" style={{ left: 256, top: 558, width: 190, height: 40 }} href="/features/spill" aria-label="Ruang Spill" />
-          <Link className="px-hit" style={{ left: 256, top: 600, width: 190, height: 40 }} href="/features/avatar" aria-label="Ruang Avatar" />
-          <Link className="px-hit" style={{ left: 256, top: 640, width: 190, height: 40 }} href="/features/toko" aria-label="Ruang Toko" />
-          <Link className="px-hit" style={{ left: 256, top: 682, width: 190, height: 40 }} href="/features/profil" aria-label="Ruang Profil" />
+          <Link className="px-hit" style={{ left: 248, top: 500, width: 194, height: 52 }} href="/home" aria-label="Ruang Beranda" />
+          <Link className="px-hit" style={{ left: 248, top: 554, width: 194, height: 44 }} href="/features/spill" aria-label="Ruang Spill" />
+          <Link className="px-hit" style={{ left: 248, top: 598, width: 194, height: 42 }} href="/features/avatar" aria-label="Ruang Avatar" />
+          <Link className="px-hit" style={{ left: 248, top: 640, width: 194, height: 42 }} href="/features/toko" aria-label="Ruang Toko" />
+          <Link className="px-hit" style={{ left: 248, top: 682, width: 194, height: 42 }} href="/features/profil" aria-label="Ruang Profil" />
 
           {/* Composer tool buttons sit exactly over the mockup's icons */}
-          <Link className="px-tool" style={{ left: 548, top: 582, width: 80, height: 34 }}
+          <Link className="px-tool" style={{ left: 542, top: 540, width: 78, height: 42 }}
             href="/features/meme-studio" aria-label="Foto: buat kartu visual" />
-          <button className="px-tool" style={{ left: 636, top: 582, width: 86, height: 34 }}
-            onClick={() => setToolNote('Lampiran video belum tersedia di versi ini.')} aria-label="Video" />
-          <Link className="px-tool" style={{ left: 725, top: 582, width: 70, height: 34 }}
+          <Link className="px-tool" style={{ left: 622, top: 540, width: 80, height: 42 }}
+            href="/features/video" aria-label="Video: bagikan tautan cerita" />
+          <Link className="px-tool" style={{ left: 720, top: 540, width: 64, height: 42 }}
             href="/features/poll" aria-label="Poll" />
-          <button className="px-tool" style={{ left: 800, top: 582, width: 100, height: 34 }}
+          <button className="px-tool" style={{ left: 792, top: 540, width: 92, height: 42 }}
             onClick={() => setEmojiOpen(!emojiOpen)} aria-label="Ekspresi" />
           {emojiOpen && (
             <div className="px-emoji">

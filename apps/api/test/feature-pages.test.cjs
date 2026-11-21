@@ -22,6 +22,15 @@ test('Fitur Seru: all six entries navigate to real feature pages', () => {
   assert.match(dash, /href=\{`\/features\/\$\{slug\}`\}/);
 });
 
+test('Video Spill and Aktivitas are real routes, not dead chips', () => {
+  for (const slug of ['video', 'notifications']) {
+    assert.ok(feature.includes(`'${slug}'`), `FeaturePage must define ${slug}`);
+    assert.ok(route.includes(`'${slug}'`), `route must allow ${slug}`);
+  }
+  assert.match(feature, /<VideoSpill/);
+  assert.match(feature, /<NotificationsPanel/);
+});
+
 test('Spill, Toko, Avatar and Profil use the same mockup chrome', () => {
   for (const slug of ['spill', 'toko', 'avatar', 'profil']) {
     assert.ok(feature.includes(`'${slug}'`), `FeaturePage must define ${slug}`);
@@ -84,15 +93,16 @@ test('UI/UX: composer overlays are real and do not duplicate the mockup button',
   assert.match(dash, /href="\/features\/meme-studio"/);
   assert.match(dash, /href="\/features\/poll"/);
   assert.match(dash, /setEmojiOpen\(!emojiOpen\)/);
-  assert.match(dash, /Lampiran video belum tersedia/);
+  assert.match(dash, /href="\/features\/video"/, 'Video chip must open the real Video Spill page');
   assert.doesNotMatch(dash, /\.px-spill\{[^}]*background:#F5C542/);
 });
 
 test('Landing feature cards route to their matching functional pages', () => {
-  const dash = fs.readFileSync(path.join(webSrc, 'components', 'ExactMockup.tsx'), 'utf8');
+  const hot = JSON.parse(read('lib', 'mockup-hotspots.json'));
   const route = read('app', 'features', '[slug]', 'page.tsx');
+  const landingHrefs = hot.landing.spots.map((s) => s.href).filter(Boolean);
   for (const slug of ['unlinked-rooms', 'support-circles', 'dear-future-me', 'tiny-wins', 'hall-of-almost']) {
-    assert.ok(dash.includes(`/features/${slug}`), `card must link ${slug}`);
+    assert.ok(landingHrefs.includes(`/features/${slug}`), `card must link ${slug}`);
     assert.ok(route.includes(`'${slug}'`), `route must allow ${slug}`);
   }
   const landing = fs.readFileSync(path.join(webSrc, 'components', 'LandingFeaturePage.tsx'), 'utf8');
@@ -108,10 +118,11 @@ test('Landing feature cards route to their matching functional pages', () => {
 
 test('Four official pillars are first-class functional pages', () => {
   const route = read('app', 'features', '[slug]', 'page.tsx');
-  const dash = fs.readFileSync(path.join(webSrc, 'components', 'ExactMockup.tsx'), 'utf8');
+  const hot = JSON.parse(read('lib', 'mockup-hotspots.json'));
+  const landingHrefs = hot.landing.spots.map((s) => s.href).filter(Boolean);
   for (const slug of ['spill', 'same-boat', 'mental-armor', 'comeback-journey']) {
     assert.ok(route.includes(`'${slug}'`), `route must allow ${slug}`);
-    assert.ok(dash.includes(`/features/${slug}`), `landing strip must link ${slug}`);
+    assert.ok(landingHrefs.includes(`/features/${slug}`), `landing strip must link ${slug}`);
   }
   const landing = fs.readFileSync(path.join(webSrc, 'components', 'LandingFeaturePage.tsx'), 'utf8');
   assert.match(landing, /function SameBoat/);
