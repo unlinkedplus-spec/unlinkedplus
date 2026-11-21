@@ -78,6 +78,10 @@ test('Hotspots: measured geometry, inside the canvas, no overlaps', () => {
 
 test('Landing pillars map to the official features in visual order', () => {
   const byId = Object.fromEntries(hotspots.landing.spots.map((s) => [s.id, s]));
+  // The first cell starts after the "Kenapa unlinked+?" label divider (~x230);
+  // including the label makes the hover highlight look merged into one card.
+  assert.ok(byId['pilar-spill'].x > 220 && byId['pilar-spill'].w < 300,
+    'Spill hotspot must not cover the section label cell');
   assert.equal(byId['pilar-spill'].href, '/features/spill');
   assert.equal(byId['pilar-same-boat'].href, '/features/same-boat');
   assert.equal(byId['pilar-mental-armor'].href, '/features/mental-armor');

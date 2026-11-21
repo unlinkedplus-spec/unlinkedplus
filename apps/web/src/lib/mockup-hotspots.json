@@ -7,7 +7,7 @@
       { "id": "gabung-top", "label": "Gabung Sekarang", "x": 1320, "y": 16, "w": 172, "h": 58, "action": "register" },
       { "id": "hero-gabung", "label": "Gabung Sekarang hero", "x": 132, "y": 386, "w": 240, "h": 58, "action": "register" },
       { "id": "hero-preview", "label": "Lihat Preview", "x": 384, "y": 386, "w": 204, "h": 58, "href": "/exact?view=beranda" },
-      { "id": "pilar-spill", "label": "Spill Without Judgment", "x": 47, "y": 464, "w": 430, "h": 74, "href": "/features/spill" },
+      { "id": "pilar-spill", "label": "Spill Without Judgment", "x": 232, "y": 464, "w": 245, "h": 74, "href": "/features/spill" },
       { "id": "pilar-same-boat", "label": "Same Boat", "x": 481, "y": 464, "w": 205, "h": 74, "href": "/features/same-boat" },
       { "id": "pilar-mental-armor", "label": "Mental Armor", "x": 690, "y": 464, "w": 222, "h": 74, "href": "/features/mental-armor" },
       { "id": "pilar-comeback", "label": "Comeback Journey", "x": 916, "y": 464, "w": 255, "h": 74, "href": "/features/comeback-journey" },
